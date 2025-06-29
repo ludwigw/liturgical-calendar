@@ -131,10 +131,13 @@ class ArtworkManager:
 - `liturgical_calendar/data/readings_data.py` - Pure readings data
 
 **Migration Steps**:
-1. Move `feasts` dictionary from `artwork.py` to `feasts_data.py`
-2. Move readings dictionaries from `readings_data.py` to new structure
-3. Update imports throughout codebase
-4. Add data validation
+1. Move `feasts` dictionary from `feasts.py` to `data/feasts_data.py`
+2. Move readings dictionaries from `readings_data.py` to `data/readings_data.py`
+3. Update imports throughout codebase to use new data locations
+4. Delete old data files (`feasts.py`, `readings_data.py`) since they contain minimal logic
+5. Add data validation and type hints
+
+**Rationale**: Both `feasts.py` and `readings_data.py` are essentially pure data containers with minimal lookup logic. The data belongs in the `data/` directory, and the managers should import from there directly.
 
 #### 2.2 Create Service Layer
 **File**: `liturgical_calendar/services/feast_service.py`
