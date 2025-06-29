@@ -123,9 +123,9 @@ class ArtworkManager:
 - ✅ All 75 image generation tests pass
 - ✅ Total: 125 tests passing (100% success rate)
 
-### Phase 2: Data Layer Separation (Week 2) ✅ **COMPLETED**
+### Phase 2: Data Layer Separation (Week 2)
 
-#### 2.1 Separate Feast Data from Logic ✅ **COMPLETED**
+#### 2.1 Separate Data from Logic ✅ **COMPLETED**
 **Files**: 
 - `liturgical_calendar/data/feasts_data.py` - Pure feast data ✅
 - `liturgical_calendar/data/readings_data.py` - Pure readings data ✅
@@ -162,22 +162,97 @@ class ArtworkManager:
 - ✅ Fixed critical artwork integration bug
 - ✅ Enhanced readings merging logic for edge cases
 
-#### 2.2 Create Service Layer (Next Phase)
-**File**: `liturgical_calendar/services/feast_service.py`
-```python
-class FeastService:
-    def get_feasts_for_date(self, date_str, liturgical_info)
-    def get_feast_artwork(self, feast_data, cycle_index)
-    def validate_feast_data(self, feast_data)
-```
+#### 2.2 Create Service Layer ✅ **COMPLETED**
 
-**File**: `liturgical_calendar/services/artwork_service.py`
-```python
-class ArtworkService:
-    def get_artwork_for_date(self, date_str, liturgical_info)
-    def extract_source_urls(self, feast_data)
-    def validate_artwork_data(self, artwork_entry)
-```
+**Files Created:**
+- ✅ `liturgical_calendar/services/feast_service.py` - Orchestrates feast-related operations
+- ✅ `liturgical_calendar/services/image_service.py` - Orchestrates image generation operations  
+- ✅ `liturgical_calendar/services/config_service.py` - Manages configuration and utilities
+
+**Service Layer Benefits:**
+- ✅ **Separation of Concerns**: Business logic centralized in services
+- ✅ **Easier Testing**: Services can be mocked and tested in isolation
+- ✅ **Reusability**: Services can be used by multiple scripts
+- ✅ **Error Handling**: Centralized error handling through services
+- ✅ **Configuration**: Centralized configuration management
+
+**Key Methods Added:**
+- ✅ `FeastService.get_liturgical_info()` - Same interface as original `liturgical_calendar()` function
+- ✅ `ImageService.get_artwork_for_date()` - Same interface as `ArtworkManager.get_artwork_for_date()`
+- ✅ `ConfigService.calculate_christmas_point()` - Christmas point calculation logic
+- ✅ `ConfigService.get_season_url()` - Season URL mapping
+
+**Migration Steps Completed:**
+1. ✅ Created comprehensive service layer with dependency injection
+2. ✅ Added unit tests for all service methods (42 tests total)
+3. ✅ Updated `create_liturgical_image.py` to use service layer instead of direct calls
+4. ✅ Updated `liturgical.py` to use service layer for artwork operations
+5. ✅ Added compatibility methods to maintain existing interfaces
+6. ✅ Verified all tests pass with service layer integration
+
+**Test Results:**
+- ✅ All 34 integration tests pass
+- ✅ All 16 artwork unit tests pass
+- ✅ All 42 service layer unit tests pass
+- ✅ All image generation tests pass
+- ✅ Total: 92+ tests passing (100% success rate)
+
+**Current State:**
+- ✅ Main `liturgical_calendar()` function uses service layer components where appropriate
+- ✅ `create_liturgical_image.py` script uses service layer instead of direct calls
+- ✅ All complex business logic preserved and working correctly
+- ✅ Service layer provides clean interface for future development
+
+#### 2.3 Incremental Migration of Main Function Logic (Next Phase)
+
+**Goal**: Gradually move logic from `liturgical_calendar()` function into service layer while maintaining all functionality.
+
+**Current Approach**: Hybrid approach where main function uses service layer components but retains complex orchestration logic.
+
+**Next Steps for Full Service Layer Migration:**
+
+1. **Week/Season Naming Logic Migration**
+   - Move week name calculation logic from main function to `FeastService`
+   - Handle Sunday vs weekday week naming differences
+   - Preserve special cases like "N before Advent" logic
+   - Test each migration step to ensure no regressions
+
+2. **Readings Merging Logic Migration**
+   - Move feast + weekday readings merging logic to `FeastService`
+   - Handle precedence rules for readings selection
+   - Preserve complex merging logic for lower precedence feasts
+   - Test readings coverage for all liturgical cycles
+
+3. **Color Determination Logic Migration**
+   - Move color determination logic from main function to `ImageService`
+   - Handle special cases like rose Sundays
+   - Preserve feast day vs season color logic
+   - Test color accuracy across all liturgical seasons
+
+4. **Season Transition Logic Migration**
+   - Move Pre-Lent/Pre-Advent to Ordinary Time conversion to `FeastService`
+   - Handle week number normalization logic
+   - Preserve edge cases for Christmas and Lent seasons
+   - Test season transitions across multiple years
+
+5. **Final Main Function Simplification**
+   - Once all logic is migrated, simplify main function to orchestration only
+   - Main function becomes thin wrapper around service calls
+   - Maintain backward compatibility for existing scripts
+   - Comprehensive testing to ensure no functionality loss
+
+**Migration Strategy:**
+- **Incremental**: Move one logical block at a time
+- **Test-Driven**: Verify each step with existing test suite
+- **Backward Compatible**: Maintain existing interfaces throughout
+- **Documented**: Update refactoring plan after each completed step
+
+**Success Criteria:**
+- All 34 integration tests continue to pass
+- All image generation tests continue to pass
+- No changes required to existing scripts using `liturgical_calendar()`
+- Service layer provides clean, testable interfaces
+- Main function becomes simple orchestration layer
 
 ### Phase 3: Image Generation Pipeline (Week 3)
 

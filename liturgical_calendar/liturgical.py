@@ -9,16 +9,16 @@ from datetime import datetime, date
 
 from .funcs import get_easter, get_advent_sunday, date_to_days, day_of_week, add_delta_days, colour_code, get_week_number, render_week_name
 from .data.feasts_data import feasts, get_liturgical_feast
-from .core.readings_manager import ReadingsManager
-from .core.artwork_manager import ArtworkManager
-from .core.season_calculator import SeasonCalculator
+from .services.feast_service import FeastService
+from .services.image_service import ImageService
+from .services.config_service import ConfigService
 
 ##########################################################################
 
-# Instantiate the SeasonCalculator and ReadingsManager
-season_calculator = SeasonCalculator()
-readings_manager = ReadingsManager()
-artwork_manager = ArtworkManager()
+# Instantiate the services
+feast_service = FeastService()
+image_service = ImageService()
+config_service = ConfigService()
 
 def liturgical_calendar(s_date: str, transferred: bool = False):
     """
@@ -47,55 +47,25 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     day = f_date.day
     dayofweek = day_of_week(year, month, day)
 
-    #die "Need to specify year, month and day" unless $y and $m and $d;
-
     # Calculate some values in Julian date
     days = date_to_days(year, month, day)
     easterm, easterd = get_easter(year)
     easterday = date_to_days(year, easterm, easterd)
 
-    possibles = []
-
-    # "The Church Year consists of two cycles of feasts and holy days: one is
-    #  dependent upon the movable date of the Sunday of the Resurrection or
-    #  Easter Day; the other, upon the fixed date of December 25, the Feast
-    #  of our Lord's Nativity or Christmas Day."
-    easter_point = days-easterday
-    christmas_point = 0
-
-    # We will store the amount of time until (-ve) or since (+ve) Christmas in
-    # christmas_point. Let's make the cut-off date the end of February,
-    # since we'll be dealing with Easter-based dates after that, and it
-    # avoids the problems of considering leap years.
-    if month>2:
-        christmas_point = days - date_to_days(year, 12, 25)
-    else:
-        christmas_point = days - date_to_days(year-1, 12, 25)
-
+    # Calculate key liturgical points
+    easter_point = days - easterday
+    christmas_point = config_service.calculate_christmas_point(year, month, days)
     advent_sunday = get_advent_sunday(year)
 
     # Use SeasonCalculator for season and week number
-    season = season_calculator.determine_season(f_date, easter_point, christmas_point, advent_sunday)
-    weekno = season_calculator.calculate_week_number(f_date, easter_point, christmas_point, advent_sunday, dayofweek)
+    season = feast_service.season_calculator.determine_season(f_date, easter_point, christmas_point, advent_sunday)
+    weekno = feast_service.season_calculator.calculate_week_number(f_date, easter_point, christmas_point, advent_sunday, dayofweek)
     
     # Use SeasonCalculator for weekday_reading
-    weekday_reading = season_calculator.calculate_weekday_reading(f_date, easter_point, christmas_point, advent_sunday, dayofweek, days, easterday)
+    weekday_reading = feast_service.season_calculator.calculate_weekday_reading(f_date, easter_point, christmas_point, advent_sunday, dayofweek, days, easterday)
 
-    # Set season_url based on season
-    season_urls = {
-        'Advent': 'https://en.wikipedia.org/wiki/Advent',
-        'Christmas': 'https://en.wikipedia.org/wiki/Christmastide',
-        'Epiphany': 'https://en.wikipedia.org/wiki/Epiphany_season',
-        'Ordinary Time': 'https://en.wikipedia.org/wiki/Ordinary_Time',
-        'Pre-Lent': 'https://en.wikipedia.org/wiki/Septuagesima',
-        'Lent': 'https://en.wikipedia.org/wiki/Lent',
-        'Holy Week': 'https://en.wikipedia.org/wiki/Holy_Week',
-        'Easter': 'https://en.wikipedia.org/wiki/Eastertide',
-        'Pentecost': 'https://en.wikipedia.org/wiki/Ordinary_Time',
-        'Trinity': 'https://en.wikipedia.org/wiki/Ordinary_Time',
-        'Pre-Advent': 'https://en.wikipedia.org/wiki/Ordinary_Time'
-    }
-    season_url = season_urls.get(season, 'https://en.wikipedia.org/wiki/Ordinary_Time')
+    # Get season URL from config service
+    season_url = config_service.get_season_url(season)
 
     # Render a Week name with or without number
     # For weekdays, determine the week name based on the Sunday that starts the week
@@ -105,11 +75,11 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
         if weekday_reading and weekday_reading.endswith(' before Advent'):
             week = weekday_reading
         else:
-            week, season = season_calculator.render_week_name(season, weekno, easter_point)
+            week, season = feast_service.season_calculator.render_week_name(season, weekno, easter_point)
     else:
         # It's a weekday, calculate what the season would be for the Sunday that starts this week
-        sunday_season, sunday_weekno = season_calculator.calculate_sunday_week_info(f_date, dayofweek, days, easterday, year)
-        week, _ = season_calculator.render_week_name(sunday_season, sunday_weekno, easter_point)
+        sunday_season, sunday_weekno = feast_service.season_calculator.calculate_sunday_week_info(f_date, dayofweek, days, easterday, year)
+        week, _ = feast_service.season_calculator.render_week_name(sunday_season, sunday_weekno, easter_point)
 
     # Only set weekno to None if it's not positive and not Pre-Lent, Christmas, or Lent
     if weekno is not None and int(weekno) > 0:
@@ -121,54 +91,21 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     if season in ['Pre-Lent', 'Pre-Advent']:
         season = 'Ordinary Time'
 
-    # Now, look for feasts.
-    feast_from_easter    = get_liturgical_feast('easter', easter_point)
-    feast_from_christmas = get_liturgical_feast('christmas', "%02d-%02d" % (month, day))
+    # Use FeastService to get possible feasts
+    possibles = feast_service.get_possible_feasts(
+        easter_point=easter_point,
+        month=month,
+        day=day,
+        transferred=transferred,
+        s_date=s_date,
+        days=days,
+        season=season,
+        weekno=weekno,
+        dayofweek=dayofweek
+    )
 
-    if feast_from_easter:
-        possibles.append(feast_from_easter)
-
-    if feast_from_christmas:
-        possibles.append(feast_from_christmas)
-
-    # Maybe transferred from yesterday.
-    # Call recursively to look for yesterday feast and push to possibles
-    if transferred is False:
-        yestery, yesterm, yesterd = add_delta_days(days-1)
-
-        transferred_feast = liturgical_calendar(s_date=f"{yestery}-{yesterm}-{yesterd}", transferred=True)
-
-        if transferred_feast:
-            transferred_feast['name'] = transferred_feast['name'] + ' (transferred)'
-            # Sundays can't be transferred
-            if transferred_feast['prec'] != 5:
-                possibles.append(transferred_feast)
-
-    # Maybe a Sunday
-    # Shouldn't need to trap weekno=0 here, as the weekno increments on
-    # a Sunday so it can never be less than 1 on a Sunday
-    if dayofweek == 0:
-        possibles.append({ 'prec': 5, 'type': 'Sunday', 'name': f"{season} {weekno}" })
-
-    # So, which event takes priority?
-    possibles = sorted(possibles, key=lambda x: x['prec'], reverse=True)
-
-    if transferred:
-        # If two feasts coincided today, we were asked to find
-        # the one which got transferred.
-        # But Sundays don't get transferred!
-        try:
-            if possibles[0] and possibles[0]['prec'] == 5:
-                return None
-            return possibles[1]
-        except IndexError:
-            return None
-
-    # Get highest priority feast
-    try:
-        result = possibles.pop(0)
-    except IndexError:
-        result = { 'name': '', 'prec': 1 }
+    # Get the highest priority feast using FeastService
+    result = feast_service.get_highest_priority_feast(possibles, transferred)
 
     # Append season info regardless
     result['season'] = season
@@ -178,59 +115,24 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     result['date'] = f_date
     result['weekday_reading'] = weekday_reading 
 
-    # Support for special Sundays which are rose
-    if result['name'] in [ 'Advent 3', 'Lent 4' ]:
-        result['colour'] = 'rose'
-
-    # If no colour is already set...
-    if result.get('colour') is None:
-        # If the priority is higher than a Lesser Festival, but not a Sunday...
-        if result['prec'] > 4 and result['prec'] != 5:
-            # It's a feast day.
-            # Feasts are generally white, unless marked differently.
-            # But martyrs are red
-            if result.get('martyr'):
-                result['colour'] = 'red'
-            else:
-                result['colour'] = 'white'
-        else:
-            # Not a feast day.
-            # Set a default colour for the season
-            if season == 'Advent':
-                result['colour'] = 'purple'
-            elif season == 'Christmas':
-                result['colour'] = 'white'
-            elif season == 'Epiphany':
-                result['colour'] = 'white'
-            elif season == 'Lent':
-                result['colour'] = 'purple'
-            elif season == 'Holy Week':
-                result['colour'] = 'red'
-            elif season == 'Easter':
-                result['colour'] = 'white'
-            else:
-                # The great fallback:
-                result['colour'] = 'green'
-
-    # Two special cases for Christmas-based festivals which
-    # depend on the day of the week.
-    if result['prec'] == 5: # An ordinary Sunday
-        if christmas_point == advent_sunday:
-            result['name'] = 'Advent Sunday'
-            result['colour'] = 'white'
-        elif christmas_point == advent_sunday-7:
-            result['name'] = 'Christ the King'
-            result['colour'] = 'white'
+    # Use ImageService to determine color
+    result['colour'] = image_service.determine_color(
+        result=result,
+        season=season,
+        christmas_point=christmas_point,
+        advent_sunday=advent_sunday
+    )
 
     # Set colour code
     result['colourcode'] = colour_code(result['colour'])
 
+    # Get readings using FeastService's readings_manager
     if 'readings' not in result:
-        result['readings'] = readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
+        result['readings'] = feast_service.readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
     else:
         # If readings already exist (from feast data), append weekday readings
         if result['prec'] < 5:  # Lower precedence feast
-            weekday_readings = readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
+            weekday_readings = feast_service.readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
             if weekday_readings and isinstance(weekday_readings, dict) and weekday_readings:
                 # Merge the readings - feast readings take priority, add weekday readings
                 merged_readings = result['readings'].copy()
@@ -239,8 +141,8 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
                         merged_readings[key] = value
                 result['readings'] = merged_readings
 
-    # Get artwork for this date
-    result['artwork'] = artwork_manager.get_artwork_for_date(f_date.strftime("%Y-%m-%d"), result)
+    # Get artwork using ImageService
+    result['artwork'] = image_service.get_artwork_for_date(f_date.strftime("%Y-%m-%d"), result)
 
     return result
 
