@@ -488,8 +488,11 @@ def get_image_source_for_date(date_str, liturgical_result=None):
               'cached_file' (if cached), and 'cached' (bool) keys
     """
     from datetime import datetime
-    from .readings import get_yearly_cycle
+    from .core.readings_manager import ReadingsManager
     from .funcs import get_easter, date_to_days, get_cache_filename
+    
+    # Create ReadingsManager instance
+    readings_manager = ReadingsManager()
     
     # Parse the date
     date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -498,7 +501,7 @@ def get_image_source_for_date(date_str, liturgical_result=None):
     day = date_obj.day
     
     # Get the yearly cycle (A, B, C)
-    sunday_cycle, weekday_cycle = get_yearly_cycle(year)
+    sunday_cycle, weekday_cycle = readings_manager.get_yearly_cycle(year)
     cycle_index = {'A': 0, 'B': 1, 'C': 2}[sunday_cycle]
     
     # Format the date key for christmas-based feasts

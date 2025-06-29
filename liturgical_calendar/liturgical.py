@@ -9,14 +9,15 @@ from datetime import datetime, date
 
 from .funcs import get_easter, get_advent_sunday, date_to_days, day_of_week, add_delta_days, colour_code, get_week_number, render_week_name
 from .feasts import lookup_feast
-from .readings import get_readings_for_date
+from .core.readings_manager import ReadingsManager
 from .artwork import get_image_source_for_date
 from .core.season_calculator import SeasonCalculator
 
 ##########################################################################
 
-# Instantiate the SeasonCalculator
+# Instantiate the SeasonCalculator and ReadingsManager
 season_calculator = SeasonCalculator()
+readings_manager = ReadingsManager()
 
 def liturgical_calendar(s_date: str, transferred: bool = False):
     """
@@ -224,10 +225,10 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     result['colourcode'] = colour_code(result['colour'])
 
     if 'readings' not in result:
-        result['readings'] = get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
+        result['readings'] = readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
     else:
         if result['prec'] < 5:
-            result['readings'] += get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
+            result['readings'] += readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
 
     # Get artwork for this date
     result['artwork'] = get_image_source_for_date(f_date.strftime("%Y-%m-%d"), result)
