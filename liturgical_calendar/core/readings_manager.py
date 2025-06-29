@@ -23,7 +23,7 @@ class ReadingsManager:
     def __init__(self):
         """Initialize the ReadingsManager."""
         # Import readings data here to avoid circular imports
-        from ..readings_data import sunday_readings, weekday_readings
+        from ..data.readings_data import sunday_readings, weekday_readings
         self.sunday_readings = sunday_readings
         self.weekday_readings = weekday_readings
     
