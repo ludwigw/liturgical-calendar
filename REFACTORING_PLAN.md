@@ -254,6 +254,81 @@ class ArtworkManager:
 - Service layer provides clean, testable interfaces
 - Main function becomes simple orchestration layer
 
+#### 2.4 Clean Up Compatibility Methods and Complete Service Layer (Final Phase 2 Step)
+
+**Goal**: Remove adapter/compatibility methods and ensure all code uses the service layer directly, completing the service layer implementation.
+
+**Problem Identified**: 
+The compatibility methods like `FeastService.get_liturgical_info()` and `ImageService.get_artwork_for_date()` are adapter patterns that bridge old interfaces to the new service layer. They create two ways to do the same thing and don't fully realize the benefits of the service layer architecture.
+
+**Current State**:
+```python
+# Compatibility methods (should be deprecated):
+FeastService.get_liturgical_info() → Wraps get_complete_feast_info()
+ImageService.get_artwork_for_date() → Wraps ArtworkManager.get_artwork_for_date()
+```
+
+**Target State**:
+```python
+# Direct service usage (preferred):
+FeastService.get_complete_feast_info() - Main entry point
+ImageService.generate_liturgical_image() - Full image generation
+ConfigService.get_season_url() - Configuration utilities
+Direct service orchestration - No adapter methods needed
+```
+
+**Migration Steps**:
+
+1. **Mark Compatibility Methods as Deprecated**
+   - Add deprecation warnings to `get_liturgical_info()` and `get_artwork_for_date()`
+   - Update docstrings to indicate deprecation
+   - Keep methods functional for existing code during transition period
+
+2. **Update Internal Scripts to Use Direct Service Methods**
+   - Update `create_liturgical_image.py` to use `get_complete_feast_info()` directly
+   - Update `liturgical.py` to use direct service methods where appropriate
+   - Update any other internal scripts to use service layer directly
+
+3. **Update Documentation and Examples**
+   - Mark compatibility methods as deprecated in all documentation
+   - Update examples to use direct service methods
+   - Add migration guide showing old vs new patterns
+   - Update README and any other user-facing documentation
+
+4. **Remove Compatibility Methods (Future)**
+   - After sufficient time for external users to migrate
+   - Remove deprecated methods entirely
+   - Clean up any remaining adapter code
+   - Update tests to use direct service methods
+
+**Benefits of This Cleanup**:
+- **Cleaner Architecture**: No duplicate interfaces or adapter layers
+- **Better Service Design**: Services expose their true capabilities directly
+- **Future-Proof**: Easier to evolve service interfaces without legacy constraints
+- **Developer Clarity**: Clear guidance on which methods to use
+
+**Success Criteria**:
+- All scripts use service layer methods directly (no adapter methods)
+- Deprecation warnings guide developers to preferred methods
+- Documentation clearly shows preferred service usage patterns
+- No breaking changes for external users during transition
+- Service layer architecture is complete and clean
+
+**Dependencies**:
+- Must complete Phase 2.3 first (migrate main function logic)
+- All tests must continue to pass after cleanup
+- External user migration period should be considered
+
+**Files to Modify**:
+- `liturgical_calendar/services/feast_service.py` (add deprecation warnings)
+- `liturgical_calendar/services/image_service.py` (add deprecation warnings)
+- `create_liturgical_image.py` (update to use direct service methods)
+- `liturgical_calendar/liturgical.py` (update to use direct service methods)
+- Documentation files (update examples and migration guides)
+- Test files (update to use direct service methods)
+
+**Note**: This phase completes the service layer implementation by removing the transitional adapter code and ensuring all components use the service layer architecture directly.
+
 ### Phase 3: Image Generation Pipeline (Week 3)
 
 #### 3.1 Create Layout Engine
@@ -358,233 +433,3 @@ class Settings:
     REQUEST_TIMEOUT = 30
     MAX_RETRIES = 3
 ```
-
-#### 5.2 Improve Error Handling
-**File**: `liturgical_calendar/exceptions.py`
-```python
-class LiturgicalCalendarError(Exception): pass
-class ArtworkNotFoundError(LiturgicalCalendarError): pass
-class ReadingsNotFoundError(LiturgicalCalendarError): pass
-class ImageGenerationError(LiturgicalCalendarError): pass
-class CacheError(LiturgicalCalendarError): pass
-```
-
-#### 5.3 Add Logging
-**File**: `liturgical_calendar/logging.py`
-```python
-import logging
-
-def setup_logging(level=logging.INFO):
-    logging.basicConfig(
-        level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-
-logger = logging.getLogger(__name__)
-```
-
-### Phase 6: Testing and Documentation (Week 6)
-
-#### 6.1 Reorganize Tests
-```
-tests/
-├── unit/
-│   ├── test_season_calculator.py ✅
-│   ├── test_readings_manager.py
-│   ├── test_artwork_manager.py
-│   ├── test_layout_engine.py
-│   ├── test_image_builder.py
-│   └── test_caching.py
-├── integration/
-│   ├── test_liturgical_calendar.py
-│   ├── test_image_generation.py
-│   └── test_end_to_end.py
-└── fixtures/
-    ├── sample_dates.json
-    ├── sample_artwork.json
-    └── sample_readings.json
-```
-
-#### 6.2 Add Image Generation Tests
-```python
-# tests/unit/test_layout_engine.py
-class TestLayoutEngine:
-    def test_header_layout_creation()
-    def test_artwork_layout_creation()
-    def test_text_wrapping()
-    def test_readings_layout()
-
-# tests/unit/test_image_builder.py
-class TestImageBuilder:
-    def test_image_creation()
-    def test_font_loading()
-    def test_color_application()
-    def test_artwork_pasting()
-```
-
-#### 6.3 Create Documentation
-```
-docs/
-├── architecture.md
-├── api_reference.md
-├── image_generation.md
-├── caching.md
-├── testing.md
-└── examples/
-    ├── basic_usage.py
-    ├── custom_layouts.py
-    └── batch_processing.py
-```
-
-### Phase 7: CLI and API Improvements (Week 7)
-
-#### 7.1 Create CLI Interface
-**File**: `liturgical_calendar/cli/main.py`
-```python
-import click
-
-@click.group()
-def cli():
-    pass
-
-@cli.command()
-@click.option('--date', default=None, help='Date in YYYY-MM-DD format')
-@click.option('--output', default=None, help='Output path')
-def generate_image(date, output):
-    """Generate a liturgical calendar image for a specific date"""
-
-@cli.command()
-def cache_artwork():
-    """Download and cache all artwork images"""
-
-@cli.command()
-def validate_data():
-    """Validate all liturgical and artwork data"""
-
-@cli.command()
-def test_system():
-    """Run comprehensive system tests"""
-```
-
-#### 7.2 Update Main Scripts
-**File**: `create_liturgical_image.py` (simplified)
-```python
-from liturgical_calendar.image_generation.pipeline import ImageGenerationPipeline
-from liturgical_calendar.config.settings import Settings
-
-def main():
-    config = Settings()
-    pipeline = ImageGenerationPipeline(config)
-    pipeline.generate_image(date_str)
-```
-
-**File**: `cache_artwork_images.py` (simplified)
-```python
-from liturgical_calendar.caching.artwork_cache import ArtworkCache
-from liturgical_calendar.services.artwork_service import ArtworkService
-
-def main():
-    cache = ArtworkCache()
-    service = ArtworkService()
-    cache.cache_all_artwork(service.get_all_artwork_urls())
-```
-
-### Phase 8: Performance and Polish (Week 8)
-
-#### 8.1 Performance Optimizations
-- Add image processing caching
-- Optimize font loading
-- Implement batch processing for multiple dates
-- Add progress indicators for long operations
-
-#### 8.2 Code Quality Improvements
-- Add type hints throughout
-- Implement comprehensive error recovery
-- Add performance monitoring
-- Create development tools (debug mode, validation tools)
-
-## Migration Strategy
-
-### Backward Compatibility
-- Keep existing function signatures during transition
-- Use deprecation warnings for old functions
-- Provide migration guide for users
-
-### Testing Strategy
-- Write tests before implementing each component
-- Maintain 90%+ test coverage
-- Add integration tests for critical paths
-- Create performance benchmarks
-
-### Rollout Plan
-1. **Week 1-2**: Core architecture (internal changes)
-2. **Week 3-4**: Image generation pipeline (internal changes)
-3. **Week 5-6**: Configuration and testing (internal changes)
-4. **Week 7-8**: CLI and documentation (user-facing changes)
-
-## Success Metrics
-
-### Code Quality
-- Reduce function complexity (cyclomatic complexity < 10)
-- Increase test coverage to >90%
-- Eliminate code duplication
-- Improve maintainability index
-
-### Performance
-- Reduce image generation time by 50%
-- Improve cache hit rate to >95%
-- Reduce memory usage by 30%
-
-### Developer Experience
-- Clear API documentation
-- Comprehensive examples
-- Easy debugging tools
-- Automated testing pipeline
-
-## Risk Mitigation
-
-### Technical Risks
-- **Breaking Changes**: Maintain backward compatibility during transition
-- **Performance Regression**: Benchmark before and after each change
-- **Data Loss**: Backup all data before refactoring
-
-### Timeline Risks
-- **Scope Creep**: Stick to defined phases
-- **Testing Delays**: Write tests alongside implementation
-- **Integration Issues**: Test integration points early
-
-## Current Status and Next Steps
-
-### ✅ Completed
-- **Phase 1.1**: Core directory structure created
-- **Phase 1.2**: SeasonCalculator extracted and integrated with 23 unit tests
-- **Phase 1.3**: ReadingsManager extracted and integrated with 22 unit tests
-- **Phase 1.4**: ArtworkManager extracted and integrated with 16 unit tests
-- **Integration**: All managers successfully integrated into liturgical.py
-- **Testing**: All 125 tests passing (34 integration + 16 artwork unit + 75 image generation)
-- **Delegation Removal**: All delegation layers removed, direct manager usage throughout
-
-### 🔄 Next Priority: Phase 2 - Data Layer Separation
-**Immediate Tasks**:
-1. Move feast data from `feasts.py` to `liturgical_calendar/data/feasts_data.py`
-2. Move readings data from `readings_data.py` to `liturgical_calendar/data/readings_data.py`
-3. Create data validation functions
-4. Update all imports to use new data locations
-5. Ensure all existing tests continue to pass
-
-**Files to work on**:
-- `liturgical_calendar/data/feasts_data.py` (new)
-- `liturgical_calendar/data/readings_data.py` (new)
-- `liturgical_calendar/feasts.py` (refactor to use new data files)
-- `liturgical_calendar/readings_data.py` (refactor to use new data files)
-- Update imports in all affected files
-
-**Phase 1 Summary:**
-- ✅ All core logic extracted into manager classes
-- ✅ All data separated from logic
-- ✅ All delegation layers removed
-- ✅ Comprehensive test coverage (125 tests)
-- ✅ No regressions in functionality
-- ✅ Clean, maintainable architecture established
-
-This plan provides a clear roadmap for transforming the codebase into a maintainable, testable, and extensible system while preserving all existing functionality. 
