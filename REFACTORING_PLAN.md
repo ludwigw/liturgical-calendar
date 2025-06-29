@@ -224,7 +224,7 @@ class ArtworkManager:
    - Test readings coverage for all liturgical cycles
 
 3. **Color Determination Logic Migration**
-   - Move color determination logic from main function to `ImageService`
+   - Move color determination logic from main function to `FeastService`
    - Handle special cases like rose Sundays
    - Preserve feast day vs season color logic
    - Test color accuracy across all liturgical seasons
