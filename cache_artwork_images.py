@@ -113,8 +113,8 @@ def extract_source_urls_from_feasts():
     source_urls = []
     
     try:
-        # Import the feasts object from artwork.py
-        from liturgical_calendar.artwork import feasts
+        # Import the feasts object from artwork data
+        from liturgical_calendar.data.artwork_data import feasts
         
         def extract_from_dict(data, path=""):
             """Recursively extract source URLs from nested dictionaries and lists"""
