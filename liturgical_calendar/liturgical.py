@@ -10,7 +10,7 @@ from datetime import datetime, date
 from .funcs import get_easter, get_advent_sunday, date_to_days, day_of_week, add_delta_days, colour_code, get_week_number, render_week_name
 from .feasts import lookup_feast
 from .core.readings_manager import ReadingsManager
-from .artwork import get_image_source_for_date
+from .core.artwork_manager import ArtworkManager
 from .core.season_calculator import SeasonCalculator
 
 ##########################################################################
@@ -18,6 +18,7 @@ from .core.season_calculator import SeasonCalculator
 # Instantiate the SeasonCalculator and ReadingsManager
 season_calculator = SeasonCalculator()
 readings_manager = ReadingsManager()
+artwork_manager = ArtworkManager()
 
 def liturgical_calendar(s_date: str, transferred: bool = False):
     """
@@ -231,7 +232,7 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
             result['readings'] += readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
 
     # Get artwork for this date
-    result['artwork'] = get_image_source_for_date(f_date.strftime("%Y-%m-%d"), result)
+    result['artwork'] = artwork_manager.get_artwork_for_date(f_date.strftime("%Y-%m-%d"), result)
 
     return result
 

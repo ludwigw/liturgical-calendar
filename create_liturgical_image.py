@@ -3,7 +3,7 @@ import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from liturgical_calendar.liturgical import liturgical_calendar
-from liturgical_calendar.artwork import get_image_source_for_date
+from liturgical_calendar.core.artwork_manager import ArtworkManager
 
 # Font paths
 FONTS_DIR = Path(__file__).parent / 'fonts'
@@ -26,6 +26,8 @@ BG_COLOR = (255, 255, 255)
 TEXT_COLOR = (74, 74, 74)  # #4A4A4A
 LINE_COLOR = (151, 151, 151)
 
+# Create ArtworkManager instance
+artwork_manager = ArtworkManager()
 
 def get_date_str(date):
     return date.strftime('%Y-%m-%d')
@@ -54,7 +56,7 @@ def main():
 
     # Get liturgical info
     info = liturgical_calendar(date_str)
-    artwork = get_image_source_for_date(date_str, info)
+    artwork = artwork_manager.get_artwork_for_date(date_str, info)
 
     # Prepare fonts
     serif_font_36 = ImageFont.truetype(str(SERIF_FONT), HEADER_FONT_SIZE)
@@ -107,7 +109,7 @@ def main():
         search_date = date
         for _ in range(366):  # Search up to a year ahead
             search_date += timedelta(days=1)
-            next_artwork_candidate = get_image_source_for_date(get_date_str(search_date))
+            next_artwork_candidate = artwork_manager.get_artwork_for_date(get_date_str(search_date))
             if next_artwork_candidate and next_artwork_candidate.get('cached_file'):
                 next_artwork = next_artwork_candidate
                 break
@@ -149,7 +151,7 @@ def main():
             search_date = date
             for _ in range(366):
                 search_date += timedelta(days=1)
-                candidate = get_image_source_for_date(get_date_str(search_date))
+                candidate = artwork_manager.get_artwork_for_date(get_date_str(search_date))
                 if candidate and candidate.get('cached_file') == next_artwork.get('cached_file'):
                     next_artwork_date = get_friendly_date(search_date)
                     break

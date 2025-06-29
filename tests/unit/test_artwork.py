@@ -3,59 +3,58 @@ Unit tests for artwork functionality
 """
 import unittest
 from unittest.mock import patch
-from liturgical_calendar.artwork import (
-    lookup_feast_artwork,
-    get_image_source_for_date,
-    find_squashed_artworks
-)
+from liturgical_calendar.core.artwork_manager import ArtworkManager
 from liturgical_calendar.data.artwork_data import feasts
+
+# Create ArtworkManager instance for testing
+artwork_manager = ArtworkManager()
 
 class TestLookupFeastArtwork(unittest.TestCase):
     def test_lookup_single_feast(self):
-        result = lookup_feast_artwork('easter', 0)  # Easter Sunday
+        result = artwork_manager.lookup_feast_artwork('easter', 0)  # Easter Sunday
         self.assertIsNotNone(result)
         self.assertEqual(result['name'], 'Easter')
         self.assertIn('source', result)
 
     def test_lookup_multiple_feasts(self):
-        result1 = lookup_feast_artwork('christmas', '01-02', 0)
+        result1 = artwork_manager.lookup_feast_artwork('christmas', '01-02', 0)
         self.assertIsNotNone(result1)
         self.assertEqual(result1['name'], 'Vedanayagam Samuel Azariah')
-        result2 = lookup_feast_artwork('christmas', '01-02', 1)
+        result2 = artwork_manager.lookup_feast_artwork('christmas', '01-02', 1)
         self.assertIsNotNone(result2)
         self.assertEqual(result2['name'], 'Seraphim of Sarov')
-        result3 = lookup_feast_artwork('christmas', '01-02', 2)
+        result3 = artwork_manager.lookup_feast_artwork('christmas', '01-02', 2)
         self.assertIsNotNone(result3)
         self.assertEqual(result3['name'], 'Vedanayagam Samuel Azariah')
 
     def test_lookup_nonexistent_feast(self):
-        result = lookup_feast_artwork('easter', 999)
+        result = artwork_manager.lookup_feast_artwork('easter', 999)
         self.assertIsNone(result)
 
     def test_lookup_nonexistent_season(self):
         with self.assertRaises(KeyError):
-            lookup_feast_artwork('nonexistent', 0)
+            artwork_manager.lookup_feast_artwork('nonexistent', 0)
 
 class TestGetImageSourceForDate(unittest.TestCase):
     def test_easter_based_feast(self):
         # 2025-04-20 is Easter Sunday
-        result = get_image_source_for_date('2025-04-20')
+        result = artwork_manager.get_artwork_for_date('2025-04-20')
         self.assertIsNotNone(result)
         self.assertEqual(result['name'], 'Easter')
         self.assertIn('source', result)
 
     def test_christmas_based_feast(self):
         # 2025-01-06 is Epiphany
-        result = get_image_source_for_date('2025-01-06')
+        result = artwork_manager.get_artwork_for_date('2025-01-06')
         self.assertIsNotNone(result)
         self.assertEqual(result['name'], 'Epiphany')
         self.assertIn('source', result)
 
     def test_multiple_feasts_cycle_selection(self):
         # 2023-01-02, 2024-01-02, 2025-01-02 should cycle through two feasts
-        result_2023 = get_image_source_for_date('2023-01-02')  # Cycle A
-        result_2024 = get_image_source_for_date('2024-01-02')  # Cycle B
-        result_2025 = get_image_source_for_date('2025-01-02')  # Cycle C (wraps to A)
+        result_2023 = artwork_manager.get_artwork_for_date('2023-01-02')  # Cycle A
+        result_2024 = artwork_manager.get_artwork_for_date('2024-01-02')  # Cycle B
+        result_2025 = artwork_manager.get_artwork_for_date('2025-01-02')  # Cycle C (wraps to A)
         # 2023 and 2025 should match, 2024 should differ
         self.assertEqual(result_2023['name'], result_2025['name'])
         self.assertNotEqual(result_2023['name'], result_2024['name'])
@@ -64,7 +63,7 @@ class TestGetImageSourceForDate(unittest.TestCase):
 
     def test_no_feast_found(self):
         # 2025-07-04 is not a feast day in the artwork data
-        result = get_image_source_for_date('2025-07-04')
+        result = artwork_manager.get_artwork_for_date('2025-07-04')
         self.assertIsNone(result)
 
     def test_liturgical_priority_matching(self):
@@ -73,13 +72,13 @@ class TestGetImageSourceForDate(unittest.TestCase):
             'name': 'Epiphany',
             'prec': 7
         }
-        result = get_image_source_for_date('2025-01-06', liturgical_result)
+        result = artwork_manager.get_artwork_for_date('2025-01-06', liturgical_result)
         self.assertIsNotNone(result)
         self.assertEqual(result['name'], 'Epiphany')
 
     def test_martyr_flag(self):
         # 2025-02-12 is Lady Jane Grey (martyr)
-        result = get_image_source_for_date('2025-02-12')
+        result = artwork_manager.get_artwork_for_date('2025-02-12')
         print(f"DEBUG: result for 2025-02-12: {result}")
         print(f"DEBUG: feasts['christmas']['02-12']: {feasts['christmas'].get('02-12')}")
         self.assertIsNotNone(result)
@@ -99,7 +98,7 @@ class TestFindSquashedArtworks(unittest.TestCase):
             'prec': 7  # High precedence - will always be selected
         }
         
-        result = find_squashed_artworks()
+        result = artwork_manager.find_squashed_artworks()
         
         # Should return a list of squashed artworks
         self.assertIsInstance(result, list)
@@ -127,7 +126,7 @@ class TestFindSquashedArtworks(unittest.TestCase):
             'prec': 3  # Low precedence - won't cause squashing
         }
         
-        result = find_squashed_artworks()
+        result = artwork_manager.find_squashed_artworks()
         
         # Should return empty list since prec <= 5
         self.assertEqual(result, [])
@@ -148,7 +147,7 @@ class TestFindSquashedArtworks(unittest.TestCase):
         
         mock_lookup_feast.side_effect = mock_lookup_side_effect
         
-        result = find_squashed_artworks()
+        result = artwork_manager.find_squashed_artworks()
         
         # Should return fewer results since some names now match
         # (but still some will be squashed because not all names match)
