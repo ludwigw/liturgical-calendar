@@ -6,7 +6,8 @@ Handles feast artwork lookup, image source retrieval, and caching.
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from ..data.artwork_data import feasts
+from ..data.artwork_data import feasts as artwork_feasts
+from ..data.feasts_data import get_liturgical_feast  # Only if needed for squashed artwork
 
 
 class ArtworkManager:
@@ -30,8 +31,8 @@ class ArtworkManager:
     """
     
     def __init__(self):
-        """Initialize the ArtworkManager with feast data."""
-        self.feasts = feasts
+        """Initialize the ArtworkManager with artwork feast data."""
+        self.feasts = artwork_feasts
     
     def lookup_feast_artwork(self, relative_to: str, pointer: Any, cycle_index: int = 0) -> Optional[Dict[str, Any]]:
         """
@@ -203,9 +204,6 @@ class ArtworkManager:
         Returns:
             List of squashed artwork entries
         """
-        import json
-        from ..feasts import lookup_feast
-        
         squashed = []
         for season, items in self.feasts.items():
             for pointer, entries in items.items():
@@ -214,7 +212,7 @@ class ArtworkManager:
                 # Get the liturgical name and prec for this date
                 feast = None
                 try:
-                    feast = lookup_feast(season, pointer)
+                    feast = get_liturgical_feast(season, pointer)
                 except Exception:
                     pass
                 if not feast or feast.get('prec', 0) <= 5:

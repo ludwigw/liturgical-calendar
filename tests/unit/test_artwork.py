@@ -89,11 +89,11 @@ class TestGetImageSourceForDate(unittest.TestCase):
 class TestFindSquashedArtworks(unittest.TestCase):
     """Test the find_squashed_artworks function"""
     
-    @patch('liturgical_calendar.feasts.lookup_feast')
-    def test_find_squashed_artworks(self, mock_lookup_feast):
+    @patch('liturgical_calendar.core.artwork_manager.get_liturgical_feast')
+    def test_find_squashed_artworks(self, mock_get_liturgical_feast):
         """Test finding artworks that will never be selected due to high precedence liturgical feasts"""
-        # Mock lookup_feast to return a high precedence feast that doesn't match artwork names
-        mock_lookup_feast.return_value = {
+        # Mock get_liturgical_feast to return a high precedence feast that doesn't match artwork names
+        mock_get_liturgical_feast.return_value = {
             'name': 'Epiphany',  # This doesn't match most artwork names
             'prec': 7  # High precedence - will always be selected
         }
@@ -117,11 +117,11 @@ class TestFindSquashedArtworks(unittest.TestCase):
         # (this is what makes it "squashed")
         self.assertNotEqual(item['liturgical_name'], item['artwork_name'])
     
-    @patch('liturgical_calendar.feasts.lookup_feast')
-    def test_no_squashed_artworks_when_low_precedence(self, mock_lookup_feast):
+    @patch('liturgical_calendar.core.artwork_manager.get_liturgical_feast')
+    def test_no_squashed_artworks_when_low_precedence(self, mock_get_liturgical_feast):
         """Test that low precedence feasts don't cause squashing"""
-        # Mock lookup_feast to return a low precedence feast
-        mock_lookup_feast.return_value = {
+        # Mock get_liturgical_feast to return a low precedence feast
+        mock_get_liturgical_feast.return_value = {
             'name': 'Some Feast',
             'prec': 3  # Low precedence - won't cause squashing
         }
@@ -131,10 +131,10 @@ class TestFindSquashedArtworks(unittest.TestCase):
         # Should return empty list since prec <= 5
         self.assertEqual(result, [])
     
-    @patch('liturgical_calendar.feasts.lookup_feast')
-    def test_no_squashed_artworks_when_names_match(self, mock_lookup_feast):
+    @patch('liturgical_calendar.core.artwork_manager.get_liturgical_feast')
+    def test_no_squashed_artworks_when_names_match(self, mock_get_liturgical_feast):
         """Test that matching names don't cause squashing"""
-        # Mock lookup_feast to return a feast that matches artwork names
+        # Mock get_liturgical_feast to return a feast that matches artwork names
         # We need to mock it to return different names for different calls
         def mock_lookup_side_effect(season, pointer):
             # Return the actual artwork name for each pointer to simulate matching
@@ -145,7 +145,7 @@ class TestFindSquashedArtworks(unittest.TestCase):
             else:
                 return {'name': 'Some Other Feast', 'prec': 7}  # This won't match
         
-        mock_lookup_feast.side_effect = mock_lookup_side_effect
+        mock_get_liturgical_feast.side_effect = mock_lookup_side_effect
         
         result = artwork_manager.find_squashed_artworks()
         

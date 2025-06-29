@@ -8,7 +8,7 @@ import sys
 from datetime import datetime, date
 
 from .funcs import get_easter, get_advent_sunday, date_to_days, day_of_week, add_delta_days, colour_code, get_week_number, render_week_name
-from .feasts import lookup_feast
+from .data.feasts_data import feasts, get_liturgical_feast
 from .core.readings_manager import ReadingsManager
 from .core.artwork_manager import ArtworkManager
 from .core.season_calculator import SeasonCalculator
@@ -122,8 +122,8 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
         season = 'Ordinary Time'
 
     # Now, look for feasts.
-    feast_from_easter    = lookup_feast('easter', easter_point)
-    feast_from_christmas = lookup_feast('christmas', "%02d-%02d" % (month, day))
+    feast_from_easter    = get_liturgical_feast('easter', easter_point)
+    feast_from_christmas = get_liturgical_feast('christmas', "%02d-%02d" % (month, day))
 
     if feast_from_easter:
         possibles.append(feast_from_easter)
@@ -228,8 +228,16 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     if 'readings' not in result:
         result['readings'] = readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
     else:
-        if result['prec'] < 5:
-            result['readings'] += readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
+        # If readings already exist (from feast data), append weekday readings
+        if result['prec'] < 5:  # Lower precedence feast
+            weekday_readings = readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
+            if weekday_readings and isinstance(weekday_readings, dict) and weekday_readings:
+                # Merge the readings - feast readings take priority, add weekday readings
+                merged_readings = result['readings'].copy()
+                for key, value in weekday_readings.items():
+                    if key not in merged_readings:
+                        merged_readings[key] = value
+                result['readings'] = merged_readings
 
     # Get artwork for this date
     result['artwork'] = artwork_manager.get_artwork_for_date(f_date.strftime("%Y-%m-%d"), result)
