@@ -91,10 +91,20 @@ class ArtworkManager:
     def validate_artwork_data(self, artwork_entry)
 ```
 
-**Migration Steps**:
-1. Extract artwork logic from `artwork.py`
-2. Create unit tests for artwork selection
-3. Update existing code to use new class
+**Migration Steps:**
+1. **Add Baseline Tests Before Refactoring**
+    - Identify key public functions in `artwork.py` (e.g., `get_image_source_for_date`, `lookup_feast_artwork`).
+    - Write integration/unit tests for these functions:
+        - Test a variety of dates (ordinary, feasts, edge cases).
+        - Test with/without `liturgical_info`.
+        - Assert on artwork name, source, cycle selection, etc.
+    - (Optional) Use snapshot/golden master testing: record current outputs for a set of dates to compare after refactor.
+2. Extract artwork logic from `artwork.py` into `ArtworkManager` class in `core/artwork_manager.py`.
+3. Create/expand unit tests for `ArtworkManager`.
+4. Update all code to use `ArtworkManager` directly.
+5. Rerun all tests and compare outputs to baseline/golden master.
+6. Manual/visual spot-checks for key dates (optional).
+7. Ensure all tests pass.
 
 ### Phase 2: Data Layer Separation (Week 2)
 
