@@ -66,8 +66,8 @@ class SeasonCalculator:
 2. ~~Create unit tests for each method~~ ✅ (23 tests)
 3. ~~Update main function to use new class~~ ✅
 
-#### 1.3 Extract Readings Management 🔄 **NEXT TASK**
-**File**: `liturgical_calendar/core/readings_manager.py`
+#### 1.3 Extract Readings Management ✅ **COMPLETED**
+**File**: `liturgical_calendar/core/readings_manager.py` ✅
 ```python
 class ReadingsManager:
     def get_sunday_readings(self, week, cycle)
@@ -77,11 +77,11 @@ class ReadingsManager:
 ```
 
 **Migration Steps**:
-1. Move readings logic from `readings.py` to new class
-2. Create unit tests for readings selection
-3. Update existing code to use new class
+1. ~~Move readings logic from `readings.py` to new class~~ ✅
+2. ~~Create unit tests for readings selection~~ ✅
+3. ~~Update existing code to use new class~~ ✅
 
-#### 1.4 Extract Artwork Management
+#### 1.4 Extract Artwork Management ✅ **COMPLETED**
 **File**: `liturgical_calendar/core/artwork_manager.py`
 ```python
 class ArtworkManager:
@@ -92,19 +92,19 @@ class ArtworkManager:
 ```
 
 **Migration Steps:**
-1. **Add Baseline Tests Before Refactoring**
-    - Identify key public functions in `artwork.py` (e.g., `get_image_source_for_date`, `lookup_feast_artwork`).
-    - Write integration/unit tests for these functions:
-        - Test a variety of dates (ordinary, feasts, edge cases).
-        - Test with/without `liturgical_info`.
-        - Assert on artwork name, source, cycle selection, etc.
-    - (Optional) Use snapshot/golden master testing: record current outputs for a set of dates to compare after refactor.
-2. Extract artwork logic from `artwork.py` into `ArtworkManager` class in `core/artwork_manager.py`.
-3. Create/expand unit tests for `ArtworkManager`.
-4. Update all code to use `ArtworkManager` directly.
-5. Rerun all tests and compare outputs to baseline/golden master.
-6. Manual/visual spot-checks for key dates (optional).
-7. Ensure all tests pass.
+1. **Add Baseline Tests Before Refactoring** ✅ **COMPLETED**
+    - ~~Identify key public functions in `artwork.py` (e.g., `get_image_source_for_date`, `lookup_feast_artwork`).~~ ✅
+    - ~~Write integration/unit tests for these functions:~~ ✅
+        - ~~Test a variety of dates (ordinary, feasts, edge cases).~~ ✅
+        - ~~Test with/without `liturgical_info`.~~ ✅
+        - ~~Assert on artwork name, source, cycle selection, etc.~~ ✅
+    - ~~(Optional) Use snapshot/golden master testing: record current outputs for a set of dates to compare after refactor.~~ ✅
+2. Extract artwork logic from `artwork.py` into `ArtworkManager` class in `core/artwork_manager.py`. 🔄
+3. Create/expand unit tests for `ArtworkManager`. 🔄
+4. Update all code to use `ArtworkManager` directly. 🔄
+5. Rerun all tests and compare outputs to baseline/golden master. 🔄
+6. Manual/visual spot-checks for key dates (optional). 🔄
+7. Ensure all tests pass. 🔄
 
 ### Phase 2: Data Layer Separation (Week 2)
 
@@ -443,18 +443,18 @@ def main():
 - **Integration**: SeasonCalculator successfully integrated into liturgical.py
 - **Testing**: All 57 tests passing (34 main + 23 unit tests)
 
-### 🔄 Next Priority: Phase 1.3 - Extract Readings Management
+### 🔄 Next Priority: Phase 1.4 - Extract Artwork Management
 **Immediate Tasks**:
-1. Create `liturgical_calendar/core/readings_manager.py`
-2. Extract readings logic from `readings.py` 
-3. Create unit tests for ReadingsManager
-4. Update `liturgical.py` to use ReadingsManager
+1. Create `liturgical_calendar/core/artwork_manager.py`
+2. Extract artwork logic from `artwork.py` 
+3. Create unit tests for ArtworkManager
+4. Update `liturgical.py` to use ArtworkManager
 5. Ensure all existing tests continue to pass
 
 **Files to work on**:
-- `liturgical_calendar/core/readings_manager.py` (new)
-- `liturgical_calendar/readings.py` (refactor)
-- `tests/unit/test_readings_manager.py` (new)
+- `liturgical_calendar/core/artwork_manager.py` (new)
+- `liturgical_calendar/artwork.py` (refactor)
+- `tests/unit/test_artwork_manager.py` (new)
 - `liturgical_calendar/liturgical.py` (update imports and usage)
 
 This plan provides a clear roadmap for transforming the codebase into a maintainable, testable, and extensible system while preserving all existing functionality. 
