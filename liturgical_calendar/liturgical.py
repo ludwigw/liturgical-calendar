@@ -67,19 +67,18 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     # Get season URL from config service
     season_url = config_service.get_season_url(season)
 
-    # Render a Week name with or without number
-    # For weekdays, determine the week name based on the Sunday that starts the week
-    if dayofweek == 0:
-        # It's a Sunday, use the current season
-        # Special case: if weekday_reading is "N before Advent", use that for the week name too
-        if weekday_reading and weekday_reading.endswith(' before Advent'):
-            week = weekday_reading
-        else:
-            week, season = feast_service.season_calculator.render_week_name(season, weekno, easter_point)
-    else:
-        # It's a weekday, calculate what the season would be for the Sunday that starts this week
-        sunday_season, sunday_weekno = feast_service.season_calculator.calculate_sunday_week_info(f_date, dayofweek, days, easterday, year)
-        week, _ = feast_service.season_calculator.render_week_name(sunday_season, sunday_weekno, easter_point)
+    # Calculate week name using FeastService
+    week = feast_service.calculate_week_name(
+        f_date=f_date,
+        dayofweek=dayofweek,
+        season=season,
+        weekno=weekno,
+        easter_point=easter_point,
+        weekday_reading=weekday_reading,
+        days=days,
+        easterday=easterday,
+        year=year
+    )
 
     # Only set weekno to None if it's not positive and not Pre-Lent, Christmas, or Lent
     if weekno is not None and int(weekno) > 0:
@@ -127,19 +126,7 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     result['colourcode'] = colour_code(result['colour'])
 
     # Get readings using FeastService's readings_manager
-    if 'readings' not in result:
-        result['readings'] = feast_service.readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
-    else:
-        # If readings already exist (from feast data), append weekday readings
-        if result['prec'] < 5:  # Lower precedence feast
-            weekday_readings = feast_service.readings_manager.get_readings_for_date(f_date.strftime("%Y-%m-%d"), result)
-            if weekday_readings and isinstance(weekday_readings, dict) and weekday_readings:
-                # Merge the readings - feast readings take priority, add weekday readings
-                merged_readings = result['readings'].copy()
-                for key, value in weekday_readings.items():
-                    if key not in merged_readings:
-                        merged_readings[key] = value
-                result['readings'] = merged_readings
+    result = feast_service._add_readings(result, f_date.strftime("%Y-%m-%d"))
 
     # Get artwork using ImageService
     result['artwork'] = image_service.get_artwork_for_date(f_date.strftime("%Y-%m-%d"), result)
