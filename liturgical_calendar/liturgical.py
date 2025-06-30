@@ -114,17 +114,6 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     result['date'] = f_date
     result['weekday_reading'] = weekday_reading 
 
-    # Use ImageService to determine color
-    result['colour'] = image_service.determine_color(
-        result=result,
-        season=season,
-        christmas_point=christmas_point,
-        advent_sunday=advent_sunday
-    )
-
-    # Set colour code
-    result['colourcode'] = colour_code(result['colour'])
-
     # Get readings using FeastService's readings_manager
     result = feast_service._add_readings(result, f_date.strftime("%Y-%m-%d"))
 
