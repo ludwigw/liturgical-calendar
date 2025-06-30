@@ -57,20 +57,20 @@ class ReadingsManager:
         """
         return self.sunday_readings.get(week, {}).get(cycle, {})
     
-    def get_weekday_readings(self, weekday_reading: str, day_of_week: str, cycle: int) -> Dict[str, List[str]]:
+    def get_weekday_readings(self, weekday_reading: str, day_of_week: str, cycle: int) -> List[str]:
         """
         Get weekday readings for a specific week, day, and cycle.
         
         Args:
-            weekday_reading: The liturgical week (e.g., 'Advent 1', 'Lent 1')
+            weekday_reading: The liturgical week (e.g., 'Advent 1', 'Lent 1', 'Proper 6')
             day_of_week: The day of the week (e.g., 'Monday', 'Tuesday')
             cycle: The weekday cycle (1 or 2)
-            
+        
         Returns:
-            Dictionary containing the readings for the weekday and cycle.
-            Returns empty dict if not found.
+            List containing the readings for the weekday and cycle.
+            Returns empty list if not found.
         """
-        return self.weekday_readings.get(weekday_reading, {}).get(day_of_week, {}).get(str(cycle), {})
+        return self.weekday_readings.get(weekday_reading, {}).get(day_of_week, {}).get(str(cycle), [])
     
     def get_feast_readings(self, feast_data: Dict) -> Dict[str, List[str]]:
         """
@@ -87,7 +87,7 @@ class ReadingsManager:
         # For now, return empty dict as feast readings are handled elsewhere
         return {}
     
-    def get_readings_for_date(self, date_str: str, liturgical_info: Dict) -> Dict[str, List[str]]:
+    def get_readings_for_date(self, date_str: str, liturgical_info: Dict) -> List[str]:
         """
         Get readings for a specific date based on liturgical information.
         
@@ -96,10 +96,10 @@ class ReadingsManager:
             liturgical_info: Dictionary containing liturgical information including:
                 - 'week': The liturgical week
                 - 'weekday_reading': The weekday reading (if applicable)
-                
+        
         Returns:
-            Dictionary containing the readings for the date.
-            Returns empty dict if no readings found.
+            List containing the readings for the date.
+            Returns empty list if no readings found.
         """
         try:
             date = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -123,12 +123,12 @@ class ReadingsManager:
                     day_of_week = date.strftime('%A')  # Get the day of the week (e.g., 'Monday')
                     return self.get_weekday_readings(weekday_reading, day_of_week, weekday_cycle)
             
-            return {}
+            return []
             
         except (ValueError, KeyError, TypeError) as e:
             # Log error in a production environment
             print(f"Error getting readings for date {date_str}: {e}")
-            return {}
+            return []
     
     def validate_readings_data(self, readings: Dict) -> bool:
         """

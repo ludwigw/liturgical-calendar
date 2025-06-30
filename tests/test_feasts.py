@@ -711,7 +711,7 @@ class TestReadingsCoverage(unittest.TestCase):
             ('2024-02-18', 'Lent'),        # Lent 1
             ('2024-03-31', 'Easter'),      # Easter Sunday
             ('2024-05-19', 'Pentecost'),   # Pentecost
-            ('2024-06-02', 'Trinity'),     # Trinity Sunday
+            ('2024-05-26', 'Trinity'),     # Trinity Sunday
             ('2024-06-23', 'Ordinary'),    # Proper 7 (Ordinary Time)
         ]
         
@@ -738,7 +738,7 @@ class TestReadingsCoverage(unittest.TestCase):
             ('2024-02-14', 'Ash Wednesday'),
             ('2024-03-31', 'Easter'),
             ('2024-05-19', 'Pentecost'),
-            ('2024-06-02', 'Trinity Sunday'),
+            ('2024-05-26', 'Trinity'),
         ]
         
         for date_str, feast_name in feast_tests:
@@ -752,9 +752,7 @@ class TestReadingsCoverage(unittest.TestCase):
                 
                 # Check that the feast name matches
                 actual_name = info.get('name', '')
-                self.assertTrue(feast_name.lower() in actual_name.lower() or 
-                              (feast_name == 'Trinity Sunday' and 'Trinity' in actual_name),
-                              f"Expected {feast_name}, got {actual_name}")
+                self.assertTrue(feast_name.lower() in actual_name.lower(), f"Expected {feast_name}, got {actual_name}")
     
     def test_weekday_vs_sunday_reading_differences(self):
         """Test that weekdays and Sundays have different readings"""

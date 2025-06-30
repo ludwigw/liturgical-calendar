@@ -25,102 +25,12 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     Return the liturgical colour for a given day
     This func contains the main logic
     """
-
-    # s_date could in a variety of formats
-    # We standardise to f_date as a Date
     if isinstance(s_date, datetime):
-        # If datetime, strip it to the date
-        f_date = s_date.date()
+        s_date = s_date.date().strftime("%Y-%m-%d")
     elif isinstance(s_date, date):
-        # If date, accept it
-        f_date = s_date
-    elif isinstance(s_date, str):
-        # If string, try to parse a YYYY-MM-DD
-        f_date = datetime.strptime(s_date, "%Y-%m-%d").date()
-    else:
-        # Otherwise use today's date
-        f_date = date.today()
-
-    # Extract the components from the date
-    year = f_date.year
-    month = f_date.month
-    day = f_date.day
-    dayofweek = day_of_week(year, month, day)
-
-    # Calculate some values in Julian date
-    days = date_to_days(year, month, day)
-    easterm, easterd = get_easter(year)
-    easterday = date_to_days(year, easterm, easterd)
-
-    # Calculate key liturgical points
-    easter_point = days - easterday
-    christmas_point = config_service.calculate_christmas_point(year, month, days)
-    advent_sunday = get_advent_sunday(year)
-
-    # Use SeasonCalculator for season and week number
-    season = feast_service.season_calculator.determine_season(f_date, easter_point, christmas_point, advent_sunday)
-    weekno = feast_service.season_calculator.calculate_week_number(f_date, easter_point, christmas_point, advent_sunday, dayofweek)
-    
-    # Use SeasonCalculator for weekday_reading
-    weekday_reading = feast_service.season_calculator.calculate_weekday_reading(f_date, easter_point, christmas_point, advent_sunday, dayofweek, days, easterday)
-
-    # Get season URL from config service
-    season_url = config_service.get_season_url(season)
-
-    # Calculate week name using FeastService
-    week = feast_service.calculate_week_name(
-        f_date=f_date,
-        dayofweek=dayofweek,
-        season=season,
-        weekno=weekno,
-        easter_point=easter_point,
-        weekday_reading=weekday_reading,
-        days=days,
-        easterday=easterday,
-        year=year
-    )
-
-    # Only set weekno to None if it's not positive and not Pre-Lent, Christmas, or Lent
-    if weekno is not None and int(weekno) > 0:
-        weekno = int(weekno)
-    elif season not in ['Pre-Lent', 'Christmas', 'Lent']:
-        weekno = None
-
-    # Change Pre-Lent and Pre-Advent seasons to Ordinary Time for the final result
-    if season in ['Pre-Lent', 'Pre-Advent']:
-        season = 'Ordinary Time'
-
-    # Use FeastService to get possible feasts
-    possibles = feast_service.get_possible_feasts(
-        easter_point=easter_point,
-        month=month,
-        day=day,
-        transferred=transferred,
-        s_date=s_date,
-        days=days,
-        season=season,
-        weekno=weekno,
-        dayofweek=dayofweek
-    )
-
-    # Get the highest priority feast using FeastService
-    result = feast_service.get_highest_priority_feast(possibles, transferred)
-
-    # Append season info regardless
-    result['season'] = season
-    result['season_url'] = season_url
-    result['weekno'] = weekno
-    result['week'] = week
-    result['date'] = f_date
-    result['weekday_reading'] = weekday_reading 
-
-    # Get readings using FeastService's readings_manager
-    result = feast_service._add_readings(result, f_date.strftime("%Y-%m-%d"))
-
-    # Get artwork using ImageService
-    result['artwork'] = image_service.get_artwork_for_date(f_date.strftime("%Y-%m-%d"), result)
-
-    return result
+        s_date = s_date.strftime("%Y-%m-%d")
+    # If string, assume it's already in YYYY-MM-DD format
+    return feast_service.get_complete_feast_info(s_date, transferred)
 
 def main():
     """

@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Any
 from ..core.season_calculator import SeasonCalculator
 from ..core.readings_manager import ReadingsManager
 from ..data.feasts_data import get_liturgical_feast
-from ..funcs import get_easter, date_to_days, add_delta_days
+from ..funcs import get_easter, date_to_days, add_delta_days, day_of_week
 
 
 class FeastService:
@@ -53,7 +53,7 @@ class FeastService:
         year = date_obj.year
         month = date_obj.month
         day = date_obj.day
-        dayofweek = date_obj.weekday()
+        dayofweek = day_of_week(year, month, day)
         
         # Calculate key dates and points
         easter_month, easter_day = get_easter(year)
@@ -89,10 +89,12 @@ class FeastService:
             result = {'name': '', 'prec': 1}
         
         # Add season and date information
+        # Presentational override: treat Pre-Lent and Pre-Advent as Ordinary Time
+        display_season = 'Ordinary Time' if season in ['Pre-Lent', 'Pre-Advent'] else season
         result.update({
-            'season': season,
-            'season_url': self._get_season_url(season),
-            'weekno': self._normalize_weekno(weekno, season),
+            'season': display_season,
+            'season_url': self._get_season_url(display_season),
+            'weekno': self._normalize_weekno(weekno, display_season),
             'week': week,
             'date': date_obj,
             'weekday_reading': weekday_reading
@@ -145,7 +147,7 @@ class FeastService:
                 possibles.append(transferred_feast)
         # Sunday - only add if no Principal Feast (prec==9) was found for this Sunday
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
-        dayofweek = date_obj.weekday()
+        dayofweek = day_of_week(date_obj.year, date_obj.month, date_obj.day)
         if dayofweek == 6:  # Sunday
             has_principal_feast = any(feast.get('prec') == 9 for feast in possibles)
             if not has_principal_feast:

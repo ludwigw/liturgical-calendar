@@ -10,7 +10,7 @@ from typing import Tuple, Optional
 
 from ..funcs import (
     get_easter, get_advent_sunday, date_to_days, day_of_week, 
-    add_delta_days, render_week_name
+    add_delta_days, render_week_name, get_week_number
 )
 
 
@@ -58,7 +58,14 @@ class SeasonCalculator:
         elif easter_point >= 49 and easter_point < 56:
             return 'Pentecost'
         else:
-            return 'Trinity'
+            # Pre-Advent: last four Sundays before Advent
+            advent_sunday_abs = date_to_days(f_date.year, 12, 25) + advent_sunday
+            weeks_until_advent = (advent_sunday_abs - date_to_days(f_date.year, f_date.month, f_date.day)) // 7
+            dayofweek = day_of_week(f_date.year, f_date.month, f_date.day)
+            if dayofweek == 0 and 0 < weeks_until_advent <= 4:
+                return 'Pre-Advent'
+            else:
+                return 'Trinity'
     
     def calculate_week_number(self, f_date: date, easter_point: int, 
                             christmas_point: int, advent_sunday: int, 
@@ -82,7 +89,8 @@ class SeasonCalculator:
             # Calculate which Sunday before Lent this date belongs to
             # -49 is the Sunday of "1 before Lent", -56 is "2 before Lent", etc.
             # For weekdays, we need to find which Sunday week this belongs to
-            return ((-49 - easter_point + dayofweek) // 7) + 1
+            weekno = ((-49 - easter_point + dayofweek) // 7) + 1
+            return weekno
         elif christmas_point >= advent_sunday and christmas_point <= -1:
             return 1 + (christmas_point - advent_sunday) // 7
         elif christmas_point >= 0 and christmas_point <= 11:
@@ -96,7 +104,6 @@ class SeasonCalculator:
             return 1 + (christmas_point - 12 - dayofweek) // 7
         elif easter_point <= -62:
             # Period of Ordinary Time after Epiphany (before Pre-Lent)
-            from ..funcs import get_week_number
             return get_week_number(f_date) - 5
         elif easter_point > -47 and easter_point < -7:
             # Week 1 of Lent is the first Sunday after Ash Wednesday (easter_point = -46)
@@ -123,9 +130,13 @@ class SeasonCalculator:
             # Period of Ordinary Time after Pentecost
             return 0
         else:
-            # Period of Ordinary Time after Pentecost
-            from ..funcs import get_week_number
-            return get_week_number(f_date) - 18
+            # Special case: last four Sundays before Advent
+            advent_sunday_abs = date_to_days(year, 12, 25) + advent_sunday
+            weeks_until_advent = (advent_sunday_abs - date_to_days(year, f_date.month, f_date.day)) // 7
+            if dayofweek == 0 and 0 < weeks_until_advent <= 4:
+                return weeks_until_advent  # Use positive number for 'N before Advent'
+            else:
+                return get_week_number(f_date) - 18
     
     def calculate_weekday_reading(self, f_date: date, easter_point: int, 
                                 christmas_point: int, advent_sunday: int, 
@@ -201,8 +212,8 @@ class SeasonCalculator:
             # Trinity Sunday
             return 'Trinity'
         else:
-            # Trinity weekday_reading or 'N before Advent' for the last four weeks before Advent
-            # Calculate weeks until Advent Sunday using absolute day numbers
+            # For Sundays after Trinity, use Proper N (get_week_number - 18)
+            # For weekdays after Trinity, use Trinity N ((easter_point - 56) // 7 + 1)
             advent_sunday_abs = date_to_days(year, 12, 25) + advent_sunday
             weeks_until_advent = (advent_sunday_abs - days) // 7
             if 0 <= weeks_until_advent <= 4:
@@ -212,8 +223,12 @@ class SeasonCalculator:
                 else:
                     return f"{weeks_until_advent} before Advent"
             else:
-                trinity_week = (easter_point - 56) // 7 + 1
-                return f"Trinity {trinity_week}"
+                if dayofweek == 0:
+                    weekno = get_week_number(f_date) - 18
+                    return f"Proper {weekno}"
+                else:
+                    trinity_week = (easter_point - 56) // 7 + 1
+                    return f"Trinity {trinity_week}"
     
     def render_week_name(self, season: str, weekno: int, easter_point: int) -> Tuple[str, str]:
         """

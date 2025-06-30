@@ -176,9 +176,10 @@ def render_week_name(season, weekno, easter_point=None):
         # Check if this is the first week of Trinity (easter_point 56-62)
         if season == 'Trinity' and easter_point is not None and 56 <= easter_point < 63:
             week = 'Trinity'
-        elif season in ['Ordinary Time', 'Trinity']:
-            weekname = 'Proper'
-            week = f"{weekname} {weekno}"
+        elif season == 'Trinity':
+            week = f"Proper {weekno}"
+        elif season == 'Ordinary Time':
+            week = f"Proper {weekno}"
         else:
             weekname = season
             week = f"{weekname} {weekno}"
