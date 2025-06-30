@@ -118,11 +118,9 @@ class FeastService:
                       weekday_reading: str, dayofweek: int, date_obj: datetime.date,
                       current_date: int, easter_date: int, year: int) -> str:
         """Get the liturgical week name."""
+        # Always use render_week_name for both Sundays and weekdays
         if dayofweek == 0:  # Sunday
-            if weekday_reading and weekday_reading.endswith(' before Advent'):
-                return weekday_reading
-            else:
-                return self.season_calculator.render_week_name(season, weekno, easter_point)[0]
+            return self.season_calculator.render_week_name(season, weekno, easter_point)[0]
         else:  # Weekday
             sunday_season, sunday_weekno = self.season_calculator.calculate_sunday_week_info(
                 date_obj, dayofweek, current_date, easter_date, year)
@@ -325,4 +323,44 @@ class FeastService:
         Returns:
             Liturgical information dictionary with the same structure as liturgical_calendar
         """
-        return self.get_complete_feast_info(date_str) 
+        return self.get_complete_feast_info(date_str)
+    
+    def calculate_week_name(self, f_date: datetime.date, dayofweek: int, season: str, 
+                           weekno: int, easter_point: int, weekday_reading: str, 
+                           days: int, easterday: int, year: int) -> str:
+        """
+        Calculate the liturgical week name for a given date.
+        
+        This method handles the complex logic for determining week names, including:
+        - Sunday vs weekday week naming differences
+        - Special cases like "N before Advent" logic
+        - Weekday week name calculation based on the Sunday that starts the week
+        
+        Args:
+            f_date: The date object
+            dayofweek: Day of week (0=Sunday, 1=Monday, etc.)
+            season: The liturgical season
+            weekno: The week number
+            easter_point: Days since Easter
+            weekday_reading: The weekday reading string
+            days: Julian days since epoch
+            easterday: Julian days for Easter
+            year: The year
+            
+        Returns:
+            The calculated week name
+        """
+        if dayofweek == 0:
+            # It's a Sunday, use the current season
+            # Special case: if weekday_reading is "N before Advent", use that for the week name too
+            if weekday_reading and weekday_reading.endswith(' before Advent'):
+                return weekday_reading
+            else:
+                week, _ = self.season_calculator.render_week_name(season, weekno, easter_point)
+                return week
+        else:
+            # It's a weekday, calculate what the season would be for the Sunday that starts this week
+            sunday_season, sunday_weekno = self.season_calculator.calculate_sunday_week_info(
+                f_date, dayofweek, days, easterday, year)
+            week, _ = self.season_calculator.render_week_name(sunday_season, sunday_weekno, easter_point)
+            return week 
