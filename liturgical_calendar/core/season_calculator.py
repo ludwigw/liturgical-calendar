@@ -28,6 +28,7 @@ class SeasonCalculator:
                         christmas_point: int, advent_sunday: int) -> str:
         """
         Determine the liturgical season for a given date.
+        See docs/liturgical_logic.md §2 for season calculation and edge cases.
         
         Args:
             f_date: The date to calculate the season for
@@ -72,6 +73,7 @@ class SeasonCalculator:
                             dayofweek: int) -> int:
         """
         Calculate the liturgical week number for a given date.
+        See docs/liturgical_logic.md §2 for week number logic and examples.
         
         Args:
             f_date: The date to calculate the week number for
@@ -143,6 +145,7 @@ class SeasonCalculator:
                                 dayofweek: int, days: int, easterday: int) -> Optional[str]:
         """
         Calculate the weekday reading for a given date.
+        See docs/liturgical_logic.md §3 for Proper N/Trinity N logic and §4 for lectionary cycles.
         
         Args:
             f_date: The date to calculate the weekday reading for
@@ -233,6 +236,7 @@ class SeasonCalculator:
     def render_week_name(self, season: str, weekno: int, easter_point: int) -> Tuple[str, str]:
         """
         Render a week name with or without number.
+        See docs/liturgical_logic.md §3 for week naming conventions.
         
         Args:
             season: The liturgical season
@@ -249,6 +253,7 @@ class SeasonCalculator:
         """
         Calculate the week information for the Sunday that starts the current week.
         Used for weekdays to determine which Sunday's season and week number to use.
+        See docs/liturgical_logic.md §3 (Sunday-Based Week Naming) for rationale.
         
         Args:
             f_date: The current date

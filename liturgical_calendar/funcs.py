@@ -8,6 +8,7 @@ from dateutil.easter import easter
 def get_easter(year: int) -> tuple:
     """
     Returns the date easter occurs on for a given year as (month,day)
+    See docs/liturgical_logic.md §1 for the Easter point system.
 
     Parameters
     ----------
@@ -29,6 +30,7 @@ def get_easter(year: int) -> tuple:
 def get_advent_sunday(year: int) -> int:
     """
     Return date of Advent Sunday, in days relative to Christmas day
+    See docs/liturgical_logic.md §1 for the point system and Advent calculation.
     This is always negative as Advent Sunday is before Christmas day
 
     Parameters
@@ -51,6 +53,7 @@ def get_advent_sunday(year: int) -> int:
 def date_to_days(year: int, month: int, day: int) -> int:
     """
     Convert a date from year,month,day to days since 1st January, 1 AD
+    See docs/liturgical_logic.md §1 for Julian day/point system rationale.
 
     Parameters
     ----------
@@ -75,6 +78,7 @@ def day_of_week(year: int, month: int, day: int) -> int:
     """
     Return day of week for any given date in year,month,day format
     between 0-6 where 0 is Sunday, i.e. the first day of the week
+    See docs/liturgical_logic.md §6a for why Sunday is 0 and not Monday.
     Compare with:
       weekday() which is 0-6 and 0 is Monday
       isoweekday() which is 1-7 and 1 is Monday
@@ -105,6 +109,7 @@ def day_of_week(year: int, month: int, day: int) -> int:
 def add_delta_days(days: int) -> tuple:
     """
     Convert days since 1st January, 1 AD back to year,month, day
+    See docs/liturgical_logic.md §1 for Julian day/point system rationale.
 
     Parameters
     ----------
@@ -151,6 +156,7 @@ def colour_code(colour: str) -> str:
 def get_week_number(given_date: date) -> int:
   """
   Return the week number of the year where the week starts on a Sunday
+  See docs/liturgical_logic.md §3 for Proper N/Trinity N and week number logic.
 
   Parameters
   ----------
@@ -171,6 +177,7 @@ def get_week_number(given_date: date) -> int:
 def render_week_name(season, weekno, easter_point=None):
     """
     Render a Week name with or without number
+    See docs/liturgical_logic.md §3 for week naming conventions.
     """
     if weekno and weekno > 0:
         # Check if this is the first week of Trinity (easter_point 56-62)
