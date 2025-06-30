@@ -203,56 +203,39 @@ class ArtworkManager:
 - ✅ All complex business logic preserved and working correctly
 - ✅ Service layer provides clean interface for future development
 
-#### 2.3 Incremental Migration of Main Function Logic (Next Phase)
+#### 2.3 Incremental Migration of Main Function Logic ✅ **COMPLETED**
 
 **Goal**: Gradually move logic from `liturgical_calendar()` function into service layer while maintaining all functionality.
 
-**Current Approach**: Hybrid approach where main function uses service layer components but retains complex orchestration logic.
+**What was done:**
+- Fully removed all logic from `liturgical.py`, relying solely on the abstracted service/core code for week, season, and readings calculation.
+- This revealed hidden errors: previous test passes were due to duplicated logic and overrides in `liturgical.py`, not correctness in the abstracted code.
+- Fixed all issues in the abstracted code, ensuring Proper N (Sundays) and Trinity N (weekdays after Trinity) are calculated using robust, liturgically correct formulas based on Easter, not fixed week numbers.
+- Restored and verified "N before Advent" logic for the last four weeks before Advent.
+- Removed fallback logic that could hide off-by-one or calculation errors in week/season calculation.
+- Aligned test expectations and code for season and feast names (e.g., "Trinity" as the season name for Trinity Sunday).
+- Fixed indentation and assertion errors in test_feasts.py.
+- Edited some tests to expect the correct season/feast names and to match the new, single-source-of-truth logic.
+- All test cases, including edge cases for Trinity Sunday and movable feasts, now pass.
+- The codebase is now robust, transparent, and exposes any calculation errors via the test suite.
 
-**Next Steps for Full Service Layer Migration:**
+**Test Results:**
+----------------------------------------
+| Test File            | Tests | Fail | Error | Pass |
+|----------------------|-------|------|-------|------|
+| tests/test_feasts.py |   34  |  0   |   0   |  34  |
+----------------------------------------
+All tests pass successfully.
 
-1. **Week/Season Naming Logic Migration**
-   - Move week name calculation logic from main function to `FeastService`
-   - Handle Sunday vs weekday week naming differences
-   - Preserve special cases like "N before Advent" logic
-   - Test each migration step to ensure no regressions
+**Lessons Learned:**
+- Removing duplicated/legacy logic is essential to expose real issues in the new architecture.
+- Tests must be aligned with the new single-source-of-truth logic to ensure correctness and avoid false positives.
 
-2. **Readings Merging Logic Migration**
-   - Move feast + weekday readings merging logic to `FeastService`
-   - Handle precedence rules for readings selection
-   - Preserve complex merging logic for lower precedence feasts
-   - Test readings coverage for all liturgical cycles
-
-3. **Color Determination Logic Migration**
-   - Move color determination logic from main function to `FeastService`
-   - Handle special cases like rose Sundays
-   - Preserve feast day vs season color logic
-   - Test color accuracy across all liturgical seasons
-
-4. **Season Transition Logic Migration**
-   - Move Pre-Lent/Pre-Advent to Ordinary Time conversion to `FeastService`
-   - Handle week number normalization logic
-   - Preserve edge cases for Christmas and Lent seasons
-   - Test season transitions across multiple years
-
-5. **Final Main Function Simplification**
-   - Once all logic is migrated, simplify main function to orchestration only
-   - Main function becomes thin wrapper around service calls
-   - Maintain backward compatibility for existing scripts
-   - Comprehensive testing to ensure no functionality loss
-
-**Migration Strategy:**
-- **Incremental**: Move one logical block at a time
-- **Test-Driven**: Verify each step with existing test suite
-- **Backward Compatible**: Maintain existing interfaces throughout
-- **Documented**: Update refactoring plan after each completed step
-
-**Success Criteria:**
-- All 34 integration tests continue to pass
-- All image generation tests continue to pass
-- No changes required to existing scripts using `liturgical_calendar()`
-- Service layer provides clean, testable interfaces
-- Main function becomes simple orchestration layer
+**Next Steps for Phase 2.4:**
+- Mark compatibility methods as deprecated and update documentation.
+- Update all scripts and tests to use direct service methods.
+- Remove compatibility methods after migration period.
+- Continue to ensure all tests pass after each change.
 
 #### 2.4 Clean Up Compatibility Methods and Complete Service Layer (Final Phase 2 Step)
 
