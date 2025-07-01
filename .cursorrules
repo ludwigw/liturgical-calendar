@@ -22,3 +22,7 @@
 ## Documentation
 - Reference `docs/liturgical_logic.md` for liturgical calendar concepts and edge cases
 - Update documentation when making significant changes to liturgical logic 
+
+## Commit Messages
+- All commit messages must follow the Conventional Commits specification (e.g., feat:, fix:, refactor:, docs:, etc.).
+- Always append a summary table of the tests run and their pass/fail rates in the footer of the commit message. 
