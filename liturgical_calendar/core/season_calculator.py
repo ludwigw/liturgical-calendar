@@ -5,7 +5,7 @@ This module contains the SeasonCalculator class which handles all season-related
 calculations including determining liturgical seasons, week numbers, and weekday readings.
 """
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Dict
 from ..funcs import (
     get_easter, get_advent_sunday, date_to_days, day_of_week, 
@@ -170,7 +170,7 @@ class SeasonCalculator:
             else:
                 week_name = f"{weeks_until_advent} before Advent"
             weekday_reading_key = week_name
-        elif sunday_season == 'Pre-Lent' or sunday_season == 'Ordinary Time':
+        elif sunday_season == 'Ordinary Time':
             # Map Ordinary Time to Epiphany N or Trinity N as appropriate
             # Use Epiphany N if before Lent, Trinity N if after Pentecost
             # Here, use Epiphany N for Pre-Lent/Ordinary Time before Lent
@@ -180,6 +180,36 @@ class SeasonCalculator:
         else:
             week_name = sunday_season
             weekday_reading_key = week_name
+        # Calculate Ash Wednesday (Easter - 46 days)
+        ash_wednesday_days = easterday - 46
+        pre_lent_start_sunday_days = ash_wednesday_days - 7*5
+        ash_wednesday_date_tuple = add_delta_days(ash_wednesday_days)
+        pre_lent_start_sunday_date_tuple = add_delta_days(pre_lent_start_sunday_days)
+        ash_wednesday_date = date(*ash_wednesday_date_tuple)
+        pre_lent_start_sunday_date = date(*pre_lent_start_sunday_date_tuple)
+        # ---
+        # Pre-Lent Weekday Reading Key Override
+        #
+        # The lectionary assigns week-based readings for Pre-Lent weekdays using keys like
+        # '5 before Lent', '4 before Lent', ..., '1 before Lent'. However, Sundays only use
+        # '2 before Lent' and '1 before Lent' as week names, because the Pre-Lent season is
+        # defined as three Sundays before Lent, but weekday readings extend to five weeks.
+        #
+        # This override ensures that for the five weeks before Ash Wednesday, weekdays get
+        # the correct 'N before Lent' reading key, matching the lectionary data. The override
+        # only applies for n in 1..5; otherwise, the main logic is used.
+        # ---
+        if pre_lent_start_sunday_date <= week_start_sunday_date < ash_wednesday_date:
+            n = ((ash_wednesday_days - week_start_sunday_days) // 7 + 1)
+            if 1 <= n <= 5:
+                override_weekday_reading_key = f"{n} before Lent"
+            else:
+                override_weekday_reading_key = None
+        else:
+            override_weekday_reading_key = None
+        # At the end, override the weekday_reading_key if needed
+        if override_weekday_reading_key:
+            weekday_reading_key = override_weekday_reading_key
         return {
             'season': current_season,
             'week_name': week_name,
