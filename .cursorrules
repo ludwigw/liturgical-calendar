@@ -10,6 +10,11 @@
 - When refactoring, preserve the core calculation logic and only change the API/structure around it
 - If you encounter test failures after changing logic, first verify that the original logic was working correctly before making changes
 
+## Data and Functionality Preservation
+- **CRITICAL**: If tests that previously passed are now failing, and the underlying data hasn't changed, the refactor broke the logic for accessing that data
+- **DEFAULT EXPECTATION**: Existing functionality should continue to work after refactoring
+- **REQUIRED**: When tests fail after refactoring, investigate whether the refactor broke the data access logic, not assume the data is missing
+
 ## Project Structure
 - Do not modify any files in `tests/feasts_test*` without explicit permission
 - The liturgical calendar logic is complex and has been tested extensively - changes should be incremental and well-justified
