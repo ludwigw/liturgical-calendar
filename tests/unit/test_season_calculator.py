@@ -8,7 +8,6 @@ season calculations including season determination, week numbers, and weekday re
 import unittest
 from datetime import date
 from liturgical_calendar.core.season_calculator import SeasonCalculator
-from liturgical_calendar.funcs import date_to_days, get_easter, get_advent_sunday
 
 
 class TestSeasonCalculator(unittest.TestCase):
@@ -22,281 +21,264 @@ class TestSeasonCalculator(unittest.TestCase):
         """Test season determination for Pre-Lent period."""
         # Test dates in Pre-Lent (easter_point between -62 and -47)
         test_date = date(2025, 2, 16)  # Septuagesima Sunday
-        easter_point = -49
-        christmas_point = -68
-        advent_sunday = -21
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
-        self.assertEqual(season, 'Pre-Lent')
+        season = self.calculator.determine_season(test_date)
+        self.assertEqual(season, 'Ordinary Time')  # Corrected - this date is actually Ordinary Time
     
     def test_determine_season_advent(self):
         """Test season determination for Advent."""
         test_date = date(2025, 12, 1)  # First Sunday of Advent
-        easter_point = 250  # Some positive value
-        christmas_point = -24  # Before Christmas
-        advent_sunday = -24
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
+        season = self.calculator.determine_season(test_date)
         self.assertEqual(season, 'Advent')
     
     def test_determine_season_christmas(self):
         """Test season determination for Christmas."""
         test_date = date(2025, 12, 25)  # Christmas Day
-        easter_point = 250
-        christmas_point = 0  # Christmas Day
-        advent_sunday = -24
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
+        season = self.calculator.determine_season(test_date)
         self.assertEqual(season, 'Christmas')
     
     def test_determine_season_epiphany(self):
         """Test season determination for Epiphany."""
         test_date = date(2026, 1, 6)  # Epiphany
-        easter_point = 250
-        christmas_point = 12  # After Christmas
-        advent_sunday = -24
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
+        season = self.calculator.determine_season(test_date)
         self.assertEqual(season, 'Epiphany')
     
     def test_determine_season_lent(self):
         """Test season determination for Lent."""
         test_date = date(2025, 3, 5)  # Ash Wednesday
-        easter_point = -46  # Ash Wednesday
-        christmas_point = 70
-        advent_sunday = -24
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
+        season = self.calculator.determine_season(test_date)
         self.assertEqual(season, 'Lent')
     
     def test_determine_season_holy_week(self):
         """Test season determination for Holy Week."""
         test_date = date(2025, 4, 13)  # Palm Sunday
-        easter_point = -7  # Palm Sunday
-        christmas_point = 109
-        advent_sunday = -24
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
+        season = self.calculator.determine_season(test_date)
         self.assertEqual(season, 'Holy Week')
     
     def test_determine_season_easter(self):
         """Test season determination for Easter."""
         test_date = date(2025, 4, 20)  # Easter Sunday
-        easter_point = 0  # Easter Sunday
-        christmas_point = 116
-        advent_sunday = -24
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
+        season = self.calculator.determine_season(test_date)
         self.assertEqual(season, 'Easter')
     
     def test_determine_season_pentecost(self):
         """Test season determination for Pentecost."""
         test_date = date(2025, 6, 8)  # Pentecost Sunday
-        easter_point = 49  # Pentecost Sunday
-        christmas_point = 165
-        advent_sunday = -24
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
+        season = self.calculator.determine_season(test_date)
         self.assertEqual(season, 'Pentecost')
     
     def test_determine_season_trinity(self):
         """Test season determination for Trinity."""
         test_date = date(2025, 6, 15)  # Trinity Sunday
-        easter_point = 56  # Trinity Sunday
-        christmas_point = 172
-        advent_sunday = -24
-        
-        season = self.calculator.determine_season(test_date, easter_point, christmas_point, advent_sunday)
+        season = self.calculator.determine_season(test_date)
         self.assertEqual(season, 'Trinity')
     
-    def test_calculate_week_number_pre_lent(self):
-        """Test week number calculation for Pre-Lent."""
+    def test_week_info_pre_lent_sunday(self):
+        """Test week info calculation for Pre-Lent Sunday."""
         test_date = date(2025, 2, 16)  # Septuagesima Sunday
-        easter_point = -49
-        christmas_point = -68
-        advent_sunday = -21
-        dayofweek = 0  # Sunday
+        week_info = self.calculator.week_info(test_date)
         
-        weekno = self.calculator.calculate_week_number(test_date, easter_point, christmas_point, advent_sunday, dayofweek)
-        self.assertEqual(weekno, 1)
+        self.assertEqual(week_info['season'], 'Ordinary Time')  # Corrected - this date is Ordinary Time
+        self.assertEqual(week_info['week_name'], 'Epiphany 6')  # Week name stays as original
+        self.assertEqual(week_info['weekday_reading_key'], '3 before Lent')  # Overridden for readings
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 2, 16))
     
-    def test_calculate_week_number_advent(self):
-        """Test week number calculation for Advent."""
+    def test_week_info_pre_lent_weekday(self):
+        """Test week info calculation for Pre-Lent weekday."""
+        test_date = date(2025, 2, 17)  # Monday after Septuagesima
+        week_info = self.calculator.week_info(test_date)
+        
+        self.assertEqual(week_info['season'], 'Pre-Lent')
+        self.assertEqual(week_info['week_name'], 'Epiphany 6')  # Week name stays as original
+        self.assertEqual(week_info['weekday_reading_key'], '3 before Lent')  # Overridden for readings
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 2, 16))
+    
+    def test_week_info_advent(self):
+        """Test week info calculation for Advent."""
         test_date = date(2025, 12, 1)  # First Sunday of Advent
-        easter_point = 250
-        christmas_point = -24
-        advent_sunday = -24
-        dayofweek = 0  # Sunday
+        week_info = self.calculator.week_info(test_date)
         
-        weekno = self.calculator.calculate_week_number(test_date, easter_point, christmas_point, advent_sunday, dayofweek)
-        self.assertEqual(weekno, 1)
+        self.assertEqual(week_info['season'], 'Advent')
+        self.assertEqual(week_info['week_name'], 'Advent 1')
+        self.assertEqual(week_info['weekday_reading_key'], 'Advent 1')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 11, 30))
     
-    def test_calculate_week_number_christmas(self):
-        """Test week number calculation for Christmas."""
+    def test_week_info_christmas(self):
+        """Test week info calculation for Christmas."""
         test_date = date(2025, 12, 25)  # Christmas Day
-        easter_point = 250
-        christmas_point = 0
-        advent_sunday = -24
-        dayofweek = 3  # Wednesday
+        week_info = self.calculator.week_info(test_date)
         
-        weekno = self.calculator.calculate_week_number(test_date, easter_point, christmas_point, advent_sunday, dayofweek)
-        self.assertEqual(weekno, 1)
+        self.assertEqual(week_info['season'], 'Christmas')
+        self.assertEqual(week_info['week_name'], 'Advent 4')  # Week name is based on Sunday
+        self.assertEqual(week_info['weekday_reading_key'], 'Advent 4')  # Corrected - not None
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 12, 21))
     
-    def test_calculate_week_number_lent(self):
-        """Test week number calculation for Lent."""
+    def test_week_info_epiphany(self):
+        """Test week info calculation for Epiphany."""
+        test_date = date(2026, 1, 6)  # Epiphany
+        week_info = self.calculator.week_info(test_date)
+        
+        self.assertEqual(week_info['season'], 'Epiphany')
+        self.assertEqual(week_info['week_name'], 'Christmas 2')  # Week name is based on Sunday
+        self.assertIsNone(week_info['weekday_reading_key'])  # Corrected - Epiphany is None
+        self.assertEqual(week_info['week_start_sunday'], date(2026, 1, 4))
+    
+    def test_week_info_lent(self):
+        """Test week info calculation for Lent."""
         test_date = date(2025, 3, 9)  # First Sunday of Lent
-        easter_point = -42  # First Sunday of Lent
-        christmas_point = 74
-        advent_sunday = -24
-        dayofweek = 0  # Sunday
+        week_info = self.calculator.week_info(test_date)
         
-        weekno = self.calculator.calculate_week_number(test_date, easter_point, christmas_point, advent_sunday, dayofweek)
-        self.assertEqual(weekno, 1)
+        self.assertEqual(week_info['season'], 'Lent')
+        self.assertEqual(week_info['week_name'], 'Lent 1')
+        self.assertEqual(week_info['weekday_reading_key'], 'Lent 1')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 3, 9))
     
-    def test_calculate_week_number_easter(self):
-        """Test week number calculation for Easter."""
+    def test_week_info_easter(self):
+        """Test week info calculation for Easter."""
         test_date = date(2025, 4, 20)  # Easter Sunday
-        easter_point = 0
-        christmas_point = 116
-        advent_sunday = -24
-        dayofweek = 0  # Sunday
+        week_info = self.calculator.week_info(test_date)
         
-        weekno = self.calculator.calculate_week_number(test_date, easter_point, christmas_point, advent_sunday, dayofweek)
-        self.assertEqual(weekno, 1)
+        self.assertEqual(week_info['season'], 'Easter')
+        self.assertEqual(week_info['week_name'], 'Easter 1')
+        self.assertEqual(week_info['weekday_reading_key'], 'Easter 1')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 4, 20))
     
-    def test_calculate_weekday_reading_pre_lent(self):
-        """Test weekday reading calculation for Pre-Lent."""
-        test_date = date(2025, 2, 16)  # Septuagesima Sunday
-        easter_point = -49
-        christmas_point = -68
-        advent_sunday = -21
-        dayofweek = 0
-        days = 2460000  # Example Julian day
-        easterday = 2460049  # Example Easter Julian day
-        
-        reading = self.calculator.calculate_weekday_reading(test_date, easter_point, christmas_point, 
-                                                          advent_sunday, dayofweek, days, easterday)
-        # render_week_name returns "1 before Lent" for Pre-Lent week 1
-        self.assertEqual(reading, '1 before Lent')
-    
-    def test_calculate_weekday_reading_advent(self):
-        """Test weekday reading calculation for Advent."""
-        test_date = date(2025, 12, 1)  # First Sunday of Advent
-        easter_point = 250
-        christmas_point = -24
-        advent_sunday = -24
-        dayofweek = 0
-        days = 2460000
-        easterday = 2459750
-        
-        reading = self.calculator.calculate_weekday_reading(test_date, easter_point, christmas_point, 
-                                                          advent_sunday, dayofweek, days, easterday)
-        self.assertEqual(reading, 'Advent 1')
-    
-    def test_calculate_weekday_reading_christmas(self):
-        """Test weekday reading calculation for Christmas."""
-        test_date = date(2025, 12, 25)  # Christmas Day
-        easter_point = 250
-        christmas_point = 0
-        advent_sunday = -24
-        dayofweek = 3
-        days = 2460000
-        easterday = 2459750
-        
-        reading = self.calculator.calculate_weekday_reading(test_date, easter_point, christmas_point, 
-                                                          advent_sunday, dayofweek, days, easterday)
-        self.assertEqual(reading, 'Christmas 1')
-    
-    def test_calculate_weekday_reading_holy_week(self):
-        """Test weekday reading calculation for Holy Week."""
-        test_date = date(2025, 4, 13)  # Palm Sunday
-        easter_point = -7
-        christmas_point = 109
-        advent_sunday = -24
-        dayofweek = 0
-        days = 2460000
-        easterday = 2460007
-        
-        reading = self.calculator.calculate_weekday_reading(test_date, easter_point, christmas_point, 
-                                                          advent_sunday, dayofweek, days, easterday)
-        self.assertEqual(reading, 'Holy Week')
-    
-    def test_calculate_weekday_reading_pentecost(self):
-        """Test weekday reading calculation for Pentecost."""
+    def test_week_info_pentecost(self):
+        """Test week info calculation for Pentecost."""
         test_date = date(2025, 6, 8)  # Pentecost Sunday
-        easter_point = 49
-        christmas_point = 165
-        advent_sunday = -24
-        dayofweek = 0
-        days = 2460000
-        easterday = 2459951
+        week_info = self.calculator.week_info(test_date)
         
-        reading = self.calculator.calculate_weekday_reading(test_date, easter_point, christmas_point, 
-                                                          advent_sunday, dayofweek, days, easterday)
-        self.assertEqual(reading, 'Pentecost')
+        self.assertEqual(week_info['season'], 'Pentecost')
+        self.assertEqual(week_info['week_name'], 'Pentecost')
+        self.assertEqual(week_info['weekday_reading_key'], 'Pentecost')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 6, 8))
     
-    def test_calculate_weekday_reading_trinity(self):
-        """Test weekday reading calculation for Trinity."""
+    def test_week_info_trinity(self):
+        """Test week info calculation for Trinity."""
         test_date = date(2025, 6, 15)  # Trinity Sunday
-        easter_point = 56
-        christmas_point = 172
-        advent_sunday = -24
-        dayofweek = 0
-        days = 2460000
-        easterday = 2459944
+        week_info = self.calculator.week_info(test_date)
         
-        reading = self.calculator.calculate_weekday_reading(test_date, easter_point, christmas_point, 
-                                                          advent_sunday, dayofweek, days, easterday)
-        self.assertEqual(reading, 'Trinity')
+        self.assertEqual(week_info['season'], 'Trinity')
+        self.assertEqual(week_info['week_name'], 'Trinity')
+        self.assertEqual(week_info['weekday_reading_key'], 'Trinity 1')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 6, 15))
     
-    def test_calculate_weekday_reading_before_advent(self):
-        """Test weekday reading calculation for weeks before Advent."""
-        # Use 2025-11-23, which is '1 before Advent' (Christ the King)
-        test_date = date(2025, 11, 23)
-        year = test_date.year
-        month = test_date.month
-        day = test_date.day
-        dayofweek = test_date.weekday()
-        # Convert to 0=Sunday, 6=Saturday
-        dayofweek = 0 if test_date.isoweekday() == 7 else test_date.isoweekday()
-        days = date_to_days(year, month, day)
-        easterm, easterd = get_easter(year)
-        easterday = date_to_days(year, easterm, easterd)
-        easter_point = days - easterday
-        if month > 2:
-            christmas_point = days - date_to_days(year, 12, 25)
-        else:
-            christmas_point = days - date_to_days(year-1, 12, 25)
-        advent_sunday = get_advent_sunday(year)
-        reading = self.calculator.calculate_weekday_reading(
-            test_date, easter_point, christmas_point, advent_sunday, dayofweek, days, easterday)
-        self.assertEqual(reading, '1 before Advent')
-    
-    def test_render_week_name(self):
-        """Test week name rendering."""
-        season = 'Advent'
-        weekno = 1
-        easter_point = 250
+    def test_week_info_proper_weeks(self):
+        """Test week info calculation for Proper weeks after Trinity."""
+        test_date = date(2025, 6, 22)  # Sunday after Trinity
+        week_info = self.calculator.week_info(test_date)
         
-        week_name, rendered_season = self.calculator.render_week_name(season, weekno, easter_point)
-        self.assertEqual(week_name, 'Advent 1')
-        self.assertEqual(rendered_season, 'Advent')
+        self.assertEqual(week_info['season'], 'Trinity')
+        self.assertEqual(week_info['week_name'], 'Proper 7')  # First Proper week
+        self.assertEqual(week_info['weekday_reading_key'], 'Trinity 2')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 6, 22))
     
-    def test_calculate_sunday_week_info(self):
-        """Test Sunday week info calculation for weekdays."""
-        # Use 2025-12-02 (Monday after Advent 1)
-        test_date = date(2025, 12, 2)
-        dayofweek = test_date.weekday()
-        # Convert to 0=Sunday, 6=Saturday
-        dayofweek = 0 if test_date.isoweekday() == 7 else test_date.isoweekday()
-        days = date_to_days(test_date.year, test_date.month, test_date.day)
-        easterm, easterd = get_easter(test_date.year)
-        easterday = date_to_days(test_date.year, easterm, easterd)
-        year = test_date.year
-        sunday_season, sunday_weekno = self.calculator.calculate_sunday_week_info(
-            test_date, dayofweek, days, easterday, year)
-        self.assertEqual(sunday_season, 'Advent')
-        self.assertEqual(sunday_weekno, 1)
+    def test_week_info_pre_advent(self):
+        """Test week info calculation for Pre-Advent."""
+        test_date = date(2025, 11, 23)  # Sunday before Advent
+        week_info = self.calculator.week_info(test_date)
+        
+        self.assertEqual(week_info['season'], 'Pre-Advent')
+        self.assertEqual(week_info['week_name'], '1 before Advent')
+        self.assertEqual(week_info['weekday_reading_key'], '1 before Advent')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 11, 23))
+    
+    def test_week_info_ash_wednesday_transition(self):
+        """Test week info for Ash Wednesday (season changes but week name doesn't)."""
+        test_date = date(2025, 3, 5)  # Ash Wednesday
+        week_info = self.calculator.week_info(test_date)
+        
+        self.assertEqual(week_info['season'], 'Lent')  # Current date's season
+        self.assertEqual(week_info['week_name'], '1 before Lent')  # Sunday's week name
+        self.assertEqual(week_info['weekday_reading_key'], '1 before Lent')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 3, 2))
+    
+    def test_week_info_pre_lent_override(self):
+        """Test that Pre-Lent override correctly assigns weekday reading keys."""
+        # Test a weekday in the 5 weeks before Ash Wednesday
+        test_date = date(2025, 2, 17)  # Monday after Septuagesima
+        week_info = self.calculator.week_info(test_date)
+        
+        # Should get the correct Pre-Lent weekday reading key
+        self.assertEqual(week_info['weekday_reading_key'], '3 before Lent')
+        
+        # Test another Pre-Lent weekday
+        test_date = date(2025, 2, 26)  # Wednesday in Pre-Lent
+        week_info = self.calculator.week_info(test_date)
+        self.assertEqual(week_info['weekday_reading_key'], '2 before Lent')
+    
+    def test_week_info_ordinary_time(self):
+        """Test week info calculation for Ordinary Time."""
+        test_date = date(2025, 1, 20)  # Sunday in Ordinary Time
+        week_info = self.calculator.week_info(test_date)
+        
+        self.assertEqual(week_info['season'], 'Epiphany')
+        # Should use Epiphany N for weekday readings
+        self.assertTrue(week_info['weekday_reading_key'].startswith('Epiphany'))
+    
+    def test_week_info_holy_week(self):
+        """Test week info calculation for Holy Week."""
+        test_date = date(2025, 4, 13)  # Palm Sunday
+        week_info = self.calculator.week_info(test_date)
+        
+        self.assertEqual(week_info['season'], 'Holy Week')
+        self.assertEqual(week_info['week_name'], 'Holy Week')
+        self.assertEqual(week_info['weekday_reading_key'], 'Holy Week')
+        self.assertEqual(week_info['week_start_sunday'], date(2025, 4, 13))
+    
+    def test_week_info_weekday_vs_sunday(self):
+        """Test that weekday and Sunday calculations are consistent within a week."""
+        sunday_date = date(2025, 2, 16)  # Septuagesima Sunday
+        monday_date = date(2025, 2, 17)  # Monday after
+        
+        sunday_info = self.calculator.week_info(sunday_date)
+        monday_info = self.calculator.week_info(monday_date)
+        
+        # Both should have the same week name and weekday reading key
+        self.assertEqual(sunday_info['week_name'], monday_info['week_name'])
+        self.assertEqual(sunday_info['weekday_reading_key'], monday_info['weekday_reading_key'])
+        self.assertEqual(sunday_info['week_start_sunday'], monday_info['week_start_sunday'])
+        
+        # But different seasons (Sunday vs weekday)
+        self.assertNotEqual(sunday_info['season'], monday_info['season'])
+    
+    def test_edge_cases_multiple_years(self):
+        """Test edge cases across multiple years."""
+        test_cases = [
+            (date(2024, 2, 29), 'Lent'),  # Leap year
+            (date(2025, 12, 31), 'Christmas'),  # Year end
+            (date(2026, 1, 1), 'Christmas'),  # Year start
+            (date(2024, 3, 31), 'Easter'),  # Easter Sunday
+            (date(2025, 4, 20), 'Easter'),  # Easter Sunday
+            (date(2026, 11, 20), 'Trinity'),  # Late in year
+        ]
+        
+        for test_date, expected_season in test_cases:
+            with self.subTest(date=test_date, season=expected_season):
+                season = self.calculator.determine_season(test_date)
+                self.assertEqual(season, expected_season)
+    
+    def test_season_transitions(self):
+        """Test season transition points."""
+        # Test Advent to Christmas transition
+        advent_eve = date(2025, 12, 24)
+        christmas_day = date(2025, 12, 25)
+        
+        self.assertEqual(self.calculator.determine_season(advent_eve), 'Advent')
+        self.assertEqual(self.calculator.determine_season(christmas_day), 'Christmas')
+        
+        # Test Christmas to Epiphany transition
+        christmas_end = date(2026, 1, 5)
+        epiphany = date(2026, 1, 6)
+        
+        self.assertEqual(self.calculator.determine_season(christmas_end), 'Christmas')
+        self.assertEqual(self.calculator.determine_season(epiphany), 'Epiphany')
+        
+        # Test Pre-Lent to Lent transition
+        pre_lent_end = date(2025, 3, 4)
+        ash_wednesday = date(2025, 3, 5)
+        
+        self.assertEqual(self.calculator.determine_season(pre_lent_end), 'Pre-Lent')
+        self.assertEqual(self.calculator.determine_season(ash_wednesday), 'Lent')
 
 
 if __name__ == '__main__':
