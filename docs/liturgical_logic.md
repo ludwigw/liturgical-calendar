@@ -93,7 +93,33 @@ The distinction between Proper N and Trinity N is necessary because the Sunday a
 **Example:**
 - In 2024 (Year B, Cycle 1), the Sunday readings will focus on Mark, and weekday readings will follow Cycle 1.
 
-## 5. Code and Church Practice
+## 5. Christmas, Epiphany, and Fixed Weekday Readings
+
+- Christmas weeks (Dec 25–Jan 5): No weekday readings are assigned. All days are either feasts or use fixed readings.
+- Epiphany (Jan 6): Always a principal feast; never assigned a weekday reading.
+- Fixed weekday readings: Dec 29–31, Jan 2–5, and Jan 7–12 have fixed readings, not week-based. These are not assigned by the week-based logic and do not use `weekday_reading_key`.
+- Implementation: The code and tests are designed so that for these dates, `weekday_reading_key` is `None` and no readings are expected from the week-based system.
+
+### Christmas Season Feasts and Fixed Readings Table
+
+| Date(s)         | Feast/Fixed Reading                |
+|-----------------|------------------------------------|
+| Dec 25          | Christmas (Principal Feast)         |
+| Dec 26          | St Stephen (Feast)                 |
+| Dec 27          | St John the Evangelist (Feast)      |
+| Dec 28          | The Holy Innocents (Feast)          |
+| Dec 29–31       | Fixed weekday readings              |
+| Jan 1           | The Naming and Circumcision of Jesus (Feast) |
+| Jan 2–5         | Fixed weekday readings              |
+| Jan 6           | Epiphany (Principal Feast)          |
+| Jan 7–12        | Fixed weekday readings (until Epiphany 1) |
+
+- **Note:**
+  - All days not listed as a specific feast use fixed weekday readings.
+  - After Jan 6, the first Sunday is Epiphany 1; fixed weekday readings are used for weekdays before that Sunday.
+  - No week-based weekday readings are assigned for any of these dates.
+
+## 6. Code and Church Practice
 The code is structured to match the rules and traditions of the Anglican liturgical calendar. This means:
 - Calculations are robust to the movable date of Easter and other feasts.
 - Week and season names are always consistent with the lectionary and church practice.
@@ -101,8 +127,8 @@ The code is structured to match the rules and traditions of the Anglican liturgi
 
 For a sample Anglican calendar to compare with the code's output, see: [Church of England Lectionary](https://www.churchofengland.org/prayer-and-worship/worship-texts-and-resources/common-worship/churchs-year/lectionary)
 
-## 6. For Developers: Implementation Gotchas and Lessons Learned
-### 6a. Day-of-Week Indexing: Python vs. Liturgical Calendar
+## 7. For Developers: Implementation Gotchas and Lessons Learned
+### 7a. Day-of-Week Indexing: Python vs. Liturgical Calendar
 - **Python's `datetime.date.weekday()`** returns `0` for Monday and `6` for Sunday.
 - **The liturgical calendar (and lectionary)** treats **Sunday as day 0** (the start of the week).
 - **Implication:**
@@ -111,15 +137,13 @@ For a sample Anglican calendar to compare with the code's output, see: [Church o
 - **Lesson:**
   - Always check the day-of-week convention in both your code and your data. Mismatches can cause subtle off-by-one errors, especially in week/season transitions.
 
-### 6b. Movable Feasts and Variable Week Numbers
+### 7b. Movable Feasts and Variable Week Numbers
 - The number of Proper/Trinity weeks can vary dramatically depending on the date of Easter.
 - Some years may "skip" certain Proper weeks, or start with a higher Proper number (e.g., Proper 7 instead of Proper 4).
 - **Lesson:**
   - Never hardcode the number of weeks in a season; always calculate based on Easter and the lectionary rules.
 
----
-
-## 7. Further Reading
+## 8. Further Reading
 - For more on the lectionary and liturgical calendar, see:
   - [Church of England: The Lectionary](https://www.churchofengland.org/prayer-and-worship/worship-texts-and-resources/common-worship/churchs-year/lectionary)
   - [Anglican Communion: Liturgical Year](https://www.anglicancommunion.org/media/253799/Liturgical-Year.pdf)

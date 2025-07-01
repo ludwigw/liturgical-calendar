@@ -70,13 +70,14 @@ class FeastService:
         # Get Advent Sunday
         advent_sunday = self._get_advent_sunday(year)
         
-        # Get season and week information
-        season = self.season_calculator.determine_season(date_obj, easter_point, christmas_point, advent_sunday)
-        weekno = self.season_calculator.calculate_week_number(date_obj, easter_point, christmas_point, advent_sunday, dayofweek)
-        weekday_reading = self.season_calculator.calculate_weekday_reading(date_obj, easter_point, christmas_point, advent_sunday, dayofweek, current_date, easter_date)
+        # Get week information using the new API
+        week_info = self.season_calculator.week_info(date_obj)
+        season = week_info['season']
+        week_name = week_info['week_name']
+        weekday_reading = week_info['weekday_reading_key']
         
-        # Get week name
-        week = self._get_week_name(season, weekno, easter_point, weekday_reading, dayofweek, date_obj, current_date, easter_date, year)
+        # Get week name (use week_name from week_info)
+        week = week_name
         
         # Collect possible feasts
         possibles = self._collect_possible_feasts(easter_point, month, day, transferred, date_str)
@@ -94,7 +95,7 @@ class FeastService:
         result.update({
             'season': display_season,
             'season_url': self._get_season_url(display_season),
-            'weekno': self._normalize_weekno(weekno, display_season),
+            'weekno': None,  # We no longer calculate week numbers separately
             'week': week,
             'date': date_obj,
             'weekday_reading': weekday_reading
@@ -115,18 +116,6 @@ class FeastService:
         # For now, using a placeholder
         from ..funcs import get_advent_sunday
         return get_advent_sunday(year)
-    
-    def _get_week_name(self, season: str, weekno: int, easter_point: int, 
-                      weekday_reading: str, dayofweek: int, date_obj: datetime.date,
-                      current_date: int, easter_date: int, year: int) -> str:
-        """Get the liturgical week name."""
-        # Always use render_week_name for both Sundays and weekdays
-        if dayofweek == 0:  # Sunday
-            return self.season_calculator.render_week_name(season, weekno, easter_point)[0]
-        else:  # Weekday
-            sunday_season, sunday_weekno = self.season_calculator.calculate_sunday_week_info(
-                date_obj, dayofweek, current_date, easter_date, year)
-            return self.season_calculator.render_week_name(sunday_season, sunday_weekno, easter_point)[0]
     
     def _collect_possible_feasts(self, easter_point: int, month: int, day: int, 
                                transferred: bool, date_str: str) -> List[Dict[str, Any]]:
@@ -151,18 +140,9 @@ class FeastService:
         if dayofweek == 6:  # Sunday
             has_principal_feast = any(feast.get('prec') == 9 for feast in possibles)
             if not has_principal_feast:
-                # Calculate season for Sunday
-                year = date_obj.year
-                easter_month, easter_day = get_easter(year)
-                easter_date = date_to_days(year, easter_month, easter_day)
-                current_date = date_to_days(year, month, day)
-                easter_point = current_date - easter_date
-                if month > 2:
-                    christmas_point = current_date - date_to_days(year, 12, 25)
-                else:
-                    christmas_point = current_date - date_to_days(year-1, 12, 25)
-                advent_sunday = self._get_advent_sunday(year)
-                season = self.season_calculator.determine_season(date_obj, easter_point, christmas_point, advent_sunday)
+                # Calculate season for Sunday using new API
+                week_info = self.season_calculator.week_info(date_obj)
+                season = week_info['season']
                 # Use the season name as the Sunday name (original logic)
                 possibles.append({'prec': 5, 'type': 'Sunday', 'name': season})
         return possibles
@@ -326,43 +306,11 @@ class FeastService:
             Liturgical information dictionary with the same structure as liturgical_calendar
         """
         return self.get_complete_feast_info(date_str)
-    
-    def calculate_week_name(self, f_date: datetime.date, dayofweek: int, season: str, 
-                           weekno: int, easter_point: int, weekday_reading: str, 
-                           days: int, easterday: int, year: int) -> str:
-        """
-        Calculate the liturgical week name for a given date.
-        
-        This method handles the complex logic for determining week names, including:
-        - Sunday vs weekday week naming differences
-        - Special cases like "N before Advent" logic
-        - Weekday week name calculation based on the Sunday that starts the week
-        
-        Args:
-            f_date: The date object
-            dayofweek: Day of week (0=Sunday, 1=Monday, etc.)
-            season: The liturgical season
-            weekno: The week number
-            easter_point: Days since Easter
-            weekday_reading: The weekday reading string
-            days: Julian days since epoch
-            easterday: Julian days for Easter
-            year: The year
-            
-        Returns:
-            The calculated week name
-        """
-        if dayofweek == 0:
-            # It's a Sunday, use the current season
-            # Special case: if weekday_reading is "N before Advent", use that for the week name too
-            if weekday_reading and weekday_reading.endswith(' before Advent'):
-                return weekday_reading
-            else:
-                week, _ = self.season_calculator.render_week_name(season, weekno, easter_point)
-                return week
-        else:
-            # It's a weekday, calculate what the season would be for the Sunday that starts this week
-            sunday_season, sunday_weekno = self.season_calculator.calculate_sunday_week_info(
-                f_date, dayofweek, days, easterday, year)
-            week, _ = self.season_calculator.render_week_name(sunday_season, sunday_weekno, easter_point)
-            return week 
+
+    def _get_week_name(self, season: str, weekno: int, easter_point: int, 
+                      weekday_reading: str, dayofweek: int, date_obj: datetime.date,
+                      current_date: int, easter_date: int, year: int) -> str:
+        """Get the liturgical week name."""
+        # This method is no longer needed with the new SeasonCalculator API
+        # The week name is now provided directly by week_info()
+        return "" 
