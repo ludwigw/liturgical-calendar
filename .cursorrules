@@ -1,0 +1,19 @@
+# Cursor Rules for Liturgical Calendar Project
+
+## Testing Framework
+- Use `unittest` for all testing, not `pytest`
+- Run tests with: `python -m unittest tests/unit/test_*.py`
+
+## Code Changes and Logic Preservation
+- **DEFAULT**: Use existing logic that is known to work rather than rewriting calculations from scratch
+- **REQUIRED**: Before rewriting any liturgical calculation logic, explain why the existing logic needs to be changed and get explicit permission
+- When refactoring, preserve the core calculation logic and only change the API/structure around it
+- If you encounter test failures after changing logic, first verify that the original logic was working correctly before making changes
+
+## Project Structure
+- Do not modify any files in `tests/feasts_test*` without explicit permission
+- The liturgical calendar logic is complex and has been tested extensively - changes should be incremental and well-justified
+
+## Documentation
+- Reference `docs/liturgical_logic.md` for liturgical calendar concepts and edge cases
+- Update documentation when making significant changes to liturgical logic 
