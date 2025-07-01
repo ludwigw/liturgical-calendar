@@ -47,10 +47,6 @@ Seasons are calculated based on the date's relationship to movable feasts (Easte
 ### Edge Cases
 - **Ash Wednesday:** The season changes to Lent, but the week name may still be "1 before Lent" (see Week Naming).
 - **Pre-Lent/Pre-Advent:** Special transition weeks before Lent/Advent, with unique naming and readings logic.
-- **Pre-Lent Weekday vs Sunday Naming:**
-    - The lectionary assigns week-based readings for Pre-Lent weekdays using keys like '5 before Lent', '4 before Lent', ..., '1 before Lent'.
-    - However, Sundays only use '2 before Lent' and '1 before Lent' as week names, because the Pre-Lent season is defined as three Sundays before Lent, but weekday readings extend to five weeks.
-    - The code includes an override to ensure that for the five weeks before Ash Wednesday, weekdays get the correct 'N before Lent' reading key, matching the lectionary data. This override only applies for n in 1..5; otherwise, the main logic is used.
 
 ## 3. Week Naming: Proper N vs. Trinity N
 ### Why Two Systems?
@@ -93,6 +89,12 @@ Seasons are calculated based on the date's relationship to movable feasts (Easte
 
 ### Why This Matters
 The distinction between Proper N and Trinity N is necessary because the Sunday and weekday lectionary cycles are independent and keyed differently in the data. This is why the code must calculate both week numbers, depending on context.
+
+### Edge Cases
+- **Pre-Lent Weekday vs Sunday Naming:**
+    - The lectionary assigns week-based readings for Pre-Lent weekdays using keys like '5 before Lent', '4 before Lent', ..., '1 before Lent'.
+    - However, Sundays only use '2 before Lent' and '1 before Lent' as week names, because the Pre-Lent season is defined as three Sundays before Lent, but weekday readings extend to five weeks.
+    - The code includes an override to ensure that for the five weeks before Ash Wednesday, weekdays get the correct 'N before Lent' reading key, matching the lectionary data. This override only applies for n in 1..5; otherwise, the main logic is used.
 
 **Example:**
 - In 2024 (Year B, Cycle 1), the Sunday readings will focus on Mark, and weekday readings will follow Cycle 1.
