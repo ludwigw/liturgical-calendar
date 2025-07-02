@@ -44,19 +44,19 @@ class ReadingsManager:
         weekday_cycle = 1 if year % 2 == 0 else 2
         return sunday_cycle, weekday_cycle
     
-    def get_sunday_readings(self, week: str, cycle: str) -> Dict[str, List[str]]:
+    def get_sunday_readings(self, week: str, cycle: str) -> List[str]:
         """
         Get Sunday readings for a specific week and cycle.
         
         Args:
             week: The liturgical week (e.g., 'Advent 1', 'Proper 4')
             cycle: The lectionary cycle ('A', 'B', or 'C')
-            
+        
         Returns:
-            Dictionary containing the readings for the week and cycle.
-            Returns empty dict if not found.
+            List containing the readings for the week and cycle.
+            Returns empty list if not found.
         """
-        return self.sunday_readings.get(week, {}).get(cycle, {})
+        return self.sunday_readings.get(week, {}).get(cycle, [])
     
     def get_weekday_readings(self, weekday_reading: str, day_of_week: str, cycle: int) -> List[str]:
         """
@@ -133,8 +133,8 @@ class ReadingsManager:
         
         This method handles Sunday and weekday readings (not feast readings).
         Precedence order:
-        1. Fixed weekday readings (if date is in fixed_weekday_readings)
-        2. Week-based readings (if date has a weekday_reading_key)
+        1. Week-based readings (if date has a weekday_reading_key)
+        2. Fixed weekday readings (if date is in fixed_weekday_readings and no week-based readings)
         3. Sunday readings (if date is a Sunday)
         
         Args:
@@ -162,19 +162,20 @@ class ReadingsManager:
             else:
                 # It's a weekday - check precedence order
                 
-                # 1. Check for fixed weekday readings
-                fixed_readings = self.get_fixed_weekday_readings(date_str, weekday_cycle)
-                if fixed_readings:
-                    return fixed_readings
-                
-                # 2. Use week-based system as fallback
+                # 1. Use week-based system first
                 weekday_reading = liturgical_info.get('weekday_reading')
                 if weekday_reading is None:
                     weekday_reading = liturgical_info.get('week')
-                
                 if weekday_reading:
                     day_of_week = date.strftime('%A')  # Get the day of the week (e.g., 'Monday')
-                    return self.get_weekday_readings(weekday_reading, day_of_week, weekday_cycle)
+                    week_based_readings = self.get_weekday_readings(weekday_reading, day_of_week, weekday_cycle)
+                    if week_based_readings:
+                        return week_based_readings
+                
+                # 2. Check for fixed weekday readings as fallback
+                fixed_readings = self.get_fixed_weekday_readings(date_str, weekday_cycle)
+                if fixed_readings:
+                    return fixed_readings
             
             return []
             
