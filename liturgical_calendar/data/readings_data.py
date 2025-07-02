@@ -509,57 +509,57 @@ weekday_readings = {
 fixed_weekday_readings = {
     # Dec 29-31: Fixed weekday readings
     "12-29": {
-        "1": ["1 John 2:3-11", "John 21:19-25"],
-        "2": ["2 Samuel 7:18-29", "Luke 1:67-79"]
+        "1": ["Jonah 1", "Colossians 1:1-14"],
+        "2": ["Isaiah 57:15-end", "John 1:1-18"]
     },
     "12-30": {
-        "1": ["1 John 2:12-17", "John 1:19-28"],
-        "2": ["1 Kings 3:5-14", "Luke 2:22-35"]
+        "1": ["Jonah 2", "Colossians 1:15-23"],
+        "2": ["Isaiah 59:1-15a", "John 1:19-28"]
     },
     "12-31": {
-        "1": ["1 John 2:18-29", "John 1:1-18"],
-        "2": ["1 Kings 3:15-28", "Luke 2:36-40"]
+        "1": ["Jonah 3-4", "Colossians 1:24-2:7"],
+        "2": ["Isaiah 59:15b-end", "John 1:29-34"]
     },
     # Jan 2-5: Fixed weekday readings
     "01-02": {
-        "1": ["1 John 2:22-28", "John 1:19-34"],
-        "2": ["1 Kings 8:1-13", "Luke 2:41-52"]
+        "1": ["Ruth 1", "Colossians 2:8-end"],
+        "2": ["Isaiah 60:1-12", "John 1:35-42"]
     },
     "01-03": {
-        "1": ["1 John 2:29-3:6", "John 1:35-42"],
-        "2": ["1 Kings 8:14-21", "Luke 3:1-6"]
+        "1": ["Ruth 2", "Colossians 3:1-11"],
+        "2": ["Isaiah 60:13-end", "John 1:43-end"]
     },
     "01-04": {
-        "1": ["1 John 3:7-10", "John 1:43-51"],
-        "2": ["1 Kings 8:22-30", "Luke 3:7-18"]
+        "1": ["Ruth 3", "Colossian 3:12-4:1"],
+        "2": ["Isaiah 61", "John 2:1-12"]
     },
     "01-05": {
-        "1": ["1 John 3:11-21", "John 1:29-34"],
-        "2": ["1 Kings 8:31-40", "Luke 3:19-22"]
+        "1": ["Ruth 4:1-17", "Colossian 4:2-end"],
+        "2": ["Isaiah 62", "John 2:13-end"]
     },
     # Jan 7-12: Fixed weekday readings (until Epiphany 1)
     "01-07": {
-        "1": ["1 John 3:22-4:6", "Matthew 4:12-17"],
-        "2": ["1 Kings 8:41-53", "Luke 4:14-21"]
+        "1": ["Jeremiah 23:1-8", "Matthew 20: 1-16"],
+        "2": ["Isaiah 63:7-end", "1 John 3"]
     },
     "01-08": {
-        "1": ["1 John 4:7-10", "Matthew 4:18-25"],
-        "2": ["1 Kings 8:54-66", "Luke 4:22-30"]
+        "1": ["Jeremiah 30:1-17", "Matthew 20:17-28"],
+        "2": ["Isaiah 64", "1 John 4:7-end"]
     },
     "01-09": {
-        "1": ["1 John 4:11-18", "Matthew 4:23-25"],
-        "2": ["1 Kings 9:1-9", "Luke 4:31-37"]
+        "1": ["Jeremiah 30:18-31:9", "Matthew 20:29-end"],
+        "2": ["Isaiah 65:1-16", "1 John 5:1-12"]
     },
     "01-10": {
-        "1": ["1 John 4:19-5:4", "Matthew 5:1-12"],
-        "2": ["1 Kings 9:10-28", "Luke 4:38-44"]
+        "1": ["Jeremiah 31:10-17", "Matthew 23:1-12"],
+        "2": ["Isaiah 65:17-end", "1 John 5:13-end"]
     },
     "01-11": {
-        "1": ["1 John 5:5-13", "Matthew 5:13-20"],
-        "2": ["1 Kings 10:1-13", "Luke 5:1-11"]
+        "1": ["Jeremiah 33:14-end", "Matthew 23:13-28"],
+        "2": ["Isaiah 66:1-11", "2 John"]
     },
     "01-12": {
-        "1": ["1 John 5:14-21", "Matthew 5:21-26"],
-        "2": ["1 Kings 10:14-29", "Luke 5:12-16"]
+        "1": ["Micah 5:2-end", "Matthew 23:29-end"],
+        "2": ["Isaiah 66:12-23", "3 John"]
     }
 }
