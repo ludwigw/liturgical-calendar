@@ -312,64 +312,21 @@ Direct service orchestration - No adapter methods needed
 
 **Note**: This phase completes the service layer implementation by removing the transitional adapter code and ensuring all components use the service layer architecture directly.
 
-#### 2.5 Integrate Fixed Weekday Readings (Christmas/Epiphany Period)
+#### 2.5 Integrate Fixed Weekday Readings (Christmas/Epiphany Period) ✅ **COMPLETED**
 
-**Background:**
-- Certain dates in the Christmas/Epiphany period (Dec 29–31, Jan 2–5, Jan 7–12) have "fixed weekday readings" assigned by the lectionary.
-- These are not part of the week-based system and do not use `weekday_reading_key`.
-- If a feast falls on one of these days, the feast readings take precedence.
+**What was done:**
+- Added `fixed_weekday_readings` dictionary to `readings_data.py` for Dec 29–31, Jan 2–5, Jan 7–12, with readings for both cycles.
+- Implemented lookup logic in `ReadingsManager` to use week-based readings first, then fixed weekday readings as fallback, matching Church of England lectionary precedence.
+- Updated and expanded unit tests to cover all fixed weekday reading edge cases and precedence.
+- Verified that feast readings take precedence over fixed weekday readings, and week-based readings are used for all other dates.
+- Confirmed data matches the official Church of England weekday lectionary for the Christmas/Epiphany period.
+- Updated documentation and test discovery to ensure all tests are run and results are included in commit messages.
 
-**Implementation Plan:**
+**Test Results:**
+- All tests pass, including new and updated tests for fixed weekday readings and precedence.
 
-1. **Data Structure**
-   - Add a new dictionary to `readings_data.py`:
-     ```python
-     fixed_weekday_readings = {
-         "12-29": { "1": [...], "2": [...] },
-         "12-30": { "1": [...], "2": [...] },
-         ...
-         "01-12": { "1": [...], "2": [...] },
-     }
-     ```
-     - Keys: MM-DD strings.
-     - Values: Dicts for cycle 1 and 2 readings.
-
-2. **Lookup Logic**
-   - In the readings manager:
-     1. If the date is a principal/fixed feast, use feast readings.
-     2. Else, if the date is in `fixed_weekday_readings`, use those readings for the correct cycle.
-     3. Else, use the week-based system as currently.
-   - **Precedence order:**
-     1. Feast readings
-     2. Fixed weekday readings
-     3. Week-based readings
-
-3. **API/Interface**
-   - Optionally expose a new field (e.g., `fixed_weekday_reading`) in the liturgical info dict for these dates.
-   - Document that for these dates, `weekday_reading_key` is `None` and readings come from the fixed weekday system.
-
-4. **Tests**
-   - Add/adjust tests to:
-     - Assert fixed weekday readings are returned for the correct dates.
-     - Assert feast readings take precedence.
-     - Assert week-based system is used for all other dates.
-
-5. **Documentation**
-   - Update `docs/liturgical_logic.md` and `REFACTORING_DECISIONS.md`:
-     - Describe the fixed weekday readings system and precedence.
-     - Clarify API behavior for these dates.
-
-6. **Migration/Compatibility**
-   - Ensure existing week-based and feast-based lookups are unaffected for other parts of the year.
-   - Communicate the change in the changelog and documentation.
-
-**Summary Table:**
-
-| Date Type             | Source of Readings         | Key Used            |
-|-----------------------|---------------------------|---------------------|
-| Principal/Fixed Feast | Feast readings            | Feast name          |
-| Fixed weekday         | Fixed weekday readings    | MM-DD               |
-| All other days        | Week-based readings       | weekday_reading_key |
+**Next Step:**
+- Proceed to 3.1: Create Layout Engine (extract layout logic from `create_liturgical_image.py` into a new class in `image_generation/layout_engine.py`).
 
 ### Phase 3: Image Generation Pipeline (Week 3)
 
