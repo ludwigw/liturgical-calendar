@@ -251,20 +251,18 @@ class FeastService:
         return colour_codes.get(colour, '#000000')
     
     def _add_readings(self, result: Dict[str, Any], date_str: str) -> Dict[str, Any]:
-        """Add readings to the result."""
-        if 'readings' not in result:
-            result['readings'] = self.readings_manager.get_readings_for_date(date_str, result)
-        else:
-            # If readings already exist (from feast data), append weekday readings
-            if result.get('prec', 0) < 5:  # Lower precedence feast
-                weekday_readings = self.readings_manager.get_readings_for_date(date_str, result)
-                if weekday_readings and isinstance(weekday_readings, dict) and weekday_readings:
-                    # Merge the readings - feast readings take priority, add weekday readings
-                    merged_readings = result['readings'].copy()
-                    for key, value in weekday_readings.items():
-                        if key not in merged_readings:
-                            merged_readings[key] = value
-                    result['readings'] = merged_readings
+        """Add readings to the result with proper precedence order."""
+        # 1. Check for feast readings (if high precedence feast)
+        feast_prec = result.get('prec', 0)
+        if feast_prec >= 5:
+            feast_readings = self.readings_manager.get_feast_readings(result)
+            if feast_readings:
+                result['readings'] = feast_readings
+                return result
+        
+        # 2. Get Sunday/weekday readings from ReadingsManager
+        readings = self.readings_manager.get_readings_for_date(date_str, result)
+        result['readings'] = readings
         
         return result
     
@@ -313,4 +311,6 @@ class FeastService:
         """Get the liturgical week name."""
         # This method is no longer needed with the new SeasonCalculator API
         # The week name is now provided directly by week_info()
-        return "" 
+        return ""
+    
+ 
