@@ -615,25 +615,9 @@ class TestReadingsCoverage(unittest.TestCase):
         for date_str in unique_dates:
             with self.subTest(date=date_str):
                 info = liturgical_calendar(date_str)
-                readings = readings_manager.get_readings_for_date(date_str, info) if info.get('season') != 'Holy Week' else info.get('readings', [])
+                readings = info.get('readings', [])
 
-                # Skip assertion for principal feasts and fixed feast days (no weekday readings expected)
-                # Once "fixed day readings" are implemented we should remove these exceptions and rely solely on info.get("readings") to make sure the overall system is working.
-                principal_feasts = {'Epiphany', 'Ash Wednesday', 'Holy Monday', 'Holy Tuesday', 'Holy Wednesday', 'Maundy Thursday', 'Good Friday', 'Holy Saturday', 'Easter', 'Christmas', 'The Naming and Circumcision of Jesus'}
-
-                if (
-                    info.get('name') in principal_feasts
-                    or info.get('season') == 'Christmas'
-                    or (
-                        date_str[5:] in {
-                            '01-07', '01-08', '01-09', '01-10', '01-11', '01-12'
-                        }
-                        # Any dates between Jan 7-12 in the first week of Epiphany should be tested for weekday readings
-                        and info.get('week') != 'Epiphany 1'
-                    )
-                ):
-                    continue
-
+            
                 self.assertTrue(readings, f"No readings found for {date_str}")
                 self.assertGreater(len(readings), 0, f"Empty readings for {date_str}")
     

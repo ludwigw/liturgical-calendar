@@ -210,6 +210,19 @@ class SeasonCalculator:
         # At the end, override the weekday_reading_key if needed
         if override_weekday_reading_key:
             weekday_reading_key = override_weekday_reading_key
+        
+        # Fixed weekday readings override
+        # For specific dates in the Christmas/Epiphany period, set weekday_reading_key to None
+        # so that the ReadingsManager can use fixed weekday readings instead
+        month_day = f"{f_date.month:02d}-{f_date.day:02d}"
+        fixed_weekday_dates = {
+            "12-29", "12-30", "12-31",  # Dec 29-31
+            "01-02", "01-03", "01-04", "01-05",  # Jan 2-5
+            "01-07", "01-08", "01-09", "01-10", "01-11", "01-12"  # Jan 7-12
+        }
+        if month_day in fixed_weekday_dates:
+            weekday_reading_key = None
+        
         return {
             'season': current_season,
             'week_name': week_name,

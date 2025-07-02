@@ -23,9 +23,10 @@ class ReadingsManager:
     def __init__(self):
         """Initialize the ReadingsManager."""
         # Import readings data here to avoid circular imports
-        from ..data.readings_data import sunday_readings, weekday_readings
+        from ..data.readings_data import sunday_readings, weekday_readings, fixed_weekday_readings
         self.sunday_readings = sunday_readings
         self.weekday_readings = weekday_readings
+        self.fixed_weekday_readings = fixed_weekday_readings
     
     def get_yearly_cycle(self, year: int) -> Tuple[str, int]:
         """
@@ -72,7 +73,26 @@ class ReadingsManager:
         """
         return self.weekday_readings.get(weekday_reading, {}).get(day_of_week, {}).get(str(cycle), [])
     
-    def get_feast_readings(self, feast_data: Dict) -> Dict[str, List[str]]:
+    def get_fixed_weekday_readings(self, date_str: str, cycle: int) -> List[str]:
+        """
+        Get fixed weekday readings for a specific date and cycle.
+        
+        Args:
+            date_str: Date in 'YYYY-MM-DD' format
+            cycle: The weekday cycle (1 or 2)
+        
+        Returns:
+            List containing the fixed weekday readings for the date and cycle.
+            Returns empty list if not found.
+        """
+        try:
+            # Extract MM-DD from YYYY-MM-DD
+            month_day = date_str[5:]  # Get MM-DD part
+            return self.fixed_weekday_readings.get(month_day, {}).get(str(cycle), [])
+        except (IndexError, KeyError):
+            return []
+    
+    def get_feast_readings(self, feast_data: Dict) -> List[str]:
         """
         Get readings for a feast day.
         
@@ -80,16 +100,42 @@ class ReadingsManager:
             feast_data: Dictionary containing feast information
             
         Returns:
-            Dictionary containing the feast readings.
-            Returns empty dict if no readings found.
+            List containing the feast readings.
+            Returns empty list if no readings found.
         """
-        # This method can be extended to handle feast-specific readings
-        # For now, return empty dict as feast readings are handled elsewhere
-        return {}
+        # Check if the feast has readings defined
+        readings = feast_data.get('readings', [])
+        if readings:
+            return readings
+        
+        # If no readings in feast_data, try to look up from feast data structure
+        feast_name = feast_data.get('name', '')
+        if feast_name:
+            # Import feast data here to avoid circular imports
+            from ..data.feasts_data import feasts
+            
+            # Look through both easter and christmas feast data
+            for feast_type in ['easter', 'christmas']:
+                if feast_type in feasts:
+                    for feast_key, feast_info in feasts[feast_type].items():
+                        if feast_info.get('name') == feast_name:
+                            feast_readings = feast_info.get('readings', [])
+                            if feast_readings:
+                                return feast_readings
+        
+        return []
+    
+
     
     def get_readings_for_date(self, date_str: str, liturgical_info: Dict) -> List[str]:
         """
         Get readings for a specific date based on liturgical information.
+        
+        This method handles Sunday and weekday readings (not feast readings).
+        Precedence order:
+        1. Fixed weekday readings (if date is in fixed_weekday_readings)
+        2. Week-based readings (if date has a weekday_reading_key)
+        3. Sunday readings (if date is a Sunday)
         
         Args:
             date_str: Date in 'YYYY-MM-DD' format
@@ -114,7 +160,14 @@ class ReadingsManager:
                 if week:
                     return self.get_sunday_readings(week, sunday_cycle)
             else:
-                # It's a weekday
+                # It's a weekday - check precedence order
+                
+                # 1. Check for fixed weekday readings
+                fixed_readings = self.get_fixed_weekday_readings(date_str, weekday_cycle)
+                if fixed_readings:
+                    return fixed_readings
+                
+                # 2. Use week-based system as fallback
                 weekday_reading = liturgical_info.get('weekday_reading')
                 if weekday_reading is None:
                     weekday_reading = liturgical_info.get('week')

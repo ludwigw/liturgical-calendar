@@ -503,3 +503,63 @@ weekday_readings = {
     },
 
 }
+
+# Fixed weekday readings for specific dates in the Christmas/Epiphany period
+# These are not part of the week-based system and have their own readings
+fixed_weekday_readings = {
+    # Dec 29-31: Fixed weekday readings
+    "12-29": {
+        "1": ["1 John 2:3-11", "John 21:19-25"],
+        "2": ["2 Samuel 7:18-29", "Luke 1:67-79"]
+    },
+    "12-30": {
+        "1": ["1 John 2:12-17", "John 1:19-28"],
+        "2": ["1 Kings 3:5-14", "Luke 2:22-35"]
+    },
+    "12-31": {
+        "1": ["1 John 2:18-29", "John 1:1-18"],
+        "2": ["1 Kings 3:15-28", "Luke 2:36-40"]
+    },
+    # Jan 2-5: Fixed weekday readings
+    "01-02": {
+        "1": ["1 John 2:22-28", "John 1:19-34"],
+        "2": ["1 Kings 8:1-13", "Luke 2:41-52"]
+    },
+    "01-03": {
+        "1": ["1 John 2:29-3:6", "John 1:35-42"],
+        "2": ["1 Kings 8:14-21", "Luke 3:1-6"]
+    },
+    "01-04": {
+        "1": ["1 John 3:7-10", "John 1:43-51"],
+        "2": ["1 Kings 8:22-30", "Luke 3:7-18"]
+    },
+    "01-05": {
+        "1": ["1 John 3:11-21", "John 1:29-34"],
+        "2": ["1 Kings 8:31-40", "Luke 3:19-22"]
+    },
+    # Jan 7-12: Fixed weekday readings (until Epiphany 1)
+    "01-07": {
+        "1": ["1 John 3:22-4:6", "Matthew 4:12-17"],
+        "2": ["1 Kings 8:41-53", "Luke 4:14-21"]
+    },
+    "01-08": {
+        "1": ["1 John 4:7-10", "Matthew 4:18-25"],
+        "2": ["1 Kings 8:54-66", "Luke 4:22-30"]
+    },
+    "01-09": {
+        "1": ["1 John 4:11-18", "Matthew 4:23-25"],
+        "2": ["1 Kings 9:1-9", "Luke 4:31-37"]
+    },
+    "01-10": {
+        "1": ["1 John 4:19-5:4", "Matthew 5:1-12"],
+        "2": ["1 Kings 9:10-28", "Luke 4:38-44"]
+    },
+    "01-11": {
+        "1": ["1 John 5:5-13", "Matthew 5:13-20"],
+        "2": ["1 Kings 10:1-13", "Luke 5:1-11"]
+    },
+    "01-12": {
+        "1": ["1 John 5:14-21", "Matthew 5:21-26"],
+        "2": ["1 Kings 10:14-29", "Luke 5:12-16"]
+    }
+}
