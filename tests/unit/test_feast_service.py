@@ -44,22 +44,20 @@ class TestFeastService(unittest.TestCase):
                 mock_calc.assert_called_once()
                 mock_readings.assert_called_once()
     
-    @patch('liturgical_calendar.funcs.get_easter')
-    @patch('liturgical_calendar.funcs.date_to_days')
     @patch('liturgical_calendar.funcs.get_advent_sunday')
-    def test_get_complete_feast_info_basic(self, mock_advent, mock_date_to_days, mock_easter):
+    def test_get_complete_feast_info_basic(self, mock_advent):
         """Test basic feast info retrieval."""
         # Mock dependencies
-        mock_easter.return_value = (4, 16)  # Easter Sunday 2023
-        mock_date_to_days.side_effect = [100, 105]  # current_date, easter_date
         mock_advent.return_value = 50
         
         # Mock season calculator methods
         self.mock_season_calculator.determine_season.return_value = 'Easter'
-        self.mock_season_calculator.calculate_week_number.return_value = 2
-        self.mock_season_calculator.calculate_weekday_reading.return_value = 'Easter 2'
-        self.mock_season_calculator.render_week_name.return_value = ('Easter 2', 'Easter 2')
-        self.mock_season_calculator.calculate_sunday_week_info.return_value = ('Easter', 2)
+        self.mock_season_calculator.week_info.return_value = {
+            'season': 'Easter',
+            'week_name': 'Easter 2',
+            'week_start_sunday': date(2023, 4, 16),
+            'weekday_reading_key': 'Easter 2',
+        }
         
         # Mock readings manager
         self.mock_readings_manager.get_readings_for_date.return_value = {
@@ -81,14 +79,14 @@ class TestFeastService(unittest.TestCase):
             
             mock_feast.side_effect = mock_feast_side_effect
             
-            result = self.feast_service.get_complete_feast_info('2023-04-16')  # Easter Sunday
+            result = self.feast_service.get_complete_feast_info('2023-04-09')  # Easter Sunday
         
         # Verify the result - should be Easter feast
         self.assertEqual(result['name'], 'Easter')
         self.assertEqual(result['season'], 'Easter')
         self.assertEqual(result['colour'], 'white')
         self.assertIn('readings', result)
-        self.assertEqual(result['date'], date(2023, 4, 16))
+        self.assertEqual(result['date'], date(2023, 4, 9))
     
     def test_validate_feast_data_valid(self):
         """Test validation of valid feast data."""
@@ -114,22 +112,20 @@ class TestFeastService(unittest.TestCase):
         """Test validation of empty feast data."""
         self.assertFalse(self.feast_service.validate_feast_data({}))
     
-    @patch('liturgical_calendar.funcs.get_easter')
-    @patch('liturgical_calendar.funcs.date_to_days')
     @patch('liturgical_calendar.funcs.get_advent_sunday')
-    def test_get_complete_feast_info_sunday(self, mock_advent, mock_date_to_days, mock_easter):
+    def test_get_complete_feast_info_sunday(self, mock_advent):
         """Test feast info for a Sunday."""
         # Mock dependencies
-        mock_easter.return_value = (4, 16)  # Easter Sunday 2023
-        mock_date_to_days.side_effect = [107, 105]  # current_date (2023-04-23), easter_date
         mock_advent.return_value = 50
         
         # Mock season calculator
         self.mock_season_calculator.determine_season.return_value = 'Easter'
-        self.mock_season_calculator.calculate_week_number.return_value = 2
-        self.mock_season_calculator.calculate_weekday_reading.return_value = 'Easter 2'
-        self.mock_season_calculator.render_week_name.return_value = ('Easter 2', 'Easter 2')
-        self.mock_season_calculator.calculate_sunday_week_info.return_value = ('Easter', 2)
+        self.mock_season_calculator.week_info.return_value = {
+            'season': 'Easter',
+            'week_name': 'Easter 2',
+            'week_start_sunday': date(2023, 4, 23),
+            'weekday_reading_key': 'Easter 2',
+        }
         
         # Mock readings manager
         self.mock_readings_manager.get_readings_for_date.return_value = {
@@ -138,13 +134,13 @@ class TestFeastService(unittest.TestCase):
         
         # Mock feast data - no specific feast for today or yesterday
         with patch('liturgical_calendar.services.feast_service.get_liturgical_feast') as mock_feast:
-            # Return None for both today and yesterday to avoid transferred feast logic
-            mock_feast.return_value = None
-            
+            def mock_feast_side_effect(relative_to, pointer):
+                return None
+            mock_feast.side_effect = mock_feast_side_effect
             result = self.feast_service.get_complete_feast_info('2023-04-23')  # Regular Sunday after Easter
         
-        # Should have Easter as the feast name (season name for Sunday)
-        self.assertEqual(result['name'], 'Easter')
+        # Should have Easter 2 as the feast name (week name for Sunday)
+        self.assertEqual(result['name'], 'Easter 2')
         self.assertEqual(result['prec'], 5)
     
     @patch('liturgical_calendar.funcs.get_easter')
@@ -159,10 +155,12 @@ class TestFeastService(unittest.TestCase):
         
         # Mock season calculator
         self.mock_season_calculator.determine_season.return_value = 'Easter'
-        self.mock_season_calculator.calculate_week_number.return_value = 2
-        self.mock_season_calculator.calculate_weekday_reading.return_value = 'Easter 2'
-        self.mock_season_calculator.render_week_name.return_value = ('Easter 2', 'Easter 2')
-        self.mock_season_calculator.calculate_sunday_week_info.return_value = ('Easter', 2)
+        self.mock_season_calculator.week_info.return_value = {
+            'season': 'Easter',
+            'week_name': 'Easter 2',
+            'week_start_sunday': date(2023, 4, 25),
+            'weekday_reading_key': 'Easter 2',
+        }
         
         # Mock readings manager
         self.mock_readings_manager.get_readings_for_date.return_value = {
@@ -282,82 +280,6 @@ class TestFeastService(unittest.TestCase):
             result = self.feast_service.get_liturgical_info('2024-12-25')
             mock_get_complete.assert_called_once_with('2024-12-25')
             self.assertEqual(result, {'test': 'data'})
-    
-    def test_calculate_week_name_sunday(self):
-        """Test week name calculation for a Sunday."""
-        from datetime import date
-        
-        f_date = date(2024, 12, 1)  # Sunday
-        dayofweek = 0  # Sunday
-        season = 'Advent'
-        weekno = 1
-        easter_point = 250
-        weekday_reading = 'Advent 1'
-        days = 738000
-        easterday = 737750
-        year = 2024
-        
-        with patch.object(self.feast_service.season_calculator, 'render_week_name') as mock_render:
-            mock_render.return_value = ('Advent 1', 'Advent')
-            
-            result = self.feast_service.calculate_week_name(
-                f_date, dayofweek, season, weekno, easter_point, 
-                weekday_reading, days, easterday, year
-            )
-            
-            mock_render.assert_called_once_with(season, weekno, easter_point)
-            self.assertEqual(result, 'Advent 1')
-    
-    def test_calculate_week_name_sunday_before_advent(self):
-        """Test week name calculation for a Sunday with 'before Advent' reading."""
-        from datetime import date
-        
-        f_date = date(2024, 11, 24)  # Sunday
-        dayofweek = 0  # Sunday
-        season = 'Pre-Advent'
-        weekno = 1
-        easter_point = 250
-        weekday_reading = '1 before Advent'  # Special case
-        days = 738000
-        easterday = 737750
-        year = 2024
-        
-        result = self.feast_service.calculate_week_name(
-            f_date, dayofweek, season, weekno, easter_point, 
-            weekday_reading, days, easterday, year
-        )
-        
-        # Should return the weekday_reading directly for "before Advent" cases
-        self.assertEqual(result, '1 before Advent')
-    
-    def test_calculate_week_name_weekday(self):
-        """Test week name calculation for a weekday."""
-        from datetime import date
-        
-        f_date = date(2024, 12, 2)  # Monday
-        dayofweek = 1  # Monday
-        season = 'Advent'
-        weekno = 1
-        easter_point = 250
-        weekday_reading = 'Advent 1'
-        days = 738001
-        easterday = 737750
-        year = 2024
-        
-        with patch.object(self.feast_service.season_calculator, 'calculate_sunday_week_info') as mock_sunday_info:
-            mock_sunday_info.return_value = ('Advent', 1)
-            
-            with patch.object(self.feast_service.season_calculator, 'render_week_name') as mock_render:
-                mock_render.return_value = ('Advent 1', 'Advent')
-                
-                result = self.feast_service.calculate_week_name(
-                    f_date, dayofweek, season, weekno, easter_point, 
-                    weekday_reading, days, easterday, year
-                )
-                
-                mock_sunday_info.assert_called_once_with(f_date, dayofweek, days, easterday, year)
-                mock_render.assert_called_once_with('Advent', 1, easter_point)
-                self.assertEqual(result, 'Advent 1')
 
 
 if __name__ == '__main__':

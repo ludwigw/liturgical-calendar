@@ -137,14 +137,15 @@ class FeastService:
         # Sunday - only add if no Principal Feast (prec==9) was found for this Sunday
         date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
         dayofweek = day_of_week(date_obj.year, date_obj.month, date_obj.day)
-        if dayofweek == 6:  # Sunday
+        if dayofweek == 0:  # Sunday
             has_principal_feast = any(feast.get('prec') == 9 for feast in possibles)
             if not has_principal_feast:
                 # Calculate season for Sunday using new API
                 week_info = self.season_calculator.week_info(date_obj)
                 season = week_info['season']
-                # Use the season name as the Sunday name (original logic)
-                possibles.append({'prec': 5, 'type': 'Sunday', 'name': season})
+                week_name = week_info['week_name']
+                # Use the week name as the Sunday name (original logic with week number)
+                possibles.append({'prec': 5, 'type': 'Sunday', 'name': week_name})
         return possibles
     
     def _get_transferred_feast(self, date_str: str) -> Optional[Dict[str, Any]]:
