@@ -15,6 +15,7 @@ import json
 from PIL import Image
 from shutil import move
 from liturgical_calendar.funcs import get_cache_filename
+from liturgical_calendar.caching.artwork_cache import ArtworkCache
 
 def get_instagram_image_url(instagram_url):
     """
@@ -51,60 +52,6 @@ def check_image_dimensions(image_path):
         print(f"    Error checking image dimensions: {e}")
     
     return None, None
-
-def download_image(image_url, cache_path, original_instagram_url=None):
-    """
-    Download an image from the given URL and save it to the cache path.
-    """
-    try:
-        # Use a session to maintain cookies and headers
-        session = requests.Session()
-        
-        # Comprehensive headers to look like a real browser
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Sec-Fetch-Dest': 'image',
-            'Sec-Fetch-Mode': 'no-cors',
-            'Sec-Fetch-Site': 'cross-site',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-        }
-        
-        # Add referrer if we have the original Instagram URL
-        if original_instagram_url:
-            headers['Referer'] = original_instagram_url
-        
-        session.headers.update(headers)
-        
-        print(f"    Downloading: {image_url}")
-        response = session.get(image_url, timeout=30, stream=True)
-        response.raise_for_status()
-        
-        with open(cache_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
-        
-        # Check image dimensions
-        width, height = check_image_dimensions(cache_path)
-        if width and height:
-            print(f"    Downloaded image: {width}x{height} pixels")
-            if width >= 1080 or height >= 1080:
-                print(f"    ✓ High resolution image downloaded")
-            elif width >= 640 or height >= 640:
-                print(f"    ⚠ Medium resolution image downloaded")
-            else:
-                print(f"    ⚠ Low resolution image downloaded")
-        
-        return True
-        
-    except Exception as e:
-        print(f"    Error downloading image from {image_url}: {e}")
-        return False
 
 def extract_source_urls_from_feasts():
     """
@@ -164,10 +111,9 @@ def main():
     """
     print("Starting artwork image caching...")
     
-    # Create cache directory
-    cache_dir = Path("./cache")
-    cache_dir.mkdir(exist_ok=True)
-    print(f"Cache directory: {cache_dir.absolute()}")
+    # Use ArtworkCache for all cache operations
+    artwork_cache = ArtworkCache()
+    print(f"Cache directory: {artwork_cache.cache_dir.absolute()}")
     
     # Extract all source URLs
     source_entries = extract_source_urls_from_feasts()
@@ -189,99 +135,70 @@ def main():
         print(f"\n[{i}/{total_images}] Processing: {name} ({path})")
         print(f"  Source URL: {source_url}")
         
-        # Generate cache filename
-        cache_filename = get_cache_filename(source_url)
-        cache_path = cache_dir / cache_filename
+        # Use ArtworkCache for cache filename and path
+        cache_path = artwork_cache.get_cached_path(source_url)
         
         # Check if already cached
-        if cache_path.exists():
-            print(f"  ✓ Already cached: {cache_filename}")
+        if artwork_cache.is_cached(source_url):
+            print(f"  ✓ Already cached: {cache_path.name}")
             skipped_images += 1
             continue
         
-        # Extract actual image URL from Instagram
-        if 'instagram.com' in source_url:
-            print("  Extracting image URL from Instagram using /media?size=l...")
-            image_url = get_instagram_image_url(source_url)
-            if not image_url:
-                print(f"  ✗ Failed to extract image URL")
-                failed_images += 1
-                failed_downloads.append({
-                    'url': source_url,
-                    'date': name,
-                    'reason': 'Failed to extract image URL'
-                })
-                continue
-        else:
-            # For non-Instagram URLs, use the URL directly
-            image_url = source_url
-        
-        print(f"  Downloading: {image_url}")
-        
-        # Download the image
-        if download_image(image_url, cache_path, source_url):
-            upsample_if_needed(cache_path, cache_path)
-            print(f"  ✓ Downloaded and upsampled: {cache_filename}")
+        # Download and cache the image
+        success = artwork_cache.download_and_cache(source_url)
+        if success:
+            print(f"  ✓ Cached: {cache_path.name}")
             cached_images += 1
         else:
-            print(f"  ✗ Failed to download")
+            print(f"  ✗ Failed to cache: {cache_path.name}")
             failed_images += 1
-            failed_downloads.append({
-                'url': source_url,
-                'date': name,
-                'reason': f'Failed to download from {image_url}'
-            })
+            failed_downloads.append({'url': source_url, 'name': name, 'path': path})
         
-        # Progress update every 10 items
-        if i % 10 == 0:
-            print(f"\n--- Progress Update ---")
-            print(f"Processed: {i}/{total_images}")
-            print(f"Successfully cached: {cached_images}")
-            print(f"Failed: {failed_images}")
-            print(f"Skipped (already cached): {skipped_images}")
-            print(f"Success rate: {(cached_images/i)*100:.1f}%")
-            print(f"----------------------\n")
-        
-        # Small delay to be respectful to servers
+        # Optionally, check image dimensions
+        width, height = check_image_dimensions(cache_path)
+        if width and height:
+            print(f"    Downloaded image: {width}x{height} pixels")
+            if width >= 1080 or height >= 1080:
+                print(f"    ✓ High resolution image downloaded")
+            elif width >= 640 or height >= 640:
+                print(f"    ⚠ Medium resolution image downloaded")
+            else:
+                print(f"    ⚠ Low resolution image downloaded")
+
+        # Add a short delay to avoid rate-limiting
         time.sleep(1)
     
-    # Summary
-    print(f"\n{'='*50}")
-    print(f"Caching complete!")
-    print(f"Total images: {total_images}")
-    print(f"Successfully cached: {cached_images}")
-    print(f"Failed: {failed_images}")
-    print(f"Skipped (already cached): {skipped_images}")
-    print(f"Success rate: {(cached_images/total_images)*100:.1f}%")
-    print(f"Cache directory: {cache_dir.absolute()}")
-    
+    print(f"\nSummary:")
+    print(f"  Cached images: {cached_images}")
+    print(f"  Skipped (already cached): {skipped_images}")
+    print(f"  Failed downloads: {failed_images}")
+    if failed_downloads:
+        print("  Failed URLs:")
+        for fail in failed_downloads:
+            print(f"    {fail['url']} ({fail['name']}, {fail['path']})")
+
+    # Save failed downloads to a JSON file
+    failed_file = artwork_cache.cache_dir / "failed_downloads.json"
+    with open(failed_file, 'w') as f:
+        json.dump(failed_downloads, f, indent=2)
+    print(f"Failed downloads saved to: {failed_file}")
+
     # Create a mapping file for easy lookup
-    mapping_file = cache_dir / "url_mapping.json"
+    mapping_file = artwork_cache.cache_dir / "url_mapping.json"
     mapping = {}
-    
     for entry in source_entries:
         source_url = entry['url']
-        cache_filename = get_cache_filename(source_url)
-        cache_path = cache_dir / cache_filename
-        
+        cache_path = artwork_cache.get_cached_path(source_url)
         if cache_path.exists():
             mapping[source_url] = {
-                'filename': cache_filename,
+                'filename': cache_path.name,
                 'name': entry['name'],
                 'path': entry['path'],
                 'size': cache_path.stat().st_size
             }
-    
     with open(mapping_file, 'w') as f:
         json.dump(mapping, f, indent=2)
-    
     print(f"URL mapping saved to: {mapping_file}")
-
-    # Save failed downloads to a JSON file
-    failed_file = cache_dir / "failed_downloads.json"
-    with open(failed_file, 'w') as f:
-        json.dump(failed_downloads, f, indent=2)
-    print(f"Failed downloads saved to: {failed_file}")
 
 if __name__ == "__main__":
     main() 

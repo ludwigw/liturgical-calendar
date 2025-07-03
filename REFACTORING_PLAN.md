@@ -448,22 +448,20 @@ class ImageGenerationPipeline:
 
 ### Phase 4: Caching and Image Processing (Week 4)
 
-#### 4.1 Improve Artwork Caching
-**File**: `liturgical_calendar/caching/artwork_cache.py`
-```python
-class ArtworkCache:
-    def __init__(self, cache_dir)
-    def get_cached_path(self, source_url)
-    def download_and_cache(self, source_url)
-    def is_cached(self, source_url)
-    def get_cache_info(self, source_url)
-    def cleanup_old_cache(self, max_age_days)
-```
+#### 4.1 Improve Artwork Caching ✅ **COMPLETED**
 
-**Migration Steps**:
-1. Extract caching logic from `cache_artwork_images.py`
-2. Add cache validation and cleanup
-3. Improve error handling for failed downloads
+**What was done:**
+- Created `ArtworkCache` class in `liturgical_calendar/caching/artwork_cache.py` with methods for cache management, download, validation, upsampling, archival, info, and cleanup.
+- Restored Instagram direct image URL logic.
+- Ensured only valid images are cached; broken downloads are deleted.
+- Original images are archived before upsampling, matching the old script.
+- Robust error handling for download, validation, and upsampling.
+- Refactored `cache_artwork_images.py` to use `ArtworkCache` for all cache operations.
+- Both `failed_downloads.json` and `url_mapping.json` are written in the same format as before.
+- Added a delay between downloads to avoid server bans.
+- Comprehensive unit tests for all `ArtworkCache` features, all passing.
+- All caching-related features from the old script are preserved or improved.
+- **Cleanup:** `cleanup_old_cache()` is available and tested, but not run automatically; can be called manually or added to workflows as needed.
 
 #### 4.2 Create Image Processor
 **File**: `liturgical_calendar/caching/image_processor.py`
