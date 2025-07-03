@@ -140,7 +140,7 @@ class LayoutEngine:
             }
         return layout
 
-    def create_title_layout(self, title: str, fonts: Dict[str, Any], draw: Any, width: int, padding: int, title_font_size: int, title_line_height: float, start_y: int) -> Dict[str, Any]:
+    def create_title_layout(self, title: str, fonts: Dict[str, Any], draw: Any, width: int, padding: int, title_font_size: int, title_line_height: float, start_y: int, font_manager=None) -> Dict[str, Any]:
         """Return layout info for the artwork title, including wrapped lines and positions."""
         font = fonts['serif_96']
         max_width = width - 2 * padding
@@ -151,7 +151,7 @@ class LayoutEngine:
             current = ''
             for word in words:
                 test = current + (' ' if current else '') + word
-                w = self._get_text_width(draw, test, font)
+                w = font_manager.get_text_size(test, font)[0] if font_manager else self._get_text_width(draw, test, font)
                 if w <= max_width:
                     current = test
                 else:
@@ -165,30 +165,31 @@ class LayoutEngine:
         layout_lines = []
         last_baseline = start_y
         for i, line in enumerate(lines):
-            line_w = self._get_text_width(draw, line, font)
+            line_w = font_manager.get_text_size(line, font)[0] if font_manager else self._get_text_width(draw, line, font)
             line_x = (width - line_w) // 2
             line_y = start_y + i * int(title_font_size * title_line_height)
             layout_lines.append({'text': line, 'font': font, 'pos': (line_x, line_y)})
-            last_baseline = line_y + font.getmetrics()[0]  # baseline = y + ascent
+            ascent = font_manager.get_text_metrics(font)[0] if font_manager else font.getmetrics()[0]
+            last_baseline = line_y + ascent  # baseline = y + ascent
         return {'lines': layout_lines, 'last_baseline': last_baseline}
 
-    def create_readings_layout(self, week: str, readings: list, fonts: Dict[str, Any], draw: Any, width: int, padding: int, start_y: int, line_height: int) -> Dict[str, Any]:
+    def create_readings_layout(self, week: str, readings: list, fonts: Dict[str, Any], draw: Any, width: int, padding: int, start_y: int, line_height: int, font_manager=None) -> Dict[str, Any]:
         """Return layout info for the week and readings columns, including vertical line and last baseline y."""
         sans_uc = fonts['sans_uc']
         serif = fonts['serif']
         # Calculate widths
-        week_w = self._get_text_width(draw, week, sans_uc)
+        week_w = font_manager.get_text_size(week, sans_uc)[0] if font_manager else self._get_text_width(draw, week, sans_uc)
         readings_w = 0
         for r in readings:
-            w = self._get_text_width(draw, r, serif)
+            w = font_manager.get_text_size(r, serif)[0] if font_manager else self._get_text_width(draw, r, serif)
             readings_w = max(readings_w, w)
         col_gap = 28 * 2 + 1  # 28px padding each side + 1px line
         total_cols_w = week_w + col_gap + readings_w
         col1_x = (width - total_cols_w) // 2
         col2_x = col1_x + week_w + col_gap
         # Baseline alignment
-        sans_ascent_col, _ = sans_uc.getmetrics()
-        serif_ascent_col, _ = serif.getmetrics()
+        sans_ascent_col = font_manager.get_text_metrics(sans_uc)[0] if font_manager else sans_uc.getmetrics()[0]
+        serif_ascent_col = font_manager.get_text_metrics(serif)[0] if font_manager else serif.getmetrics()[0]
         col_baseline_y = start_y + max(sans_ascent_col, serif_ascent_col)
         # Layout for week
         week_layout = {'text': week, 'font': sans_uc, 'pos': (col1_x, col_baseline_y - sans_ascent_col)}

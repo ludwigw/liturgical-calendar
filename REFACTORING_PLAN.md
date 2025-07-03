@@ -348,11 +348,16 @@ class LayoutEngine:
 - All image generation tests pass, output is visually unchanged.
 
 **Migration Steps**:
-1. Extract layout logic from `create_liturgical_image.py`
-2. Create unit tests for each layout component
-3. Add text wrapping and positioning logic
+1. Extract layout logic from `create_liturgical_image.py` ✅
+2. Create unit tests for each layout component ⏳ (to be expanded)
+3. Add text wrapping and positioning logic ✅
 
-#### 3.2 Create Font Manager
+**Next Steps:**
+- 3.2: Implement Font Manager (centralize font loading/metrics)
+- 3.3: Implement Image Builder (encapsulate drawing/compositing)
+- 3.4: Implement Generation Pipeline (orchestrate full process)
+
+#### 3.2 Create Font Manager ✅ **COMPLETED**
 **File**: `liturgical_calendar/image_generation/font_manager.py`
 ```python
 class FontManager:
@@ -361,6 +366,13 @@ class FontManager:
     def get_text_metrics(self, text, font)
     def get_text_size(self, text, font)
 ```
+
+**Progress (2024-06-09):**
+- FontManager class created to centralize font loading, caching, and text measurement.
+- All font loading in image generation and layout engine now uses FontManager.
+- All text size and metrics calculations now use FontManager methods.
+- Code is more maintainable and ready for further modularization.
+- All image generation tests pass, output unchanged.
 
 #### 3.3 Create Image Builder
 **File**: `liturgical_calendar/image_generation/image_builder.py`

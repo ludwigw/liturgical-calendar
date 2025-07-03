@@ -5,12 +5,13 @@ from PIL import Image, ImageDraw, ImageFont
 from liturgical_calendar.services.feast_service import FeastService
 from liturgical_calendar.services.image_service import ImageService
 from liturgical_calendar.image_generation.layout_engine import LayoutEngine
+from liturgical_calendar.image_generation.font_manager import FontManager
 
 # Font paths
 FONTS_DIR = Path(__file__).parent / 'fonts'
 
-SERIF_FONT = FONTS_DIR / 'HappyTimes-Regular.otf'
-SANS_FONT = FONTS_DIR / 'HankenGrotesk-Medium.ttf'
+SERIF_FONT = 'HappyTimes-Regular.otf'
+SANS_FONT = 'HankenGrotesk-Medium.ttf'
 
 # Image settings
 WIDTH, HEIGHT = 1404, 1872
@@ -32,6 +33,7 @@ LINE_COLOR = (151, 151, 151)
 # Create service instances
 feast_service = FeastService()
 image_service = ImageService()
+font_manager = FontManager(FONTS_DIR)
 
 def get_date_str(date):
     return date.strftime('%Y-%m-%d')
@@ -63,10 +65,10 @@ def main():
     artwork = image_service.get_artwork_for_date(date_str, info)
 
     # Prepare fonts
-    serif_font_36 = ImageFont.truetype(str(SERIF_FONT), HEADER_FONT_SIZE)
-    serif_font_96 = ImageFont.truetype(str(SERIF_FONT), TITLE_FONT_SIZE)
-    sans_font_36 = ImageFont.truetype(str(SANS_FONT), COLUMN_FONT_SIZE)
-    sans_font_36_uc = ImageFont.truetype(str(SANS_FONT), COLUMN_FONT_SIZE)
+    serif_font_36 = font_manager.get_font(SERIF_FONT, HEADER_FONT_SIZE)
+    serif_font_96 = font_manager.get_font(SERIF_FONT, TITLE_FONT_SIZE)
+    sans_font_36 = font_manager.get_font(SANS_FONT, COLUMN_FONT_SIZE)
+    sans_font_36_uc = font_manager.get_font(SANS_FONT, COLUMN_FONT_SIZE)
 
     # Create base image
     img = Image.new('RGB', (WIDTH, HEIGHT), BG_COLOR)
@@ -110,8 +112,8 @@ def main():
     fonts_for_artwork = {
         'serif': serif_font_36,
         'sans': sans_font_36,
-        'sans_32': ImageFont.truetype(str(SANS_FONT), 32),
-        'sans_26': ImageFont.truetype(str(SANS_FONT), 26),
+        'sans_32': font_manager.get_font(SANS_FONT, 32),
+        'sans_26': font_manager.get_font(SANS_FONT, 26),
     }
     artwork_layout = layout_engine.create_artwork_layout(
         artwork, next_artwork, WIDTH, ARTWORK_SIZE, art_y, fonts=fonts_for_artwork, draw=draw
@@ -161,7 +163,7 @@ def main():
         'serif_96': serif_font_96,
     }
     title_layout = layout_engine.create_title_layout(
-        title, fonts_for_title, draw, WIDTH, PADDING, TITLE_FONT_SIZE, TITLE_LINE_HEIGHT, title_y
+        title, fonts_for_title, draw, WIDTH, PADDING, TITLE_FONT_SIZE, TITLE_LINE_HEIGHT, title_y, font_manager=font_manager
     )
     for line_info in title_layout['lines']:
         draw.text(line_info['pos'], line_info['text'], font=line_info['font'], fill=TEXT_COLOR)
@@ -178,7 +180,7 @@ def main():
         'sans_uc': sans_font_36_uc,
     }
     readings_layout = layout_engine.create_readings_layout(
-        week, readings, fonts_for_readings, draw, WIDTH, PADDING, col_y, 48
+        week, readings, fonts_for_readings, draw, WIDTH, PADDING, col_y, 48, font_manager=font_manager
     )
     draw.text(readings_layout['week']['pos'], readings_layout['week']['text'], font=readings_layout['week']['font'], fill=TEXT_COLOR)
     for r in readings_layout['readings']:
