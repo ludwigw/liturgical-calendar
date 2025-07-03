@@ -7,8 +7,9 @@ from liturgical_calendar.services.image_service import ImageService
 
 # Font paths
 FONTS_DIR = Path(__file__).parent / 'fonts'
-SERIF_FONT = FONTS_DIR / 'TestSignifier-Regular.otf'
-SANS_FONT = FONTS_DIR / 'HankenGrotesk-VariableFont_wght.ttf'
+
+SERIF_FONT = FONTS_DIR / 'HappyTimes-Regular.otf'
+SANS_FONT = FONTS_DIR / 'HankenGrotesk-Medium.ttf'
 
 # Image settings
 WIDTH, HEIGHT = 1404, 1872
@@ -19,6 +20,7 @@ ROW_SPACING = 48
 # Font sizes
 HEADER_FONT_SIZE = 36
 TITLE_FONT_SIZE = 96
+TITLE_LINE_HEIGHT = 1.2
 COLUMN_FONT_SIZE = 36
 
 # Colors
@@ -196,11 +198,11 @@ def main():
     for i, line in enumerate(title_lines):
         line_w, line_h = get_text_size(draw, line, serif_font_96)
         line_x = (WIDTH - line_w) // 2
-        line_y = title_y + i * line_h
+        line_y = title_y + i * int(line_h * TITLE_LINE_HEIGHT)
         draw.text((line_x, line_y), line, font=serif_font_96, fill=TEXT_COLOR)
         last_title_baseline = line_y + serif_font_96.getmetrics()[0]  # baseline = y + ascent
     # Row 4: Two columns (week name, readings)
-    week = info.get('week', '')
+    week = info.get('week', '').upper()
     # Calculate cap-height for sans-serif week font
     sans_ascent_col, _ = sans_font_36_uc.getmetrics()
     # Place cap-height of week at 96px below last title baseline
@@ -209,36 +211,10 @@ def main():
     readings = info.get('readings', [])
     if not readings:
         readings = ['No assigned readings for this day.']
-    readings_parts = []
     readings_w = 0
-    import string
-    PUNCTUATION = set(':,.;–—()[]!?')
     for r in readings:
-        # Split the line into runs of punctuation and non-punctuation
-        runs = []
-        current = ''
-        current_is_punct = None
-        for ch in r:
-            is_punct = ch in PUNCTUATION
-            if current == '':
-                current = ch
-                current_is_punct = is_punct
-            elif is_punct == current_is_punct:
-                current += ch
-            else:
-                runs.append((current, current_is_punct))
-                current = ch
-                current_is_punct = is_punct
-        if current:
-            runs.append((current, current_is_punct))
-        # Measure total width
-        total_w = 0
-        for text, is_punct in runs:
-            font = sans_font_36_uc if is_punct else serif_font_36
-            w, _ = get_text_size(draw, text, font)
-            total_w += w
-        readings_w = max(readings_w, total_w)
-        readings_parts.append(runs)
+        w, _ = get_text_size(draw, r, serif_font_36)
+        readings_w = max(readings_w, w)
     # Line height for fourth row
     LINE_HEIGHT = 48
     col_gap = 28 * 2 + 1  # 28px padding each side + 1px line
@@ -251,27 +227,16 @@ def main():
     col_baseline_y = col_y + max(sans_ascent_col, serif_ascent_col)
     # Draw left column (week)
     draw.text((col1_x, col_baseline_y - sans_ascent_col), week, font=sans_font_36_uc, fill=TEXT_COLOR)
-    # Draw right column (readings, with line-height 48px and sans-serif colon)
+    # Draw right column (readings, all in serif)
     reading_y = col_baseline_y - serif_ascent_col
-    reading_ys = []
-    readings_x = col1_x + week_w + 32 + 32  # 32px margin + 32px for vertical line
-    for runs in readings_parts:
-        x = readings_x
-        for text, is_punct in runs:
-            font = sans_font_36_uc if is_punct else serif_font_36
-            w, h = get_text_size(draw, text, font)
-            draw.text((x, reading_y), text, font=font, fill=TEXT_COLOR)
-            x += w
-        reading_ys.append(reading_y)
-        reading_y += 48  # Fixed 48px line height
+    for r in readings:
+        draw.text((col2_x, reading_y), r, font=serif_font_36, fill=TEXT_COLOR)
+        reading_y += LINE_HEIGHT
     # Draw vertical line (1px wide, 6px above cap-height, 24px below baseline)
     line_x = col1_x + week_w + 28
     cap_height = serif_ascent_col
     line_top = col_baseline_y - serif_ascent_col - 6
-    if reading_ys:
-        last_baseline = reading_ys[-1] + serif_ascent_col
-    else:
-        last_baseline = col_baseline_y
+    last_baseline = reading_y - LINE_HEIGHT + serif_ascent_col
     line_bottom = last_baseline + 24
     draw.rectangle([line_x, line_top, line_x + 1, line_bottom], fill=LINE_COLOR)
 
