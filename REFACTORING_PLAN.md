@@ -341,16 +341,19 @@ class LayoutEngine:
     def wrap_text(self, text, font, max_width)
 ```
 
+**Migration Steps**:
+1. Extract layout logic from `create_liturgical_image.py` ✅
+2. Create unit tests for each layout component ✅ (see tests/unit/test_layout_engine.py)
+3. Add text wrapping and positioning logic ✅
+
+**Test Coverage (2024-06-09):**
+- `tests/unit/test_layout_engine.py`: Covers header, artwork, title, and readings layout methods in LayoutEngine.
+
 **Progress (2024-06-09):**
 - Header, artwork, title, and readings layout logic fully extracted from `create_liturgical_image.py` into `LayoutEngine`.
 - All layout is now modular and testable.
 - Image generation script updated to use layout engine for all layout.
 - All image generation tests pass, output is visually unchanged.
-
-**Migration Steps**:
-1. Extract layout logic from `create_liturgical_image.py` ✅
-2. Create unit tests for each layout component ⏳ (to be expanded)
-3. Add text wrapping and positioning logic ✅
 
 **Next Steps:**
 - 3.2: Implement Font Manager (centralize font loading/metrics)
@@ -373,6 +376,7 @@ class FontManager:
 - All text size and metrics calculations now use FontManager methods.
 - Code is more maintainable and ready for further modularization.
 - All image generation tests pass, output unchanged.
+- `tests/unit/test_font_manager.py`: Covers font loading, caching, text size, and metrics for FontManager.
 
 #### 3.3 Create Image Builder
 **File**: `liturgical_calendar/image_generation/image_builder.py`
