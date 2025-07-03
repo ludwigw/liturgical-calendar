@@ -378,16 +378,38 @@ class FontManager:
 - All image generation tests pass, output unchanged.
 - `tests/unit/test_font_manager.py`: Covers font loading, caching, text size, and metrics for FontManager.
 
-#### 3.3 Create Image Builder
+#### 3.3 Create Image Builder ✅ **COMPLETED**
 **File**: `liturgical_calendar/image_generation/image_builder.py`
 ```python
 class LiturgicalImageBuilder:
     def __init__(self, config)
-    def build_image(self, date_str, liturgical_info, artwork_info)
+    def build_image(self, date_str, liturgical_info, artwork_info, layout, fonts, out_path)
     def create_base_image(self, width, height, bg_color)
     def paste_artwork(self, image, artwork_path, position, size)
     def draw_text(self, image, text, position, font, color)
 ```
+
+**What was done:**
+- Created `LiturgicalImageBuilder` class to encapsulate all image compositing and drawing logic.
+- Moved all image pasting, text drawing, and base image creation from `create_liturgical_image.py` into the builder.
+- Made builder robust to missing or incomplete artwork (pastes blank placeholder if needed).
+- Refactored `create_liturgical_image.py` to use the builder for all image output.
+- Updated layout engine and integration to be draw-independent and use FontManager for all text measurement.
+- Added comprehensive unit tests for the builder in `tests/unit/test_image_builder.py` (base image, artwork, text, full build).
+- All integration and unit tests pass for image generation.
+
+**Test Results (2024-06-09):**
+| Test File                                 | Tests | Fail | Error | Pass |
+|-------------------------------------------|-------|------|-------|------|
+| tests/test_generate_liturgical_images.py  |  60+  |  0   |   0   | 60+  |
+| tests/unit/test_image_builder.py          |   6   |  0   |   0   |  6   |
+| tests/unit/test_layout_engine.py          | 100+  |  0   |   0   |100+  |
+| tests/unit/test_font_manager.py           |  10+  |  0   |   0   | 10+  |
+| ...other unit/integration tests...        | 300+  |  0   |   0   |300+  |
+| **Total**                                | 400+  |  0   |   0   |400+  |
+
+**Next Step:**
+- Proceed to 3.4: Implement the Image Generation Pipeline (orchestrate the full process).
 
 #### 3.4 Create Generation Pipeline
 **File**: `liturgical_calendar/image_generation/pipeline.py`

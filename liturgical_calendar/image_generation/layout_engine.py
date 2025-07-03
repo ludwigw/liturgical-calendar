@@ -5,7 +5,7 @@ class LayoutEngine:
     Responsible for calculating layout positions and text for each section of the liturgical image.
     Does not draw to an image; returns layout data for use by an image builder.
     """
-    def create_header_layout(self, season: str, date: str, fonts: Dict[str, Any], draw: Any, width: int, padding: int) -> Dict[str, Any]:
+    def create_header_layout(self, season: str, date: str, fonts: Dict[str, Any], draw: Any, width: int, padding: int, font_manager=None) -> Dict[str, Any]:
         """Return layout info for the header row (season, dash, date)."""
         # Fonts expected: {'sans_uc': ..., 'serif': ...}
         season_text = season.upper()
@@ -14,9 +14,14 @@ class LayoutEngine:
         sans_font_36_uc = fonts['sans_uc']
         serif_font_36 = fonts['serif']
         # Measure for baseline alignment
-        season_w, season_h = draw.textbbox((0, 0), season_text, font=sans_font_36_uc)[2:4]
-        dash_w, dash_h = draw.textbbox((0, 0), header_dash, font=sans_font_36_uc)[2:4]
-        date_w, date_h = draw.textbbox((0, 0), date_text, font=serif_font_36)[2:4]
+        if font_manager:
+            season_w, season_h = font_manager.get_text_size(season_text, sans_font_36_uc)
+            dash_w, dash_h = font_manager.get_text_size(header_dash, sans_font_36_uc)
+            date_w, date_h = font_manager.get_text_size(date_text, serif_font_36)
+        else:
+            season_w, season_h = sans_font_36_uc.getbbox(season_text)[2:4]
+            dash_w, dash_h = sans_font_36_uc.getbbox(header_dash)[2:4]
+            date_w, date_h = serif_font_36.getbbox(date_text)[2:4]
         total_w = season_w + dash_w + date_w
         x = (width - total_w) // 2
         y = padding
@@ -54,6 +59,7 @@ class LayoutEngine:
         fonts: Dict[str, Any] = None,
         next_title_y_offset: int = 16,
         draw: Any = None,
+        font_manager=None,
     ) -> Dict[str, Any]:
         """
         Return layout info for the artwork and (optionally) next artwork thumbnail and its text.
@@ -67,7 +73,7 @@ class LayoutEngine:
             },
             'show_next': False,
         }
-        if next_artwork and fonts and draw:
+        if next_artwork and fonts and font_manager:
             thumb_size = art_size // 2
             thumb_x = art_x + (art_size - thumb_size) // 2
             thumb_y = y + (art_size - thumb_size) // 2
@@ -78,14 +84,15 @@ class LayoutEngine:
             }
             # Add next artwork label/title/date layout
             layout.update(self._create_next_artwork_layout(
-                next_artwork, art_x, art_size, thumb_y, thumb_size, fonts, next_title_y_offset, draw
+                next_artwork, art_x, art_size, thumb_y, thumb_size, fonts, next_title_y_offset, None, font_manager
             ))
             layout['show_next'] = True
         return layout
 
-    def _get_text_width(self, draw, text, font):
-        bbox = draw.textbbox((0, 0), text, font=font)
-        return bbox[2] - bbox[0]
+    def _get_text_width(self, draw, text, font, font_manager=None):
+        if font_manager:
+            return font_manager.get_text_size(text, font)[0]
+        return font.getbbox(text)[2] - font.getbbox(text)[0]
 
     def _create_next_artwork_layout(
         self,
@@ -97,6 +104,7 @@ class LayoutEngine:
         fonts: Dict[str, Any],
         next_title_y_offset: int,
         draw: Any,
+        font_manager=None,
     ) -> Dict[str, Any]:
         """
         Return layout info for the 'NEXT:' label, next artwork title, and date below the thumbnail.
@@ -108,8 +116,8 @@ class LayoutEngine:
         # Baseline alignment
         sans_ascent, _ = sans_font.getmetrics()
         serif_ascent, _ = serif_font.getmetrics()
-        next_prefix_w = self._get_text_width(draw, next_prefix, sans_font)
-        next_title_w = self._get_text_width(draw, next_title, serif_font)
+        next_prefix_w = self._get_text_width(None, next_prefix, sans_font, font_manager)
+        next_title_w = self._get_text_width(None, next_title, serif_font, font_manager)
         total_next_w = next_prefix_w + next_title_w
         next_x = art_x + (art_size - total_next_w) // 2
         next_title_y = thumb_y + thumb_size + next_title_y_offset
@@ -151,7 +159,7 @@ class LayoutEngine:
             current = ''
             for word in words:
                 test = current + (' ' if current else '') + word
-                w = font_manager.get_text_size(test, font)[0] if font_manager else self._get_text_width(draw, test, font)
+                w = font_manager.get_text_size(test, font)[0] if font_manager else font.getbbox(test)[2] - font.getbbox(test)[0]
                 if w <= max_width:
                     current = test
                 else:
@@ -165,7 +173,7 @@ class LayoutEngine:
         layout_lines = []
         last_baseline = start_y
         for i, line in enumerate(lines):
-            line_w = font_manager.get_text_size(line, font)[0] if font_manager else self._get_text_width(draw, line, font)
+            line_w = font_manager.get_text_size(line, font)[0] if font_manager else font.getbbox(line)[2] - font.getbbox(line)[0]
             line_x = (width - line_w) // 2
             line_y = start_y + i * int(title_font_size * title_line_height)
             layout_lines.append({'text': line, 'font': font, 'pos': (line_x, line_y)})
@@ -178,10 +186,10 @@ class LayoutEngine:
         sans_uc = fonts['sans_uc']
         serif = fonts['serif']
         # Calculate widths
-        week_w = font_manager.get_text_size(week, sans_uc)[0] if font_manager else self._get_text_width(draw, week, sans_uc)
+        week_w = font_manager.get_text_size(week, sans_uc)[0] if font_manager else sans_uc.getbbox(week)[2] - sans_uc.getbbox(week)[0]
         readings_w = 0
         for r in readings:
-            w = font_manager.get_text_size(r, serif)[0] if font_manager else self._get_text_width(draw, r, serif)
+            w = font_manager.get_text_size(r, serif)[0] if font_manager else serif.getbbox(r)[2] - serif.getbbox(r)[0]
             readings_w = max(readings_w, w)
         col_gap = 28 * 2 + 1  # 28px padding each side + 1px line
         total_cols_w = week_w + col_gap + readings_w
