@@ -4,6 +4,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from liturgical_calendar.services.feast_service import FeastService
 from liturgical_calendar.services.image_service import ImageService
+from liturgical_calendar.image_generation.layout_engine import LayoutEngine
 
 # Font paths
 FONTS_DIR = Path(__file__).parent / 'fonts'
@@ -71,42 +72,30 @@ def main():
     img = Image.new('RGB', (WIDTH, HEIGHT), BG_COLOR)
     draw = ImageDraw.Draw(img)
 
+    # Layout engine
+    layout_engine = LayoutEngine()
+    fonts = {'serif': serif_font_36, 'sans_uc': sans_font_36_uc}
     # Row 1: Season (sans, uppercase) — Date (serif)
     season = info.get('season', '').upper()
-    # Use EM DASH (–) in sans-serif to avoid rendering artifacts
-    header_dash = ' — '
-    season_text = season
     date_text = f"{friendly_date}"
-    # Measure for baseline alignment
-    season_w, season_h = get_text_size(draw, season_text, sans_font_36_uc)
-    dash_w, dash_h = get_text_size(draw, header_dash, sans_font_36_uc)
-    date_w, date_h = get_text_size(draw, date_text, serif_font_36)
-    total_w = season_w + dash_w + date_w
-    x = (WIDTH - total_w) // 2
-    y = PADDING
-    # Baseline alignment: get font metrics
-    sans_ascent, sans_descent = sans_font_36_uc.getmetrics()
-    serif_ascent, serif_descent = serif_font_36.getmetrics()
-    baseline_y = y + max(sans_ascent, serif_ascent)
-    # Draw season (sans, upper)
-    draw.text((x, baseline_y - sans_ascent), season_text, font=sans_font_36_uc, fill=TEXT_COLOR)
-    # Draw dash (sans)
-    draw.text((x + season_w, baseline_y - sans_ascent), header_dash, font=sans_font_36_uc, fill=TEXT_COLOR)
-    # Draw date (serif)
-    draw.text((x + season_w + dash_w, baseline_y - serif_ascent), date_text, font=serif_font_36, fill=TEXT_COLOR)
+    header_layout = layout_engine.create_header_layout(season, date_text, fonts, draw, WIDTH, PADDING)
+    # Draw header using layout
+    for part in ['season', 'dash', 'date']:
+        part_info = header_layout[part]
+        draw.text(part_info['pos'], part_info['text'], font=part_info['font'], fill=TEXT_COLOR)
+    baseline_y = header_layout['baseline_y']
 
     # Row 2: Artwork (centered)
-    art_y = y + HEADER_FONT_SIZE + ROW_SPACING
-    art_x = (WIDTH - ARTWORK_SIZE) // 2
-    artwork_img = None
+    art_y = baseline_y + ROW_SPACING
+    # Ensure next_artwork is always defined
     next_artwork = None
-    show_next_artwork = False
+    main_artwork_img = None
     if artwork and artwork.get('cached_file'):
         try:
-            artwork_img = Image.open(artwork['cached_file']).convert('RGB')
+            main_artwork_img = Image.open(artwork['cached_file']).convert('RGB')
         except Exception:
-            artwork_img = None
-    if not artwork_img:
+            main_artwork_img = None
+    if not main_artwork_img:
         # Try to find the next available artwork after this date
         from datetime import timedelta
         search_date = date
@@ -115,57 +104,50 @@ def main():
             next_artwork_candidate = image_service.get_artwork_for_date(get_date_str(search_date))
             if next_artwork_candidate and next_artwork_candidate.get('cached_file'):
                 next_artwork = next_artwork_candidate
+                next_artwork['date'] = get_friendly_date(search_date)
                 break
-        # fallback: blank or placeholder
-        artwork_img = Image.new('RGB', (ARTWORK_SIZE, ARTWORK_SIZE), (230, 230, 230))
-        show_next_artwork = next_artwork is not None
-    img.paste(artwork_img.resize((ARTWORK_SIZE, ARTWORK_SIZE)), (art_x, art_y))
-    # If showing next artwork, draw it at 50% size centered in the square
-    if show_next_artwork:
-        thumb_size = ARTWORK_SIZE // 2
-        thumb_x = art_x + (ARTWORK_SIZE - thumb_size) // 2
-        thumb_y = art_y + (ARTWORK_SIZE - thumb_size) // 2
+    # Use layout engine for artwork layout
+    fonts_for_artwork = {
+        'serif': serif_font_36,
+        'sans': sans_font_36,
+        'sans_32': ImageFont.truetype(str(SANS_FONT), 32),
+        'sans_26': ImageFont.truetype(str(SANS_FONT), 26),
+    }
+    artwork_layout = layout_engine.create_artwork_layout(
+        artwork, next_artwork, WIDTH, ARTWORK_SIZE, art_y, fonts=fonts_for_artwork, draw=draw
+    )
+    # Main artwork
+    main_art = artwork_layout['main']
+    main_img = None
+    if main_art['artwork'] and main_art['artwork'].get('cached_file'):
         try:
-            thumb_img = Image.open(next_artwork['cached_file']).convert('RGB').resize((thumb_size, thumb_size))
-            img.paste(thumb_img, (thumb_x, thumb_y))
+            main_img = Image.open(main_art['artwork']['cached_file']).convert('RGB')
         except Exception:
-            pass
-        # Draw the next artwork title below the thumbnail
-        next_title = next_artwork.get('name', '')
-        next_title_y = thumb_y + thumb_size + 16
-        # Draw 'NEXT: ' in sans-serif, then title in serif, baseline aligned
-        next_prefix = 'NEXT: '
-        # Get font metrics for baseline alignment
-        sans_ascent, sans_descent = sans_font_36.getmetrics()
-        serif_ascent, serif_descent = serif_font_36.getmetrics()
-        next_prefix_w, _ = get_text_size(draw, next_prefix, sans_font_36)
-        next_title_w, _ = get_text_size(draw, next_title, serif_font_36)
-        total_next_w = next_prefix_w + next_title_w
-        next_x = art_x + (ARTWORK_SIZE - total_next_w) // 2
-        # Align baselines
-        baseline_y = next_title_y + max(sans_ascent, serif_ascent)
-        draw.text((next_x, baseline_y - sans_ascent), next_prefix, font=sans_font_36, fill=TEXT_COLOR)
-        draw.text((next_x + next_prefix_w, baseline_y - serif_ascent), next_title, font=serif_font_36, fill=TEXT_COLOR)
-        # Draw the date of the next artwork in parentheses below, centered
-        next_artwork_date = next_artwork.get('date')
-        if not next_artwork_date:
-            # Try to find the date by searching forward again
-            from datetime import timedelta
-            search_date = date
-            for _ in range(366):
-                search_date += timedelta(days=1)
-                candidate = image_service.get_artwork_for_date(get_date_str(search_date))
-                if candidate and candidate.get('cached_file') == next_artwork.get('cached_file'):
-                    next_artwork_date = get_friendly_date(search_date)
-                    break
-        if next_artwork_date:
-            date_text = next_artwork_date
-            # Use sans-serif 32px font
-            sans_font_32 = ImageFont.truetype(str(SANS_FONT), 32)
-            # Align left edge of date to left edge of next artwork name
-            date_x = next_x + next_prefix_w
-            date_y = baseline_y + 8  # 8px below the title
-            draw.text((date_x, date_y), date_text, font=sans_font_32, fill=TEXT_COLOR)
+            main_img = None
+    if not main_img:
+        main_img = Image.new('RGB', main_art['size'], (230, 230, 230))
+    img.paste(main_img.resize(main_art['size']), main_art['pos'])
+    # Next artwork thumbnail (if present)
+    if artwork_layout.get('show_next'):
+        next_art = artwork_layout['next']
+        thumb_img = None
+        if next_art['artwork'] and next_art['artwork'].get('cached_file'):
+            try:
+                thumb_img = Image.open(next_art['artwork']['cached_file']).convert('RGB').resize(next_art['size'])
+            except Exception:
+                thumb_img = None
+        if thumb_img:
+            img.paste(thumb_img, next_art['pos'])
+        # Draw 'NEXT:' label and next artwork title
+        if 'next_label' in artwork_layout:
+            nl = artwork_layout['next_label']
+            draw.text(nl['pos'], nl['text'], font=nl['font'], fill=TEXT_COLOR)
+        if 'next_title' in artwork_layout:
+            nt = artwork_layout['next_title']
+            draw.text(nt['pos'], nt['text'], font=nt['font'], fill=TEXT_COLOR)
+        if 'next_date' in artwork_layout:
+            nd = artwork_layout['next_date']
+            draw.text(nd['pos'], nd['text'], font=nd['font'], fill=TEXT_COLOR)
 
     # Row 3: Artwork title (serif, 96px, centered, wrap if too long)
     if artwork and artwork.get('name', ''):
@@ -175,70 +157,34 @@ def main():
     title_y = art_y + ARTWORK_SIZE + ROW_SPACING
     # Replace Unicode colon with sans-serif colon for rendering
     title = title.replace('：', ':')
-    # Wrap title if too wide
-    def wrap_text(text, font, max_width):
-        words = text.split()
-        lines = []
-        current = ''
-        for word in words:
-            test = current + (' ' if current else '') + word
-            w, _ = get_text_size(draw, test, font)
-            if w <= max_width:
-                current = test
-            else:
-                if current:
-                    lines.append(current)
-                current = word
-        if current:
-            lines.append(current)
-        return lines
-    title_lines = wrap_text(title, serif_font_96, WIDTH - 2 * PADDING)
-    # Draw each line and track total height and last baseline
-    last_title_baseline = title_y
-    for i, line in enumerate(title_lines):
-        line_w, line_h = get_text_size(draw, line, serif_font_96)
-        line_x = (WIDTH - line_w) // 2
-        line_y = title_y + i * int(line_h * TITLE_LINE_HEIGHT)
-        draw.text((line_x, line_y), line, font=serif_font_96, fill=TEXT_COLOR)
-        last_title_baseline = line_y + serif_font_96.getmetrics()[0]  # baseline = y + ascent
+    fonts_for_title = {
+        'serif_96': serif_font_96,
+    }
+    title_layout = layout_engine.create_title_layout(
+        title, fonts_for_title, draw, WIDTH, PADDING, TITLE_FONT_SIZE, TITLE_LINE_HEIGHT, title_y
+    )
+    for line_info in title_layout['lines']:
+        draw.text(line_info['pos'], line_info['text'], font=line_info['font'], fill=TEXT_COLOR)
+    last_title_baseline = title_layout['last_baseline']
+
     # Row 4: Two columns (week name, readings)
     week = info.get('week', '').upper()
-    # Calculate cap-height for sans-serif week font
-    sans_ascent_col, _ = sans_font_36_uc.getmetrics()
-    # Place cap-height of week at 96px below last title baseline
-    col_y = last_title_baseline + 96 - sans_ascent_col
-    week_w, week_h = get_text_size(draw, week, sans_font_36_uc)
     readings = info.get('readings', [])
     if not readings:
         readings = ['No assigned readings for this day.']
-    readings_w = 0
-    for r in readings:
-        w, _ = get_text_size(draw, r, serif_font_36)
-        readings_w = max(readings_w, w)
-    # Line height for fourth row
-    LINE_HEIGHT = 48
-    col_gap = 28 * 2 + 1  # 28px padding each side + 1px line
-    total_cols_w = week_w + col_gap + readings_w
-    col1_x = (WIDTH - total_cols_w) // 2
-    col2_x = col1_x + week_w + col_gap
-    # Baseline alignment for columns
-    sans_ascent_col, _ = sans_font_36_uc.getmetrics()
-    serif_ascent_col, _ = serif_font_36.getmetrics()
-    col_baseline_y = col_y + max(sans_ascent_col, serif_ascent_col)
-    # Draw left column (week)
-    draw.text((col1_x, col_baseline_y - sans_ascent_col), week, font=sans_font_36_uc, fill=TEXT_COLOR)
-    # Draw right column (readings, all in serif)
-    reading_y = col_baseline_y - serif_ascent_col
-    for r in readings:
-        draw.text((col2_x, reading_y), r, font=serif_font_36, fill=TEXT_COLOR)
-        reading_y += LINE_HEIGHT
-    # Draw vertical line (1px wide, 6px above cap-height, 24px below baseline)
-    line_x = col1_x + week_w + 28
-    cap_height = serif_ascent_col
-    line_top = col_baseline_y - serif_ascent_col - 6
-    last_baseline = reading_y - LINE_HEIGHT + serif_ascent_col
-    line_bottom = last_baseline + 24
-    draw.rectangle([line_x, line_top, line_x + 1, line_bottom], fill=LINE_COLOR)
+    col_y = last_title_baseline + 96 - sans_font_36_uc.getmetrics()[0]
+    fonts_for_readings = {
+        'serif': serif_font_36,
+        'sans_uc': sans_font_36_uc,
+    }
+    readings_layout = layout_engine.create_readings_layout(
+        week, readings, fonts_for_readings, draw, WIDTH, PADDING, col_y, 48
+    )
+    draw.text(readings_layout['week']['pos'], readings_layout['week']['text'], font=readings_layout['week']['font'], fill=TEXT_COLOR)
+    for r in readings_layout['readings']:
+        draw.text(r['pos'], r['text'], font=r['font'], fill=TEXT_COLOR)
+    line_rect = readings_layout['vertical_line']['rect']
+    draw.rectangle(line_rect, fill=LINE_COLOR)
 
     # Save image
     build_dir = Path(__file__).parent / 'build'

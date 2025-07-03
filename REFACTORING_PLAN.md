@@ -330,7 +330,7 @@ Direct service orchestration - No adapter methods needed
 
 ### Phase 3: Image Generation Pipeline (Week 3)
 
-#### 3.1 Create Layout Engine
+#### 3.1 Create Layout Engine ✅ **COMPLETED**
 **File**: `liturgical_calendar/image_generation/layout_engine.py`
 ```python
 class LayoutEngine:
@@ -341,94 +341,21 @@ class LayoutEngine:
     def wrap_text(self, text, font, max_width)
 ```
 
+**Progress (2024-06-09):**
+- Header, artwork, title, and readings layout logic fully extracted from `create_liturgical_image.py` into `LayoutEngine`.
+- All layout is now modular and testable.
+- Image generation script updated to use layout engine for all layout.
+- All image generation tests pass, output is visually unchanged.
+
 **Migration Steps**:
-1. Extract layout logic from `create_liturgical_image.py`
-2. Create unit tests for each layout component
-3. Add text wrapping and positioning logic
+1. Extract layout logic from `create_liturgical_image.py` ✅
+2. Create unit tests for each layout component ⏳ (to be expanded)
+3. Add text wrapping and positioning logic ✅
+
+**Next Steps:**
+- 3.2: Implement Font Manager (centralize font loading/metrics)
+- 3.3: Implement Image Builder (encapsulate drawing/compositing)
+- 3.4: Implement Generation Pipeline (orchestrate full process)
 
 #### 3.2 Create Font Manager
-**File**: `liturgical_calendar/image_generation/font_manager.py`
-```python
-class FontManager:
-    def __init__(self, fonts_dir)
-    def get_font(self, font_name, size)
-    def get_text_metrics(self, text, font)
-    def get_text_size(self, text, font)
-```
-
-#### 3.3 Create Image Builder
-**File**: `liturgical_calendar/image_generation/image_builder.py`
-```python
-class LiturgicalImageBuilder:
-    def __init__(self, config)
-    def build_image(self, date_str, liturgical_info, artwork_info)
-    def create_base_image(self, width, height, bg_color)
-    def paste_artwork(self, image, artwork_path, position, size)
-    def draw_text(self, image, text, position, font, color)
-```
-
-#### 3.4 Create Generation Pipeline
-**File**: `liturgical_calendar/image_generation/pipeline.py`
-```python
-class ImageGenerationPipeline:
-    def __init__(self, config)
-    def generate_image(self, date_str)
-    
-    def _prepare_data(self, date_str)
-    def _create_layout(self, data)
-    def _render_image(self, layout)
-    def _save_image(self, image, output_path)
-```
-
-### Phase 4: Caching and Image Processing (Week 4)
-
-#### 4.1 Improve Artwork Caching
-**File**: `liturgical_calendar/caching/artwork_cache.py`
-```python
-class ArtworkCache:
-    def __init__(self, cache_dir)
-    def get_cached_path(self, source_url)
-    def download_and_cache(self, source_url)
-    def is_cached(self, source_url)
-    def get_cache_info(self, source_url)
-    def cleanup_old_cache(self, max_age_days)
-```
-
-**Migration Steps**:
-1. Extract caching logic from `cache_artwork_images.py`
-2. Add cache validation and cleanup
-3. Improve error handling for failed downloads
-
-#### 4.2 Create Image Processor
-**File**: `liturgical_calendar/caching/image_processor.py`
-```python
-class ImageProcessor:
-    def download_image(self, url, cache_path)
-    def upsample_image(self, original_path, target_path, target_size)
-    def validate_image(self, image_path)
-    def optimize_for_web(self, image_path)
-    def create_thumbnail(self, image_path, size)
-```
-
-### Phase 5: Configuration and Error Handling (Week 5)
-
-#### 5.1 Centralize Configuration
-**File**: `liturgical_calendar/config/settings.py`
-```python
-class Settings:
-    def __init__(self, config_file=None):
-        self.load_config(config_file)
-    
-    # Image generation settings
-    IMAGE_WIDTH = 1404
-    IMAGE_HEIGHT = 1872
-    FONTS_DIR = "fonts"
-    
-    # Caching settings
-    CACHE_DIR = "cache"
-    MAX_CACHE_SIZE = "1GB"
-    
-    # API settings
-    REQUEST_TIMEOUT = 30
-    MAX_RETRIES = 3
-```
+**File**: `
