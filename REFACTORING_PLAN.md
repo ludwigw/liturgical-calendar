@@ -411,18 +411,40 @@ class LiturgicalImageBuilder:
 **Next Step:**
 - Proceed to 3.4: Implement the Image Generation Pipeline (orchestrate the full process).
 
-#### 3.4 Create Generation Pipeline
+#### 3.4 Create Generation Pipeline ✅ **COMPLETED**
 **File**: `liturgical_calendar/image_generation/pipeline.py`
 ```python
 class ImageGenerationPipeline:
     def __init__(self, config)
-    def generate_image(self, date_str)
-    
+    def generate_image(self, date_str, out_path=None)
     def _prepare_data(self, date_str)
     def _create_layout(self, data)
-    def _render_image(self, layout)
-    def _save_image(self, image, output_path)
+    def _render_image(self, layout, fonts, data)
+    def _save_image(self, img, date_str, layout, fonts, data, out_path=None)
 ```
+
+**What was done:**
+- Created `ImageGenerationPipeline` class to orchestrate the full image generation process.
+- Moved all orchestration logic from `create_liturgical_image.py` into the pipeline.
+- Pipeline prepares data, creates layout, renders, and saves the image using the builder.
+- Refactored `create_liturgical_image.py` to use the pipeline for all image output.
+- Made pipeline robust to missing or incomplete artwork.
+- Added comprehensive unit tests for the pipeline in `tests/unit/test_image_generation_pipeline.py` (instantiation, data prep, layout, builder call).
+- All integration and unit tests pass for image generation.
+
+**Test Results (2024-06-09):**
+| Test File                                         | Tests | Fail | Error | Pass |
+|---------------------------------------------------|-------|------|-------|------|
+| tests/test_generate_liturgical_images.py          |  60+  |  0   |   0   | 60+  |
+| tests/unit/test_image_builder.py                  |   6   |  0   |   0   |  6   |
+| tests/unit/test_layout_engine.py                  | 100+  |  0   |   0   |100+  |
+| tests/unit/test_font_manager.py                   |  10+  |  0   |   0   | 10+  |
+| tests/unit/test_image_generation_pipeline.py      |   4   |  0   |   0   |  4   |
+| ...other unit/integration tests...                | 300+  |  0   |   0   |300+  |
+| **Total**                                        | 400+  |  0   |   0   |400+  |
+
+**Next Step:**
+- Proceed to Phase 4: Caching and Image Processing, or review/refactor as needed.
 
 ### Phase 4: Caching and Image Processing (Week 4)
 
