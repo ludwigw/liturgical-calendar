@@ -65,14 +65,8 @@ class ImageGenerationPipeline:
         import datetime
         date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
         friendly_date = date.strftime('%-d %B, %Y')
-        
-        # Use the pre-prepared feast info
         info = feast_info
-        
-        # Use the pre-prepared artwork info
-        artwork = artwork_info
-        
-        # Find next artwork if needed (fallback logic)
+        artwork = artwork_info if artwork_info and artwork_info.get('cached_file') else None
         next_artwork = None
         if not (artwork and artwork.get('cached_file')):
             from datetime import timedelta
@@ -84,7 +78,6 @@ class ImageGenerationPipeline:
                     next_artwork = next_artwork_candidate
                     next_artwork['date'] = search_date.strftime('%-d %B, %Y')
                     break
-        
         return {
             'date': date,
             'date_str': date_str,
@@ -102,8 +95,8 @@ class ImageGenerationPipeline:
         date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
         friendly_date = date.strftime('%-d %B, %Y')
         info = self.feast_service.get_liturgical_info(date_str)
-        artwork = self.artwork_manager.get_artwork_for_date(date_str, info)
-        # Find next artwork if needed
+        artwork_candidate = self.artwork_manager.get_artwork_for_date(date_str, info)
+        artwork = artwork_candidate if artwork_candidate and artwork_candidate.get('cached_file') else None
         next_artwork = None
         if not (artwork and artwork.get('cached_file')):
             from datetime import timedelta

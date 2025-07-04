@@ -44,15 +44,17 @@ class TestImageGenerationPipeline(unittest.TestCase):
 
     def test_prepare_data_with_and_without_artwork(self):
         self.mock_feast.get_liturgical_info.return_value = {'season': 'Test', 'week': 'Test', 'readings': ['R1']}
-        # Case 1: artwork present
-        self.mock_image.get_artwork_for_date.return_value = {'cached_file': 'foo.png', 'name': 'Art'}
-        data = self.pipeline._prepare_data('2022-01-01')
-        self.assertEqual(data['artwork']['cached_file'], 'foo.png')
-        # Case 2: artwork missing, next_artwork found
-        self.mock_image.get_artwork_for_date.side_effect = [None, {'cached_file': 'bar.png', 'name': 'NextArt'}]
-        data2 = self.pipeline._prepare_data('2022-01-02')
-        self.assertIsNone(data2['artwork'])
-        self.assertEqual(data2['next_artwork']['cached_file'], 'bar.png')
+        # Patch artwork_manager.get_artwork_for_date for this test
+        with patch.object(self.pipeline.artwork_manager, 'get_artwork_for_date') as mock_get_artwork:
+            # Case 1: artwork present
+            mock_get_artwork.return_value = {'cached_file': 'foo.png', 'name': 'Art'}
+            data = self.pipeline._prepare_data('2022-01-01')
+            self.assertEqual(data['artwork']['cached_file'], 'foo.png')
+            # Case 2: artwork missing, next_artwork found
+            mock_get_artwork.side_effect = [None, {'cached_file': 'bar.png', 'name': 'NextArt'}]
+            data2 = self.pipeline._prepare_data('2022-01-02')
+            self.assertIsNone(data2['artwork'])
+            self.assertEqual(data2['next_artwork']['cached_file'], 'bar.png')
 
     @patch('liturgical_calendar.image_generation.pipeline.LiturgicalImageBuilder')
     def test_create_layout_structure(self, MockBuilder):

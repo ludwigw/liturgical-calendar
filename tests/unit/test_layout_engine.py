@@ -68,6 +68,12 @@ class TestLayoutEngine(unittest.TestCase):
     def test_create_artwork_layout_with_next(self):
         artwork = {'name': 'Jesus', 'cached_file': 'foo.png'}
         next_artwork = {'name': 'Mary', 'cached_file': 'bar.png', 'date': '2 April 2024'}
+        class DummyFontManager:
+            def get_text_size(self, text, font):
+                return (100, 20)
+            def get_text_metrics(self, font):
+                return (10, 2)
+        dummy_font_manager = DummyFontManager()
         layout = self.engine.create_artwork_layout(
             artwork=artwork,
             next_artwork=next_artwork,
@@ -75,7 +81,8 @@ class TestLayoutEngine(unittest.TestCase):
             art_size=200,
             y=50,
             fonts=self.fonts,
-            draw=self.dummy_draw
+            draw=self.dummy_draw,
+            font_manager=dummy_font_manager
         )
         self.assertTrue(layout['show_next'])
         self.assertIn('next', layout)

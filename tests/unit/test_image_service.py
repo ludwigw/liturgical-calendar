@@ -26,11 +26,28 @@ class TestImageService(unittest.TestCase):
         self.mock_season_calculator = Mock(spec=SeasonCalculator)
         self.mock_feast_service = Mock(spec=FeastService)
         
+        # Create a mock config object
+        self.mock_config = Mock()
+        self.mock_config.IMAGE_WIDTH = 1404
+        self.mock_config.IMAGE_HEIGHT = 1872
+        self.mock_config.FONTS_DIR = "fonts"
+        self.mock_config.PADDING = 48
+        self.mock_config.ARTWORK_SIZE = 1080
+        self.mock_config.ROW_SPACING = 48
+        self.mock_config.HEADER_FONT_SIZE = 36
+        self.mock_config.TITLE_FONT_SIZE = 96
+        self.mock_config.TITLE_LINE_HEIGHT = 1.2
+        self.mock_config.COLUMN_FONT_SIZE = 36
+        self.mock_config.BG_COLOR = (255, 255, 255)
+        self.mock_config.TEXT_COLOR = (74, 74, 74)
+        self.mock_config.LINE_COLOR = (151, 151, 151)
+        
         self.image_service = ImageService(
             artwork_manager=self.mock_artwork_manager,
             readings_manager=self.mock_readings_manager,
             season_calculator=self.mock_season_calculator,
-            feast_service=self.mock_feast_service
+            feast_service=self.mock_feast_service,
+            config=self.mock_config
         )
     
     def test_init_with_dependencies(self):
@@ -53,7 +70,9 @@ class TestImageService(unittest.TestCase):
             with patch('liturgical_calendar.services.image_service.ReadingsManager') as mock_readings:
                 with patch('liturgical_calendar.services.image_service.SeasonCalculator') as mock_calc:
                     with patch('liturgical_calendar.services.image_service.FeastService') as mock_feast:
-                        service = ImageService()
+                        # Create a mock config for the service
+                        mock_config = Mock()
+                        service = ImageService(config=mock_config)
                         
                         mock_artwork.assert_called_once()
                         mock_readings.assert_called_once()
@@ -83,7 +102,13 @@ class TestImageService(unittest.TestCase):
         }
         self.mock_artwork_manager.get_artwork_for_date.return_value = artwork_info
         
-        result = self.image_service.generate_liturgical_image('2023-04-16')
+        # Mock the pipeline
+        with patch('liturgical_calendar.image_generation.pipeline.ImageGenerationPipeline') as mock_pipeline_class:
+            mock_pipeline = Mock()
+            mock_pipeline.generate_image.return_value = '/tmp/test_output.png'
+            mock_pipeline_class.return_value = mock_pipeline
+            
+            result = self.image_service.generate_liturgical_image('2023-04-16')
         
         # Verify the result
         self.assertTrue(result['success'])
@@ -91,6 +116,7 @@ class TestImageService(unittest.TestCase):
         self.assertEqual(result['feast_info'], feast_info)
         self.assertEqual(result['artwork_info'], artwork_info)
         self.assertTrue(result['image_generated'])
+        self.assertEqual(result['file_path'], '/tmp/test_output.png')
         
         # Verify service calls
         self.mock_feast_service.get_complete_feast_info.assert_called_once_with('2023-04-16', False)
@@ -124,14 +150,18 @@ class TestImageService(unittest.TestCase):
         }
         self.mock_artwork_manager.get_artwork_for_date.return_value = artwork_info
         
-        with patch('os.makedirs') as mock_makedirs:
+        # Mock the pipeline
+        with patch('liturgical_calendar.image_generation.pipeline.ImageGenerationPipeline') as mock_pipeline_class:
+            mock_pipeline = Mock()
+            mock_pipeline.generate_image.return_value = '/tmp/test.png'
+            mock_pipeline_class.return_value = mock_pipeline
+            
             result = self.image_service.generate_liturgical_image(
                 '2023-04-16', 
                 output_path='/tmp/test.png'
             )
         
         self.assertEqual(result['file_path'], '/tmp/test.png')
-        mock_makedirs.assert_called_once_with('/tmp', exist_ok=True)
         # Verify artwork manager was called with correct parameters
         self.mock_artwork_manager.get_artwork_for_date.assert_called_once_with('2023-04-16', feast_info)
     
@@ -156,8 +186,12 @@ class TestImageService(unittest.TestCase):
         
         date_list = ['2023-04-16', '2023-04-17']
         
-        with patch('os.path.join') as mock_join:
-            mock_join.return_value = '/tmp/liturgical_2023-04-16.png'
+        # Mock the pipeline
+        with patch('liturgical_calendar.image_generation.pipeline.ImageGenerationPipeline') as mock_pipeline_class:
+            mock_pipeline = Mock()
+            mock_pipeline.generate_image.return_value = '/tmp/liturgical_2023-04-16.png'
+            mock_pipeline_class.return_value = mock_pipeline
+            
             results = self.image_service.generate_multiple_images(date_list, '/tmp')
         
         self.assertEqual(len(results), 2)
@@ -189,7 +223,14 @@ class TestImageService(unittest.TestCase):
         self.mock_artwork_manager.get_artwork_for_date.return_value = artwork_info
         
         date_list = ['2023-04-16', '2023-04-17']
-        results = self.image_service.generate_multiple_images(date_list)
+        
+        # Mock the pipeline
+        with patch('liturgical_calendar.image_generation.pipeline.ImageGenerationPipeline') as mock_pipeline_class:
+            mock_pipeline = Mock()
+            mock_pipeline.generate_image.return_value = '/tmp/liturgical_2023-04-16.png'
+            mock_pipeline_class.return_value = mock_pipeline
+            
+            results = self.image_service.generate_multiple_images(date_list)
         
         self.assertEqual(len(results), 2)
         self.assertTrue(results[0]['success'])
@@ -254,19 +295,22 @@ class TestImageService(unittest.TestCase):
         result = self.image_service._prepare_image_data(feast_info, artwork_info)
         
         expected_data = {
-            'feast_name': 'Easter Sunday',
+            'name': 'Easter Sunday',
             'season': 'Easter',
             'week': 'Easter 2',
             'weekno': 2,
             'colour': 'white',
             'colourcode': '#FFFFFF',
             'readings': {'gospel': 'John 20:19-31'},
-            'artwork_url': 'https://example.com/artwork.jpg',
-            'artwork_title': 'Resurrection',
-            'artwork_artist': 'Unknown',
             'date': date(2023, 4, 16),
             'weekday_reading': 'Easter 2',
-            'feast_type': 'Feast'
+            'feast_type': 'Feast',
+            'artwork_info': artwork_info,
+            'url': 'https://example.com/artwork.jpg',
+            'title': 'Resurrection',
+            'artist': 'Unknown',
+            'cached_file': '',
+            'artwork_name': ''  # Artwork name
         }
         
         self.assertEqual(result, expected_data)
@@ -290,12 +334,12 @@ class TestImageService(unittest.TestCase):
         result = self.image_service._prepare_image_data(feast_info, artwork_info)
         
         self.assertTrue(result['martyr'])
-        self.assertEqual(result['feast_name'], 'St. Stephen')
+        self.assertEqual(result['name'], 'St. Stephen')
     
     def test_validate_image_data_valid(self):
         """Test validation of valid image data."""
         valid_data = {
-            'feast_name': 'Easter Sunday',
+            'name': 'Easter Sunday',
             'season': 'Easter',
             'colour': 'white'
         }
@@ -307,7 +351,7 @@ class TestImageService(unittest.TestCase):
         invalid_data = {
             'season': 'Easter',
             'colour': 'white'
-            # Missing 'feast_name' field
+            # Missing 'name' field
         }
         
         self.assertFalse(self.image_service.validate_image_data(invalid_data))

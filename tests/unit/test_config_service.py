@@ -9,6 +9,7 @@ import unittest
 import os
 import json
 import tempfile
+import shutil
 from unittest.mock import Mock, patch, mock_open
 from liturgical_calendar.services.config_service import ConfigService
 
@@ -27,7 +28,7 @@ class TestConfigService(unittest.TestCase):
         if os.path.exists(self.config_file):
             os.remove(self.config_file)
         if os.path.exists(self.temp_dir):
-            os.rmdir(self.temp_dir)
+            shutil.rmtree(self.temp_dir)
     
     def test_init_with_config_file(self):
         """Test initialization with specific config file."""
@@ -314,10 +315,8 @@ class TestConfigService(unittest.TestCase):
         """Test getting default configuration file path."""
         with patch('os.path.expanduser') as mock_expanduser:
             with patch('os.makedirs') as mock_makedirs:
-                mock_expanduser.return_value = '/home/testuser'
-                
+                mock_expanduser.return_value = '/home/testuser/.liturgical_calendar'
                 path = self.config_service._get_default_config_path()
-                
                 expected_path = '/home/testuser/.liturgical_calendar/config.json'
                 self.assertEqual(path, expected_path)
                 mock_makedirs.assert_called_once_with('/home/testuser/.liturgical_calendar', exist_ok=True)

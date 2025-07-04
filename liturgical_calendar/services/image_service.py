@@ -183,7 +183,7 @@ class ImageService:
             'title': artwork_info.get('title', ''),
             'artist': artwork_info.get('artist', ''),
             'cached_file': artwork_info.get('cached_file', ''),
-            'name': artwork_info.get('name', '')  # Artwork name
+            'artwork_name': artwork_info.get('name', '')  # Artwork name (renamed to avoid conflict)
         }
         
         # Add any additional metadata
@@ -252,7 +252,7 @@ class ImageService:
         Returns:
             True if valid, False otherwise
         """
-        required_fields = ['feast_name', 'season', 'colour']
+        required_fields = ['name', 'season', 'colour']
         return all(field in image_data for field in required_fields)
     
     def get_image_generation_stats(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:

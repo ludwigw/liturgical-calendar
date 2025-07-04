@@ -179,19 +179,6 @@ FeastService → Return complete feast information
 - Compatibility methods exist for backward compatibility
 - Some orchestration logic is duplicated
 
-### Target State
-- ImageService is the main entry point for image generation
-- ImageGenerationPipeline focuses purely on rendering
-- Compatibility methods are deprecated and removed
-- Clear separation between business and technical logic
-
-### Migration Steps
-1. Update ImageService.generate_liturgical_image() to call ImageGenerationPipeline
-2. Refactor ImageGenerationPipeline to receive prepared data
-3. Update scripts to use ImageService as main entry point
-4. Deprecate and remove compatibility methods
-5. Remove duplicate orchestration logic
-
 ## Benefits
 
 ### Maintainability
