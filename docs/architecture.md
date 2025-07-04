@@ -118,6 +118,19 @@ The liturgical calendar project follows a layered architecture with clear separa
 - **Purpose**: Pure artwork data storage
 - **Content**: Artwork dictionaries, source URLs, metadata
 
+### Utility Layer
+
+#### ImageProcessor (Planned)
+- **Purpose**: Low-level image file operations (download, validate, upsample, optimize)
+- **Key Methods**: `download_image()`, `validate_image()`, `upsample_image()`, `optimize_for_web()`, `archive_original()`
+- **Used by**: `ArtworkCache`
+- **Responsibilities**:
+  - Download images from URLs with correct headers
+  - Validate image files (format, integrity)
+  - Upsample images to required size, archive originals
+  - Optimize images for web use (compression, format)
+  - Archive original images before upsampling
+
 ## Architecture Principles
 
 ### 1. Separation of Concerns

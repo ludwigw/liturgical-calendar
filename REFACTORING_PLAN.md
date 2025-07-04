@@ -483,16 +483,38 @@ class ImageGenerationPipeline:
 **Test Results:**
 - All unit, integration, and image generation tests pass (see summary tables in latest commit).
 
-#### 4.3 Create Image Processor
+#### 4.3 Create Image Processor (Planned)
+
+**Goal**: Extract all low-level image file operations from `ArtworkCache` and scripts into a dedicated `ImageProcessor` class.
+
 **File**: `liturgical_calendar/caching/image_processor.py`
 ```python
 class ImageProcessor:
-    def download_image(self, url, cache_path)
-    def upsample_image(self, original_path, target_path, target_size)
+    def download_image(self, url, cache_path, headers=None, referer=None)
     def validate_image(self, image_path)
+    def upsample_image(self, original_path, target_path, target_size=(1080, 1080))
     def optimize_for_web(self, image_path)
-    def create_thumbnail(self, image_path, size)
+    def archive_original(self, image_path, archive_dir)
 ```
+
+**Responsibilities:**
+- Download images from URLs with correct headers and referer
+- Validate image files (format, integrity)
+- Upsample images to required size, archive originals
+- Optimize images for web use (compression, format)
+- Archive original images before upsampling
+
+**Migration Steps:**
+1. Implement `ImageProcessor` with all required methods.
+2. Refactor `ArtworkCache` to use `ImageProcessor` for all file operations.
+3. Update `cache_artwork_images.py` and any other scripts to use the new cache+processor stack.
+4. Add/expand unit tests for `ImageProcessor` and update tests for `ArtworkCache`.
+5. Document the new utility layer/component in `docs/architecture.md`.
+
+**Benefits:**
+- No duplication of image file logic.
+- Easier to add new processing features (e.g., webp, batch ops).
+- Clear separation of cache management and file processing.
 
 ### Phase 5: Configuration and Error Handling (Week 5)
 
