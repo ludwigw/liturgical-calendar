@@ -1,5 +1,11 @@
 # Liturgical Calendar Project - Comprehensive Refactoring Plan
 
+## Final Status (2024-06-09)
+- All refactoring phases through 4.2 are complete.
+- All unit, integration, and image generation tests pass.
+- Architecture is modular, maintainable, and fully tested.
+- TODO.md removed as all tracked issues are resolved.
+
 ## Overview
 This plan addresses maintainability, readability, and testability issues by breaking down monolithic functions, separating concerns, and creating a modular architecture for both liturgical calculations and image generation.
 
@@ -463,55 +469,19 @@ class ImageGenerationPipeline:
 - All caching-related features from the old script are preserved or improved.
 - **Cleanup:** `cleanup_old_cache()` is available and tested, but not run automatically; can be called manually or added to workflows as needed.
 
-#### 4.2 Image Generation Architecture
+#### 4.2 Image Generation Architecture ✅ **COMPLETED**
 
-**Current State Analysis:**
-- **ImageService.generate_liturgical_image()**: High-level orchestration method (not currently used in production)
-- **ImageGenerationPipeline.generate_image()**: Technical implementation (currently used by scripts)
-- **Problem**: Pipeline bypasses service layer, calling compatibility methods directly
+**What was done:**
+- Refactored `ImageService.generate_liturgical_image()` to be the main orchestration entry point for image generation.
+- Updated `ImageService` to call `ImageGenerationPipeline.generate_image()` for all technical rendering.
+- Updated all scripts (including `create_liturgical_image.py`) to use `ImageService` as the main entry point.
+- Deprecated compatibility methods (e.g., `get_artwork_for_date`, `get_liturgical_info`) and updated documentation to recommend direct service usage.
+- Removed duplicate orchestration logic from `ImageGenerationPipeline`.
+- Ensured all business logic (feast info, artwork selection, validation) is handled in the service layer, and all technical rendering is handled in the pipeline.
+- All integration, unit, and image generation tests pass, confirming the architecture is robust and maintainable.
 
-**Intended Architecture:**
-
-**ImageService (Service Layer) - "What to Generate"**
-- **Role**: High-level business logic orchestration
-- **Responsibilities**:
-  - Business logic (feast info, artwork selection)
-  - Service interface (clean, high-level API)
-  - Dependency management (coordinate between services)
-  - Error handling and validation
-  - Configuration management
-- **Key Method**: `generate_liturgical_image(date_str, output_path=None, transferred=False)`
-- **Purpose**: Handle the "what" and "why" of image generation
-
-**ImageGenerationPipeline (Pipeline Layer) - "How to Generate It"**
-- **Role**: Technical implementation and image rendering
-- **Responsibilities**:
-  - Technical implementation (actual image rendering)
-  - Layout management (coordinate layout engine, fonts, builder)
-  - File I/O (paths, directories, image saving)
-  - Rendering pipeline (visual composition)
-  - Rendering-specific configuration
-- **Key Method**: `generate_image(date_str, out_path=None, feast_info=None, artwork_info=None)`
-- **Purpose**: Handle the "how" of image generation
-
-**Correct Relationship:**
-```
-Script → ImageService.generate_liturgical_image() → ImageGenerationPipeline.generate_image()
-```
-
-**Migration Plan:**
-1. **Update ImageService.generate_liturgical_image()** to call ImageGenerationPipeline
-2. **Refactor ImageGenerationPipeline** to receive prepared data from ImageService
-3. **Update scripts** to use ImageService as the main entry point
-4. **Deprecate compatibility methods** (get_artwork_for_date, get_liturgical_info)
-5. **Remove duplicate orchestration logic** from ImageGenerationPipeline
-
-**Benefits:**
-- Single responsibility principle
-- Better testability (business vs technical logic)
-- Improved maintainability
-- Cleaner architecture
-- Future flexibility
+**Test Results:**
+- All unit, integration, and image generation tests pass (see summary tables in latest commit).
 
 #### 4.3 Create Image Processor
 **File**: `liturgical_calendar/caching/image_processor.py`
