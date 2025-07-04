@@ -497,26 +497,20 @@ class ImageGenerationPipeline:
 **Next Step:**
 - Proceed to Phase 5: Configuration and Error Handling (centralize config, improve error handling, add logging).
 
-### Phase 5: Configuration and Error Handling (Week 5)
+### Phase 5: Configuration and Error Handling
 
-#### 5.1 Centralize Configuration
-**Goal:** Move all hardcoded values (paths, timeouts, image sizes, etc.) into a single, well-documented configuration module/class.
+#### 5.1 Centralize and Standardize Configuration ✅ **COMPLETED**
+- Created a centralized `Settings` class in `liturgical_calendar/config/settings.py` for all configuration values (image, cache, network, etc.).
+- All hardcoded config values throughout the codebase replaced with references to `Settings`.
+- Added support for dynamic config loading: defaults in code, optional YAML config file, and environment variable overrides (with type casting).
+- Added a well-documented `config.yaml` template matching all authoritative settings and types.
+- All main scripts (`create_liturgical_image.py`, `cache_artwork_images.py`, `liturgical_calendar/liturgical.py`) now call `Settings.load_from_file()` at startup, supporting an optional config file path argument.
+- Documentation (`README.md`, `docs/architecture.md`) updated to reflect config loading and usage.
+- `Settings.load_from_file()` now gracefully handles None/empty paths (no runtime errors).
+- All tests pass after migration and integration.
 
-**Tasks:**
-- Create `liturgical_calendar/config/settings.py` with a `Settings` class or module-level constants.
-- Move all configuration values from scripts, services, and core modules into this file:
-  - Image generation settings (width, height, fonts, padding, colors)
-  - Caching settings (cache directory, max cache size, cleanup policy)
-  - API/network settings (timeouts, retries, user-agent)
-  - Feature toggles (e.g., enable/disable upsampling, logging level)
-- Allow loading from a config file (YAML, JSON, or .env) for overrides.
-- Update all code to use the centralized settings.
-- Add documentation/comments for each config option.
-
-**Deliverables:**
-- `liturgical_calendar/config/settings.py`
-- Updated imports/usages throughout the codebase
-- Section in `docs/architecture.md` describing configuration management
+**Test Results:**
+- ✅ All 34 integration and unit tests pass (see commit for summary table)
 
 #### 5.2 Improve Error Handling
 **Goal:** Replace generic exceptions and print statements with structured, meaningful error handling using custom exception classes.
