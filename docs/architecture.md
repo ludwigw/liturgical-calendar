@@ -308,3 +308,17 @@ This will print extra log output to the console and help diagnose problems.
 ### Configuration Loading
 
 All configuration is centralized in the `
+
+## Command-Line Interface (CLI)
+
+A unified CLI (`python -m liturgical_calendar.cli` or `litcal` if installed) provides access to all major project functions:
+
+- `generate [DATE] [--output PATH] [--config CONFIG] [--verbose]`: Generate a liturgical image for a date.
+- `info [DATE] [--config CONFIG] [--verbose]`: Print liturgical info for a date.
+- `cache-artwork [--config CONFIG] [--verbose]`: Download/cache all artwork images.
+- `validate-config [--config CONFIG] [--verbose]`: Validate the config file.
+- `version`: Print CLI version.
+
+All subcommands support `--config` and `--verbose` global options. See the README and CLI_DESIGN.md for usage examples and advanced options.
+
+**Note:** The CLI replaces legacy scripts (e.g., `create_liturgical_image.py`). Use the CLI for all workflows going forward.

@@ -23,6 +23,52 @@ Or get liturgical info for today at the command line:
 liturgical_calendar
 ```
 
+## Command-Line Interface (CLI)
+
+The project now provides a unified CLI for all major functions. You can run it as:
+
+```sh
+python -m liturgical_calendar.cli [subcommand] [options]
+```
+
+Or, if installed as a script:
+
+```sh
+litcal [subcommand] [options]
+```
+
+### Subcommands
+
+- `generate [DATE] [--output PATH] [--config CONFIG] [--verbose]`  
+  Generate a liturgical image for a given date (default: today).
+- `info [DATE] [--config CONFIG] [--verbose]`  
+  Print liturgical info (season, feast, readings) for a date.
+- `cache-artwork [--config CONFIG] [--verbose]`  
+  Download/cache all artwork images.
+- `validate-config [--config CONFIG] [--verbose]`  
+  Validate the current config file and print any issues.
+- `version`  
+  Print version and exit.
+
+### Global Options
+- `--config CONFIG` (path to config file)
+- `--verbose` (set log level to DEBUG)
+- `--help` (show help for any command)
+
+### Example Usage
+
+```sh
+python -m liturgical_calendar.cli generate 2024-12-25 --output christmas.png --verbose
+python -m liturgical_calendar.cli info 2024-12-25
+python -m liturgical_calendar.cli cache-artwork
+python -m liturgical_calendar.cli validate-config
+python -m liturgical_calendar.cli version
+```
+
+See [CLI_DESIGN.md](CLI_DESIGN.md) for design details and advanced usage.
+
+**Note:** The CLI replaces the old script-based entry points (`create_liturgical_image.py`, etc.). Use the CLI for all new workflows.
+
 ## Documentation
 
 - [Architecture Overview](docs/architecture.md)
