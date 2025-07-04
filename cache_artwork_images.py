@@ -16,6 +16,8 @@ from PIL import Image
 from shutil import move
 from liturgical_calendar.funcs import get_cache_filename
 from liturgical_calendar.caching.artwork_cache import ArtworkCache
+from liturgical_calendar.config.settings import Settings
+import sys
 
 def get_instagram_image_url(instagram_url):
     """
@@ -90,25 +92,30 @@ def upsample_if_needed(original_path, upsampled_path):
     """
     Move the original image to cache/original and upsample to 1080x1080 if needed, saving the upsampled image in cache/.
     """
-    orig_dir = original_path.parent / "original"
+    orig_dir = original_path.parent / Settings.ORIGINALS_SUBDIR
     orig_dir.mkdir(exist_ok=True)
     orig_backup = orig_dir / original_path.name
     # Move the original image to cache/original
     move(str(original_path), str(orig_backup))
     with Image.open(orig_backup) as img:
         width, height = img.size
-        if width < 1080 or height < 1080:
-            print(f"    Upsampling {original_path.name} ({width}x{height}) to 1080x1080...")
-            upsampled = img.resize((1080, 1080), Image.LANCZOS)
+        if width < Settings.ARTWORK_SIZE or height < Settings.ARTWORK_SIZE:
+            print(f"    Upsampling {original_path.name} ({width}x{height}) to {Settings.ARTWORK_SIZE}x{Settings.ARTWORK_SIZE}...")
+            upsampled = img.resize((Settings.ARTWORK_SIZE, Settings.ARTWORK_SIZE), Image.LANCZOS)
             upsampled.save(upsampled_path, quality=95)
         else:
-            print(f"    Copying {original_path.name} ({width}x{height}) - already 1080 or larger.")
+            print(f"    Copying {original_path.name} ({width}x{height}) - already {Settings.ARTWORK_SIZE} or larger.")
             img.save(upsampled_path, quality=95)
 
 def main():
     """
     Main function to download and cache all artwork images.
     """
+    # Optionally load config file from argument or default location
+    config_path = None
+    if len(sys.argv) > 1 and not sys.argv[1].startswith('-'):
+        config_path = sys.argv[1]
+    Settings.load_from_file(config_path)  # Loads config from file/env if present
     print("Starting artwork image caching...")
     
     # Use ArtworkCache for all cache operations

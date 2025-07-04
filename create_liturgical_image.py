@@ -2,20 +2,21 @@ import sys
 import datetime
 from pathlib import Path
 from liturgical_calendar.services.image_service import ImageService
+from liturgical_calendar.config.settings import Settings
 
 # Image settings for config
-WIDTH, HEIGHT = 1404, 1872
-PADDING = 48
-ARTWORK_SIZE = 1080
-ROW_SPACING = 48
-HEADER_FONT_SIZE = 36
-TITLE_FONT_SIZE = 96
-TITLE_LINE_HEIGHT = 1.2
-COLUMN_FONT_SIZE = 36
-BG_COLOR = (255, 255, 255)
-TEXT_COLOR = (74, 74, 74)
-LINE_COLOR = (151, 151, 151)
-FONTS_DIR = Path(__file__).parent / 'fonts'
+WIDTH, HEIGHT = Settings.IMAGE_WIDTH, Settings.IMAGE_HEIGHT
+PADDING = Settings.PADDING
+ARTWORK_SIZE = Settings.ARTWORK_SIZE
+ROW_SPACING = Settings.ROW_SPACING
+HEADER_FONT_SIZE = Settings.HEADER_FONT_SIZE
+TITLE_FONT_SIZE = Settings.TITLE_FONT_SIZE
+TITLE_LINE_HEIGHT = Settings.TITLE_LINE_HEIGHT
+COLUMN_FONT_SIZE = Settings.COLUMN_FONT_SIZE
+BG_COLOR = Settings.BG_COLOR
+TEXT_COLOR = Settings.TEXT_COLOR
+LINE_COLOR = Settings.LINE_COLOR
+FONTS_DIR = Settings.FONTS_DIR
 
 class SimpleConfig:
     IMAGE_WIDTH = WIDTH
@@ -37,6 +38,11 @@ def get_date_str(date):
     return date.strftime('%Y-%m-%d')
 
 def main():
+    # Optionally load config file from argument or default location
+    config_path = None
+    if len(sys.argv) > 2:
+        config_path = sys.argv[2]
+    Settings.load_from_file(config_path)  # Loads config from file/env if present
     # Parse date argument
     if len(sys.argv) > 1:
         try:

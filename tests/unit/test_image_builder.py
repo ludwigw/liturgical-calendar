@@ -4,11 +4,12 @@ import os
 from pathlib import Path
 from PIL import Image, ImageFont
 from liturgical_calendar.image_generation.image_builder import LiturgicalImageBuilder
+from liturgical_calendar.config.settings import Settings
 
 class DummyConfig:
     IMAGE_WIDTH = 200
     IMAGE_HEIGHT = 100
-    BG_COLOR = (255, 255, 255)
+    BG_COLOR = Settings.BG_COLOR
 
 class TestLiturgicalImageBuilder(unittest.TestCase):
     def setUp(self):

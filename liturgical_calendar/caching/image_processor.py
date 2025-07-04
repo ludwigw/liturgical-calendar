@@ -5,6 +5,7 @@ import os
 
 from pathlib import Path
 from typing import Optional
+from liturgical_calendar.config.settings import Settings
 
 class ImageProcessor:
     """
@@ -20,7 +21,7 @@ class ImageProcessor:
         try:
             session = requests.Session()
             req_headers = headers or {
-                'User-Agent': 'Mozilla/5.0',
+                'User-Agent': Settings.USER_AGENT,
                 'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
                 'Accept-Language': 'en-US,en;q=0.9',
                 'Accept-Encoding': 'gzip, deflate, br',
@@ -35,7 +36,7 @@ class ImageProcessor:
             if referer:
                 req_headers['Referer'] = referer
             session.headers.update(req_headers)
-            response = session.get(url, timeout=30, stream=True)
+            response = session.get(url, timeout=Settings.REQUEST_TIMEOUT, stream=True)
             response.raise_for_status()
             with open(cache_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
@@ -64,11 +65,13 @@ class ImageProcessor:
             image_path.unlink(missing_ok=True)
             return False
 
-    def upsample_image(self, original_path: Path, target_path: Path, target_size=(1080, 1080)) -> bool:
+    def upsample_image(self, original_path: Path, target_path: Path, target_size=None) -> bool:
         """
         Upsample the image at original_path to target_size and save to target_path.
         Returns True if upsampling was performed, False otherwise.
         """
+        if target_size is None:
+            target_size = (Settings.ARTWORK_SIZE, Settings.ARTWORK_SIZE)
         try:
             with Image.open(original_path) as img:
                 width, height = img.size

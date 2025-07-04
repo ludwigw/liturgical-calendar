@@ -227,8 +227,6 @@ All configuration for the liturgical calendar project is centralized in `liturgi
 - Never hardcode values in scripts or services—always use the settings module.
 - Document each config option with comments for maintainability.
 
----
-
 ### Error Handling
 
 Error handling is structured and robust, using custom exception classes defined in `liturgical_calendar/exceptions.py`:
@@ -251,8 +249,6 @@ Error handling is structured and robust, using custom exception classes defined 
 - Catch exceptions at the highest level where recovery or user feedback is possible.
 - Avoid catching broad exceptions unless re-raising or logging.
 
----
-
 ### Logging
 
 Logging is handled via a project-wide logger defined in `liturgical_calendar/logging.py`:
@@ -271,13 +267,23 @@ Logging is handled via a project-wide logger defined in `liturgical_calendar/log
 - Do not log sensitive data.
 - Ensure logs are actionable and not overly verbose in production.
 
----
-
 ### CLI/Script Error Reporting
 
 - All CLI scripts (e.g., `create_liturgical_image.py`, `cache_artwork_images.py`) wrap their main entry points in try/except blocks.
 - On error, scripts print a user-friendly message and exit with a non-zero code.
 - Optionally, a `--verbose` or `--debug` flag can enable more detailed logging output for troubleshooting.
+
+### Configuration Loading
+
+All configuration is centralized in the `Settings` class (`liturgical_calendar/config/settings.py`).
+
+- **Defaults**: All config values have sensible defaults in code.
+- **YAML file**: Optionally, a `config.yaml` file can be provided in the project root or specified as an argument to main scripts (e.g., `create_liturgical_image.py`).
+- **Environment variables**: Any config value can be overridden by setting an environment variable with the same name.
+
+Main scripts (such as `create_liturgical_image.py`) now call `Settings.load_from_file()` at startup, ensuring config is loaded from file/env if present.
+
+See the README for usage examples and more details.
 
 ---
 

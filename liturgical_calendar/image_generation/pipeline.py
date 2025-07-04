@@ -4,27 +4,28 @@ from liturgical_calendar.core.artwork_manager import ArtworkManager
 from liturgical_calendar.image_generation.layout_engine import LayoutEngine
 from liturgical_calendar.image_generation.font_manager import FontManager
 from liturgical_calendar.image_generation.image_builder import LiturgicalImageBuilder
+from liturgical_calendar.config.settings import Settings
 
 class ImageGenerationPipeline:
     def __init__(self, config):
         self.config = config
         self.feast_service = FeastService()
         self.artwork_manager = ArtworkManager()
-        self.font_manager = FontManager(getattr(config, 'FONTS_DIR', Path(__file__).parent.parent.parent / 'fonts'))
+        self.font_manager = FontManager(getattr(config, 'FONTS_DIR', Settings.FONTS_DIR))
         self.layout_engine = LayoutEngine()
         self.builder = LiturgicalImageBuilder(config)
-        self.width = getattr(config, 'IMAGE_WIDTH', 1404)
-        self.height = getattr(config, 'IMAGE_HEIGHT', 1872)
-        self.padding = getattr(config, 'PADDING', 48)
-        self.artwork_size = getattr(config, 'ARTWORK_SIZE', 1080)
-        self.row_spacing = getattr(config, 'ROW_SPACING', 48)
-        self.header_font_size = getattr(config, 'HEADER_FONT_SIZE', 36)
-        self.title_font_size = getattr(config, 'TITLE_FONT_SIZE', 96)
-        self.title_line_height = getattr(config, 'TITLE_LINE_HEIGHT', 1.2)
-        self.column_font_size = getattr(config, 'COLUMN_FONT_SIZE', 36)
-        self.bg_color = getattr(config, 'BG_COLOR', (255, 255, 255))
-        self.text_color = getattr(config, 'TEXT_COLOR', (74, 74, 74))
-        self.line_color = getattr(config, 'LINE_COLOR', (151, 151, 151))
+        self.width = getattr(config, 'IMAGE_WIDTH', Settings.IMAGE_WIDTH)
+        self.height = getattr(config, 'IMAGE_HEIGHT', Settings.IMAGE_HEIGHT)
+        self.padding = getattr(config, 'PADDING', Settings.PADDING)
+        self.artwork_size = getattr(config, 'ARTWORK_SIZE', Settings.ARTWORK_SIZE)
+        self.row_spacing = getattr(config, 'ROW_SPACING', Settings.ROW_SPACING)
+        self.header_font_size = getattr(config, 'HEADER_FONT_SIZE', Settings.HEADER_FONT_SIZE)
+        self.title_font_size = getattr(config, 'TITLE_FONT_SIZE', Settings.TITLE_FONT_SIZE)
+        self.title_line_height = getattr(config, 'TITLE_LINE_HEIGHT', Settings.TITLE_LINE_HEIGHT)
+        self.column_font_size = getattr(config, 'COLUMN_FONT_SIZE', Settings.COLUMN_FONT_SIZE)
+        self.bg_color = getattr(config, 'BG_COLOR', Settings.BG_COLOR)
+        self.text_color = getattr(config, 'TEXT_COLOR', Settings.TEXT_COLOR)
+        self.line_color = getattr(config, 'LINE_COLOR', Settings.LINE_COLOR)
 
     def generate_image(self, date_str, out_path=None, feast_info=None, artwork_info=None):
         """

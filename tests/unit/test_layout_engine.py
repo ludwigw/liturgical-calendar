@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 from liturgical_calendar.image_generation.layout_engine import LayoutEngine
+from liturgical_calendar.config.settings import Settings
 
 class DummyFont:
     def __init__(self, ascent=10, descent=2, width=100, height=20):
@@ -41,7 +42,7 @@ class TestLayoutEngine(unittest.TestCase):
             fonts=self.fonts,
             draw=self.dummy_draw,
             width=500,
-            padding=10
+            padding=Settings.PADDING
         )
         self.assertIn('season', layout)
         self.assertIn('date', layout)
@@ -96,7 +97,7 @@ class TestLayoutEngine(unittest.TestCase):
             fonts={'serif_96': self.dummy_font},
             draw=self.dummy_draw,
             width=500,
-            padding=10,
+            padding=Settings.PADDING,
             title_font_size=96,
             title_line_height=1.2,
             start_y=300
@@ -118,7 +119,7 @@ class TestLayoutEngine(unittest.TestCase):
             fonts={'serif': self.dummy_font, 'sans_uc': self.dummy_font},
             draw=self.dummy_draw,
             width=800,
-            padding=20,
+            padding=Settings.PADDING,
             start_y=600,
             line_height=48
         )

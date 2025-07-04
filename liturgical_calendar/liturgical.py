@@ -12,6 +12,7 @@ from .data.feasts_data import feasts, get_liturgical_feast
 from .services.feast_service import FeastService
 from .services.image_service import ImageService
 from .services.config_service import ConfigService
+from .config.settings import Settings
 
 ##########################################################################
 
@@ -36,6 +37,11 @@ def main():
     """
     Main function for command line usage
     """
+    # Optionally load config file from argument or default location
+    config_path = None
+    if len(sys.argv) > 2 and not sys.argv[2].startswith('-'):
+        config_path = sys.argv[2]
+    Settings.load_from_file(config_path)  # Loads config from file/env if present
     if len(sys.argv) > 1:
         date_str = sys.argv[1]
     else:

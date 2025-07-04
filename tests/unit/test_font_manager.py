@@ -2,8 +2,9 @@ import unittest
 import os
 from pathlib import Path
 from liturgical_calendar.image_generation.font_manager import FontManager
+from liturgical_calendar.config.settings import Settings
 
-FONTS_DIR = Path(__file__).parent.parent.parent / 'fonts'
+FONTS_DIR = Settings.FONTS_DIR
 SANS_FONT = 'HankenGrotesk-Medium.ttf'
 SERIF_FONT = 'HappyTimes-Regular.otf'
 

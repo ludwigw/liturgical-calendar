@@ -1,10 +1,11 @@
 from pathlib import Path
 from PIL import ImageFont
 from typing import Dict, Tuple, Any
+from liturgical_calendar.config.settings import Settings
 
 class FontManager:
-    def __init__(self, fonts_dir: Path):
-        self.fonts_dir = Path(fonts_dir)
+    def __init__(self, fonts_dir: Path = None):
+        self.fonts_dir = Path(fonts_dir) if fonts_dir else Path(Settings.FONTS_DIR)
         self._cache: Dict[Tuple[str, int], Any] = {}
 
     def get_font(self, font_name: str, size: int):

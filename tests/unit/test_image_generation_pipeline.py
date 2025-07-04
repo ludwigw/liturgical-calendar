@@ -3,15 +3,16 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 from PIL import ImageFont
 from liturgical_calendar.image_generation.pipeline import ImageGenerationPipeline
+from liturgical_calendar.config.settings import Settings
 
 class DummyConfig:
     IMAGE_WIDTH = 100
     IMAGE_HEIGHT = 100
-    BG_COLOR = (255, 255, 255)
+    BG_COLOR = Settings.BG_COLOR
     TEXT_COLOR = (0, 0, 0)
     LINE_COLOR = (100, 100, 100)
-    FONTS_DIR = Path('.')
-    PADDING = 10
+    FONTS_DIR = Settings.FONTS_DIR
+    PADDING = Settings.PADDING
     ARTWORK_SIZE = 50
     ROW_SPACING = 5
     HEADER_FONT_SIZE = 10

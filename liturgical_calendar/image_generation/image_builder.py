@@ -1,13 +1,14 @@
 from PIL import Image, ImageDraw
 from pathlib import Path
 import os
+from liturgical_calendar.config.settings import Settings
 
 class LiturgicalImageBuilder:
     def __init__(self, config):
         self.config = config
-        self.width = getattr(config, 'IMAGE_WIDTH', 1404)
-        self.height = getattr(config, 'IMAGE_HEIGHT', 1872)
-        self.bg_color = getattr(config, 'BG_COLOR', (255, 255, 255))
+        self.width = getattr(config, 'IMAGE_WIDTH', Settings.IMAGE_WIDTH)
+        self.height = getattr(config, 'IMAGE_HEIGHT', Settings.IMAGE_HEIGHT)
+        self.bg_color = getattr(config, 'BG_COLOR', Settings.BG_COLOR)
 
     def create_base_image(self, width=None, height=None, bg_color=None):
         w = width if width is not None else self.width

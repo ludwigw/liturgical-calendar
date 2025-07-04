@@ -6,6 +6,7 @@ from PIL import Image
 import time
 import shutil
 from .image_processor import ImageProcessor
+from liturgical_calendar.config.settings import Settings
 
 # Import get_instagram_image_url from the script (or reimplement if needed)
 def get_instagram_image_url(instagram_url):
@@ -16,9 +17,9 @@ def get_instagram_image_url(instagram_url):
 
 class ArtworkCache:
     def __init__(self, cache_dir=None):
-        self.cache_dir = Path(cache_dir) if cache_dir else Path("./cache")
+        self.cache_dir = Path(cache_dir) if cache_dir else Path(Settings.CACHE_DIR)
         self.cache_dir.mkdir(exist_ok=True)
-        self.original_dir = self.cache_dir / "original"
+        self.original_dir = self.cache_dir / Settings.ORIGINALS_SUBDIR
         self.original_dir.mkdir(exist_ok=True)
         self.processor = ImageProcessor()
 

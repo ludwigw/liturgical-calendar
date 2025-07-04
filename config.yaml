@@ -1,0 +1,36 @@
+# Sample configuration for the Liturgical Calendar project
+# Copy this file to your project root and edit as needed.
+#
+# Note: Colors can be specified as RGB tuples (e.g., [255, 255, 255]) or hex strings (e.g., '#FFFFFF').
+
+# Image settings
+IMAGE_WIDTH: 1404         # Width of generated images (pixels)
+IMAGE_HEIGHT: 1872        # Height of generated images (pixels)
+PADDING: 48               # Padding around image content (pixels)
+ARTWORK_SIZE: 1080        # Size of artwork in the image (pixels)
+ROW_SPACING: 48           # Spacing between rows (pixels)
+HEADER_FONT_SIZE: 36      # Font size for header text
+TITLE_FONT_SIZE: 96       # Font size for title text
+TITLE_LINE_HEIGHT: 1.2    # Line height for title text
+COLUMN_FONT_SIZE: 36      # Font size for column text
+BG_COLOR: [255, 255, 255] # Background color (RGB tuple or hex string)
+TEXT_COLOR: [74, 74, 74]  # Text color (RGB tuple or hex string)
+LINE_COLOR: [151, 151, 151] # Line color (RGB tuple or hex string)
+FONTS_DIR: 'fonts'        # Directory containing font files
+
+# Cache settings
+CACHE_DIR: "cache"                # Directory for cached images
+ORIGINALS_SUBDIR: "original"      # Subdirectory for original images
+MAX_CACHE_SIZE: null              # e.g., "1GB" (not enforced yet)
+CACHE_CLEANUP_DAYS: 30            # Remove files older than this (days)
+
+# Network/API settings
+REQUEST_TIMEOUT: 30               # Timeout for network requests (seconds)
+MAX_RETRIES: 3                    # Number of retries for failed downloads
+USER_AGENT: 'Mozilla/5.0'         # User agent for HTTP requests
+
+# Feature toggles
+ENABLE_UPSAMPLING: true           # Whether to upsample images to minimum size
+LOGGING_LEVEL: "INFO"             # Logging level (e.g., INFO, DEBUG)
+
+# Add more settings as needed, following the pattern above. 
