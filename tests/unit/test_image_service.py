@@ -81,7 +81,7 @@ class TestImageService(unittest.TestCase):
             'title': 'Resurrection',
             'artist': 'Unknown'
         }
-        self.mock_artwork_manager.get_artwork_for_feast.return_value = artwork_info
+        self.mock_artwork_manager.get_artwork_for_date.return_value = artwork_info
         
         result = self.image_service.generate_liturgical_image('2023-04-16')
         
@@ -94,7 +94,7 @@ class TestImageService(unittest.TestCase):
         
         # Verify service calls
         self.mock_feast_service.get_complete_feast_info.assert_called_once_with('2023-04-16', False)
-        self.mock_artwork_manager.get_artwork_for_feast.assert_called_once_with(feast_info)
+        self.mock_artwork_manager.get_artwork_for_date.assert_called_once_with('2023-04-16', feast_info)
     
     def test_generate_liturgical_image_no_feast_info(self):
         """Test image generation when no feast info is available."""
@@ -122,7 +122,7 @@ class TestImageService(unittest.TestCase):
             'title': 'Resurrection',
             'artist': 'Unknown'
         }
-        self.mock_artwork_manager.get_artwork_for_feast.return_value = artwork_info
+        self.mock_artwork_manager.get_artwork_for_date.return_value = artwork_info
         
         with patch('os.makedirs') as mock_makedirs:
             result = self.image_service.generate_liturgical_image(
@@ -132,6 +132,8 @@ class TestImageService(unittest.TestCase):
         
         self.assertEqual(result['file_path'], '/tmp/test.png')
         mock_makedirs.assert_called_once_with('/tmp', exist_ok=True)
+        # Verify artwork manager was called with correct parameters
+        self.mock_artwork_manager.get_artwork_for_date.assert_called_once_with('2023-04-16', feast_info)
     
     def test_generate_multiple_images_success(self):
         """Test generating multiple images successfully."""
@@ -150,7 +152,7 @@ class TestImageService(unittest.TestCase):
             'title': 'Resurrection',
             'artist': 'Unknown'
         }
-        self.mock_artwork_manager.get_artwork_for_feast.return_value = artwork_info
+        self.mock_artwork_manager.get_artwork_for_date.return_value = artwork_info
         
         date_list = ['2023-04-16', '2023-04-17']
         
@@ -184,7 +186,7 @@ class TestImageService(unittest.TestCase):
             'title': 'Resurrection',
             'artist': 'Unknown'
         }
-        self.mock_artwork_manager.get_artwork_for_feast.return_value = artwork_info
+        self.mock_artwork_manager.get_artwork_for_date.return_value = artwork_info
         
         date_list = ['2023-04-16', '2023-04-17']
         results = self.image_service.generate_multiple_images(date_list)
@@ -196,48 +198,36 @@ class TestImageService(unittest.TestCase):
     
     def test_select_artwork_feast_specific(self):
         """Test artwork selection for feast-specific artwork."""
-        feast_info = {'name': 'Easter Sunday', 'season': 'Easter'}
+        feast_info = {'name': 'Easter Sunday', 'season': 'Easter', 'date': date(2023, 4, 16)}
         artwork_info = {'url': 'https://example.com/easter.jpg'}
         
-        self.mock_artwork_manager.get_artwork_for_feast.return_value = artwork_info
+        self.mock_artwork_manager.get_artwork_for_date.return_value = artwork_info
         
         result = self.image_service._select_artwork(feast_info)
         
         self.assertEqual(result, artwork_info)
-        self.mock_artwork_manager.get_artwork_for_feast.assert_called_once_with(feast_info)
-        self.mock_artwork_manager.get_artwork_for_season.assert_not_called()
-        self.mock_artwork_manager.get_default_artwork.assert_not_called()
+        self.mock_artwork_manager.get_artwork_for_date.assert_called_once_with('2023-04-16', feast_info)
     
-    def test_select_artwork_season_fallback(self):
-        """Test artwork selection with season fallback."""
-        feast_info = {'name': 'Easter Sunday', 'season': 'Easter'}
-        season_artwork = {'url': 'https://example.com/easter.jpg'}
+    def test_select_artwork_no_artwork_found(self):
+        """Test artwork selection when no artwork is found."""
+        feast_info = {'name': 'Easter Sunday', 'season': 'Easter', 'date': date(2023, 4, 16)}
         
-        self.mock_artwork_manager.get_artwork_for_feast.return_value = None
-        self.mock_artwork_manager.get_artwork_for_season.return_value = season_artwork
+        self.mock_artwork_manager.get_artwork_for_date.return_value = None
         
         result = self.image_service._select_artwork(feast_info)
         
-        self.assertEqual(result, season_artwork)
-        self.mock_artwork_manager.get_artwork_for_feast.assert_called_once_with(feast_info)
-        self.mock_artwork_manager.get_artwork_for_season.assert_called_once_with('Easter')
-        self.mock_artwork_manager.get_default_artwork.assert_not_called()
+        self.assertEqual(result, {})
+        self.mock_artwork_manager.get_artwork_for_date.assert_called_once_with('2023-04-16', feast_info)
     
-    def test_select_artwork_default_fallback(self):
-        """Test artwork selection with default fallback."""
+    def test_select_artwork_no_date_in_feast_info(self):
+        """Test artwork selection when feast_info has no date."""
         feast_info = {'name': 'Easter Sunday', 'season': 'Easter'}
-        default_artwork = {'url': 'https://example.com/default.jpg'}
-        
-        self.mock_artwork_manager.get_artwork_for_feast.return_value = None
-        self.mock_artwork_manager.get_artwork_for_season.return_value = None
-        self.mock_artwork_manager.get_default_artwork.return_value = default_artwork
         
         result = self.image_service._select_artwork(feast_info)
         
-        self.assertEqual(result, default_artwork)
-        self.mock_artwork_manager.get_artwork_for_feast.assert_called_once_with(feast_info)
-        self.mock_artwork_manager.get_artwork_for_season.assert_called_once_with('Easter')
-        self.mock_artwork_manager.get_default_artwork.assert_called_once()
+        self.assertEqual(result, {})
+        # Should not call artwork manager since there's no date
+        self.mock_artwork_manager.get_artwork_for_date.assert_not_called()
     
     def test_prepare_image_data(self):
         """Test image data preparation."""

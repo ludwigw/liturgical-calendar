@@ -1,6 +1,6 @@
 from pathlib import Path
 from liturgical_calendar.services.feast_service import FeastService
-from liturgical_calendar.services.image_service import ImageService
+from liturgical_calendar.core.artwork_manager import ArtworkManager
 from liturgical_calendar.image_generation.layout_engine import LayoutEngine
 from liturgical_calendar.image_generation.font_manager import FontManager
 from liturgical_calendar.image_generation.image_builder import LiturgicalImageBuilder
@@ -9,7 +9,7 @@ class ImageGenerationPipeline:
     def __init__(self, config):
         self.config = config
         self.feast_service = FeastService()
-        self.image_service = ImageService()
+        self.artwork_manager = ArtworkManager()
         self.font_manager = FontManager(getattr(config, 'FONTS_DIR', Path(__file__).parent.parent.parent / 'fonts'))
         self.layout_engine = LayoutEngine()
         self.builder = LiturgicalImageBuilder(config)
@@ -26,18 +26,83 @@ class ImageGenerationPipeline:
         self.text_color = getattr(config, 'TEXT_COLOR', (74, 74, 74))
         self.line_color = getattr(config, 'LINE_COLOR', (151, 151, 151))
 
-    def generate_image(self, date_str, out_path=None):
-        data = self._prepare_data(date_str)
+    def generate_image(self, date_str, out_path=None, feast_info=None, artwork_info=None):
+        """
+        Generate an image for the given date.
+        
+        Args:
+            date_str: Date string in YYYY-MM-DD format
+            out_path: Optional output path for the image
+            feast_info: Optional pre-prepared feast information
+            artwork_info: Optional pre-prepared artwork information
+            
+        Returns:
+            Path to the generated image file
+        """
+        if feast_info and artwork_info:
+            # Use pre-prepared data from service layer
+            data = self._prepare_data_from_service(date_str, feast_info, artwork_info)
+        else:
+            # Fallback to original data preparation (for backward compatibility)
+            data = self._prepare_data(date_str)
+        
         layout, fonts = self._create_layout(data)
         img = self._render_image(layout, fonts, data)
         return self._save_image(img, date_str, layout, fonts, data, out_path)
 
+    def _prepare_data_from_service(self, date_str, feast_info, artwork_info):
+        """
+        Prepare data using pre-prepared feast and artwork information from service layer.
+        
+        Args:
+            date_str: Date string in YYYY-MM-DD format
+            feast_info: Pre-prepared feast information from service
+            artwork_info: Pre-prepared artwork information from service
+            
+        Returns:
+            Data dictionary for image generation
+        """
+        import datetime
+        date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+        friendly_date = date.strftime('%-d %B, %Y')
+        
+        # Use the pre-prepared feast info
+        info = feast_info
+        
+        # Use the pre-prepared artwork info
+        artwork = artwork_info
+        
+        # Find next artwork if needed (fallback logic)
+        next_artwork = None
+        if not (artwork and artwork.get('cached_file')):
+            from datetime import timedelta
+            search_date = date
+            for _ in range(366):
+                search_date += timedelta(days=1)
+                next_artwork_candidate = self.artwork_manager.get_artwork_for_date(search_date.strftime('%Y-%m-%d'))
+                if next_artwork_candidate and next_artwork_candidate.get('cached_file'):
+                    next_artwork = next_artwork_candidate
+                    next_artwork['date'] = search_date.strftime('%-d %B, %Y')
+                    break
+        
+        return {
+            'date': date,
+            'date_str': date_str,
+            'friendly_date': friendly_date,
+            'info': info,
+            'artwork': artwork,
+            'next_artwork': next_artwork,
+        }
+
     def _prepare_data(self, date_str):
+        """
+        Original data preparation method (for backward compatibility).
+        """
         import datetime
         date = datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
         friendly_date = date.strftime('%-d %B, %Y')
         info = self.feast_service.get_liturgical_info(date_str)
-        artwork = self.image_service.get_artwork_for_date(date_str, info)
+        artwork = self.artwork_manager.get_artwork_for_date(date_str, info)
         # Find next artwork if needed
         next_artwork = None
         if not (artwork and artwork.get('cached_file')):
@@ -45,7 +110,7 @@ class ImageGenerationPipeline:
             search_date = date
             for _ in range(366):
                 search_date += timedelta(days=1)
-                next_artwork_candidate = self.image_service.get_artwork_for_date(search_date.strftime('%Y-%m-%d'))
+                next_artwork_candidate = self.artwork_manager.get_artwork_for_date(search_date.strftime('%Y-%m-%d'))
                 if next_artwork_candidate and next_artwork_candidate.get('cached_file'):
                     next_artwork = next_artwork_candidate
                     next_artwork['date'] = search_date.strftime('%-d %B, %Y')

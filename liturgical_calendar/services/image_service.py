@@ -28,7 +28,8 @@ class ImageService:
                  artwork_manager: Optional[ArtworkManager] = None,
                  readings_manager: Optional[ReadingsManager] = None,
                  season_calculator: Optional[SeasonCalculator] = None,
-                 feast_service: Optional[FeastService] = None):
+                 feast_service: Optional[FeastService] = None,
+                 config: Optional[Any] = None):
         """
         Initialize the ImageService.
         
@@ -37,6 +38,7 @@ class ImageService:
             readings_manager: Optional ReadingsManager instance for dependency injection
             season_calculator: Optional SeasonCalculator instance for dependency injection
             feast_service: Optional FeastService instance for dependency injection
+            config: Optional configuration object for the pipeline
         """
         self.artwork_manager = artwork_manager or ArtworkManager()
         self.readings_manager = readings_manager or ReadingsManager()
@@ -45,6 +47,8 @@ class ImageService:
             season_calculator=self.season_calculator,
             readings_manager=self.readings_manager
         )
+        self.config = config
+        self.pipeline = None  # Will be initialized lazily when needed
     
     def generate_liturgical_image(self, date_str: str, 
                                 output_path: Optional[str] = None,
@@ -131,16 +135,20 @@ class ImageService:
         Returns:
             Artwork information dictionary
         """
-        # Use the artwork manager to select artwork
-        artwork = self.artwork_manager.get_artwork_for_feast(feast_info)
+        # Extract date from feast_info
+        date_obj = feast_info.get('date')
+        if not date_obj:
+            # If no date in feast_info, we can't get artwork
+            return {}
+        
+        date_str = date_obj.strftime('%Y-%m-%d')
+        
+        # Use the artwork manager to select artwork for the date
+        artwork = self.artwork_manager.get_artwork_for_date(date_str, feast_info)
         
         if not artwork:
-            # Fallback to season-based artwork
-            artwork = self.artwork_manager.get_artwork_for_season(feast_info.get('season', ''))
-        
-        if not artwork:
-            # Final fallback to default artwork
-            artwork = self.artwork_manager.get_default_artwork()
+            # Return empty dict as fallback
+            artwork = {}
         
         return artwork
     
@@ -156,20 +164,26 @@ class ImageService:
         Returns:
             Prepared data for image generation
         """
-        # Extract key information for image generation
+        # Create a combined data structure that includes both feast and artwork info
         image_data = {
-            'feast_name': feast_info.get('name', ''),
+            # Feast information
+            'name': feast_info.get('name', ''),
             'season': feast_info.get('season', ''),
             'week': feast_info.get('week', ''),
             'weekno': feast_info.get('weekno'),
             'colour': feast_info.get('colour', 'green'),
             'colourcode': feast_info.get('colourcode', '#00FF00'),
             'readings': feast_info.get('readings', {}),
-            'artwork_url': artwork_info.get('url', ''),
-            'artwork_title': artwork_info.get('title', ''),
-            'artwork_artist': artwork_info.get('artist', ''),
             'date': feast_info.get('date'),
-            'weekday_reading': feast_info.get('weekday_reading', '')
+            'weekday_reading': feast_info.get('weekday_reading', ''),
+            
+            # Artwork information (for pipeline compatibility)
+            'artwork_info': artwork_info,
+            'url': artwork_info.get('url', ''),
+            'title': artwork_info.get('title', ''),
+            'artist': artwork_info.get('artist', ''),
+            'cached_file': artwork_info.get('cached_file', ''),
+            'name': artwork_info.get('name', '')  # Artwork name
         }
         
         # Add any additional metadata
@@ -184,7 +198,7 @@ class ImageService:
     def _generate_image(self, image_data: Dict[str, Any], 
                        output_path: Optional[str] = None) -> Dict[str, Any]:
         """
-        Generate the actual image using the image generation module.
+        Generate the actual image using the image generation pipeline.
         
         Args:
             image_data: Prepared data for image generation
@@ -193,22 +207,38 @@ class ImageService:
         Returns:
             Image generation result dictionary
         """
-        # This would integrate with the existing image generation code
-        # For now, returning a placeholder result
-        result = {
-            'image_generated': True,
-            'image_data': image_data
-        }
+        if not self.config:
+            raise RuntimeError("ImageService requires a configuration object to initialize the pipeline")
         
-        if output_path:
-            # Ensure output directory exists
-            output_dir = os.path.dirname(output_path)
-            if output_dir:
-                os.makedirs(output_dir, exist_ok=True)
-            
-            # Here we would call the actual image generation function
-            # result['file_path'] = generate_image_file(image_data, output_path)
-            result['file_path'] = output_path
+        # Lazy import to avoid circular dependency
+        if self.pipeline is None:
+            from ..image_generation.pipeline import ImageGenerationPipeline
+            self.pipeline = ImageGenerationPipeline(self.config)
+        
+        # Extract date from image_data
+        date_obj = image_data.get('date')
+        if not date_obj:
+            raise ValueError("No date found in image_data")
+        
+        date_str = date_obj.strftime('%Y-%m-%d')
+        
+        # Use the pipeline to generate the image
+        try:
+            # Pass the prepared feast and artwork info to the pipeline
+            feast_info = image_data
+            artwork_info = image_data.get('artwork_info', {})
+            file_path = self.pipeline.generate_image(date_str, output_path, feast_info, artwork_info)
+            result = {
+                'image_generated': True,
+                'image_data': image_data,
+                'file_path': str(file_path)
+            }
+        except Exception as e:
+            result = {
+                'image_generated': False,
+                'image_data': image_data,
+                'error': str(e)
+            }
         
         return result
     

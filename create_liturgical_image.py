@@ -1,7 +1,7 @@
 import sys
 import datetime
 from pathlib import Path
-from liturgical_calendar.image_generation.pipeline import ImageGenerationPipeline
+from liturgical_calendar.services.image_service import ImageService
 
 # Image settings for config
 WIDTH, HEIGHT = 1404, 1872
@@ -48,9 +48,18 @@ def main():
         date = datetime.date.today()
     date_str = get_date_str(date)
 
-    pipeline = ImageGenerationPipeline(SimpleConfig)
-    out_path = pipeline.generate_image(date_str)
-    print(f"Saved image to {out_path}")
+    # Create ImageService with config
+    image_service = ImageService(config=SimpleConfig)
+    
+    # Generate image using the service
+    result = image_service.generate_liturgical_image(date_str)
+    
+    if result.get('success'):
+        print(f"Saved image to {result.get('file_path')}")
+        print(f"Feast: {result.get('feast_info', {}).get('name', 'Unknown')}")
+    else:
+        print(f"Error generating image: {result.get('error', 'Unknown error')}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main() 
