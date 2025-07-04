@@ -1,5 +1,41 @@
 # Liturgical Calendar
 
+## Features
+
+- Calculates Anglican liturgical seasons, feasts, and colors for any date
+- Generates images for e-ink or digital displays
+- Centralized, extensible configuration (YAML/env)
+- Raspberry Pi & e-ink display support
+- Fully tested with `unittest`
+- Modular, maintainable codebase
+
+## Quickstart
+
+Generate today's liturgical image with default settings:
+
+```sh
+python create_liturgical_image.py
+```
+
+Or get liturgical info for today at the command line:
+
+```sh
+liturgical_calendar
+```
+
+## Documentation
+
+- [Architecture Overview](docs/architecture.md)
+- [Liturgical Logic & Edge Cases](docs/liturgical_logic.md)
+- [API Reference](docs/api_reference.md)
+- [Image Generation](docs/image_generation.md)
+- [Caching](docs/caching.md)
+- [Testing](docs/testing.md)
+- [Raspberry Pi & E-Ink Integration](docs/raspberry_pi_eink.md)
+- [Example Scripts](docs/examples/)
+
+---
+
 This Python module will return the name, season, week number and liturgical
 colour for any day in the Gregorian calendar, according to the Anglican
 tradition of the Church of England.
@@ -165,3 +201,44 @@ PYTHONPATH=. python -m unittest discover -s tests/integration -p 'test*.py' -v
 ```
 
 All tests must pass before committing changes. See the project rules for commit and test summary requirements.
+
+## Raspberry Pi & E-Ink Integration
+
+This project can be run on a Raspberry Pi to update an e-ink display with the current liturgical calendar image. See [docs/raspberry_pi_eink.md](docs/raspberry_pi_eink.md) for a full integration guide, including:
+- System requirements and installation
+- Scheduling regular updates (e.g., with cron)
+- E-ink display tips (image size, color mode, conversion)
+- Performance notes for low-resource devices
+- Troubleshooting
+
+A minimal example for updating an e-ink display is provided in `docs/examples/update_eink_display.py`.
+
+## Requirements & Dependencies
+
+- Python 3.8+
+- Pillow, PyYAML, etc. (see requirements.txt)
+- On Raspberry Pi/ARM: You may need to install system packages for Pillow (e.g., libjpeg, zlib, libfreetype6-dev). See the Pi integration guide for details.
+
+## Troubleshooting
+
+### Common Issues
+- **Missing fonts:** Ensure the required fonts are present in the `fonts/` directory or update the config.
+- **Pillow install errors on Pi:** Install system dependencies: `sudo apt-get install libjpeg-dev zlib1g-dev libfreetype6-dev`
+- **Image not updating on e-ink:** Check the device-specific update command and permissions.
+- **YAML config errors:** Validate your `config.yaml` with an online YAML linter.
+- **Performance issues:** Use smaller images, avoid upsampling, and limit batch size on low-memory devices.
+
+See [docs/raspberry_pi_eink.md](docs/raspberry_pi_eink.md) for more troubleshooting tips.
+
+## Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+- All changes must pass the full test suite before committing (see Testing section).
+- Include a summary table of test results in each commit message.
+- Open issues or pull requests for bugs, features, or questions.
+
+## License
+
+[Specify your license here, or link to LICENSE file]

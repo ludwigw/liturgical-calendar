@@ -3,6 +3,8 @@
 ## Introduction
 The liturgical calendar is a system used by many Christian churches to organize the year around key feasts (special days), seasons (periods with particular themes), and readings from the Bible. Each week, the calendar determines which readings, prayers, and colors are used in worship. This project implements the Anglican liturgical calendar, which is based on a combination of fixed dates (like Christmas) and movable feasts (like Easter, which changes each year).
 
+See also: architecture.md for system design, api_reference.md for method details, and examples/ for runnable code.
+
 The code in this project is designed to calculate the correct season, week name, and readings for any given date, following the rules and traditions of the Anglican Communion. Mistakes in these calculations can lead to using the wrong readings or prayers in worship, so accuracy is essential.
 
 ## Glossary
@@ -20,6 +22,7 @@ Many calculations in this project use the concept of an "Easter point" or "Chris
 - **Christmas point:** The number of days between the current date and Christmas Day. Used for Christmas season calculations.
 - These points allow us to calculate seasons and feasts that move each year, based on the date of Easter or Christmas.
 - See `funcs.py` for the calculation functions.
+See api_reference.md for the relevant methods in SeasonCalculator and ReadingsManager.
 
 **Example:**
 If Easter is March 31, 2024, then April 7, 2024 has an Easter point of 7 (7 days after Easter). Christmas point for December 26 is 1 (1 day after Christmas).
@@ -47,6 +50,7 @@ Seasons are calculated based on the date's relationship to movable feasts (Easte
 ### Edge Cases
 - **Ash Wednesday:** The season changes to Lent, but the week name may still be "1 before Lent" (see Week Naming).
 - **Pre-Lent/Pre-Advent:** Special transition weeks before Lent/Advent, with unique naming and readings logic.
+See testing.md for how these cases are covered in the test suite.
 
 ## 3. Week Naming: Proper N vs. Trinity N
 ### Why Two Systems?

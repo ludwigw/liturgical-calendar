@@ -9,6 +9,8 @@ The liturgical calendar project follows a layered architecture with clear separa
 - **Pipeline Layer**: Technical implementation and rendering
 - **Data Layer**: Pure data storage and access
 
+See also: api_reference.md for method details, image_generation.md for pipeline, caching.md for cache, testing.md for test structure, and examples/ for runnable code.
+
 ## Component Roles
 
 ### Core Layer
@@ -79,6 +81,8 @@ The liturgical calendar project follows a layered architecture with clear separa
   - File I/O operations
   - Technical implementation details
 
+See image_generation.md for a detailed breakdown of the image generation process.
+
 #### LayoutEngine
 - **Purpose**: Layout calculation and positioning
 - **Key Methods**: `create_header_layout()`, `create_artwork_layout()`, `create_title_layout()`, `create_readings_layout()`
@@ -109,6 +113,8 @@ The liturgical calendar project follows a layered architecture with clear separa
 #### feasts_data.py
 - **Purpose**: Pure feast data storage
 - **Content**: Feast dictionaries, precedence rules, liturgical data
+
+See liturgical_logic.md for the rationale and rules behind the data.
 
 #### readings_data.py
 - **Purpose**: Pure readings data storage
@@ -306,4 +312,6 @@ The test suite is organized for clarity and maintainability:
 **Rationale:**
 - Clear separation of test types makes it easy to find, run, and maintain tests.
 - Enables targeted testing (e.g., run only fast unit tests during development).
-- Fixtures directory supports reusable sample data for robust testing. 
+- Fixtures directory supports reusable sample data for robust testing.
+
+See testing.md for test suite structure and commands. 
