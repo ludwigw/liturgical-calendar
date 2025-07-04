@@ -40,12 +40,7 @@ This Python module will return the name, season, week number and liturgical
 colour for any day in the Gregorian calendar, according to the Anglican
 tradition of the Church of England.
 
-This module's algorithm is a direct port to Python of
-[`DateTime::Calendar::Liturgical::Christian`](https://github.com/gitpan/DateTime-Calendar-Liturgical-Christian),
-which was originally written in Perl and loaded with the calendar of the Episcopal
-Church of the USA. It has now been fed with data from the Church of England's
-[Calendar of saints](https://en.wikipedia.org/wiki/Calendar_of_saints_(Church_of_England))
-and substantially modified to suit the Anglican calendar.
+
 
 The output of this module is compared against the
 [Church of England Lectionary](https://www.chpublishing.co.uk/features/lectionary),

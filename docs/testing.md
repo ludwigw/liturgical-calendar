@@ -35,5 +35,3 @@
 - `README.md` and `docs/architecture.md` for quick commands and rationale.
 - `docs/liturgical_logic.md` for logic details and edge case rationale.
 - `docs/examples/` for runnable test and usage examples.
-
-(Work in progress) 
