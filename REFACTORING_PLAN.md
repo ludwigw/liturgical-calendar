@@ -592,22 +592,14 @@ tests/
     └── sample_readings.json
 ```
 
-#### 6.2 Add Image Generation Tests
-```python
-# tests/unit/test_layout_engine.py
-class TestLayoutEngine:
-    def test_header_layout_creation()
-    def test_artwork_layout_creation()
-    def test_text_wrapping()
-    def test_readings_layout()
-
-# tests/unit/test_image_builder.py
-class TestImageBuilder:
-    def test_image_creation()
-    def test_font_loading()
-    def test_color_application()
-    def test_artwork_pasting()
-```
+#### 6.2 Add Image Generation Tests ✅ **COMPLETED**
+- Comprehensive unit tests for all image generation components:
+  - `tests/unit/test_layout_engine.py`: header, artwork, title (text wrapping), and readings layout
+  - `tests/unit/test_image_builder.py`: base image creation, artwork pasting (valid/missing/None), text drawing, full image build
+  - `tests/unit/test_image_generation_pipeline.py`: pipeline instantiation, data prep, layout, and end-to-end image generation
+- Integration/end-to-end tests:
+  - `tests/test_generate_liturgical_images.py`: runs the main script for a wide range of dates, years, and artwork/season edge cases
+- All deliverables for this phase are present and actively maintained. Tests are comprehensive and up-to-date.
 
 #### 6.3 Create Documentation
 ```
