@@ -1,6 +1,6 @@
 # TODO: Test Failures and Errors (as of latest test run)
 
-This file summarizes all current test failures and errors, grouped by module. Most are unrelated to the recent artwork caching refactor.
+This file summarizes all current test failures and errors, grouped by module. Most are unrelated to the recent refactoring work.
 
 ---
 
@@ -19,6 +19,16 @@ This file summarizes all current test failures and errors, grouped by module. Mo
 - Updated `_select_artwork` method to use `get_artwork_for_date(date_str, feast_info)` instead of non-existent methods
 - Updated unit tests to match actual method signatures and simplified fallback logic
 - All ImageService unit tests now pass
+
+## ✅ COMPLETED: Architecture Refactoring
+
+**Status: COMPLETED** - Successfully implemented the intended architecture:
+- ImageService now calls ImageGenerationPipeline (not vice versa)
+- Resolved circular dependency with lazy imports
+- Updated create_liturgical_image.py to use ImageService as main entry point
+- Maintained backward compatibility with existing pipeline interface
+- All tests pass, confirming refactoring preserves functionality
+- Architecture now follows: Script → ImageService → ImageGenerationPipeline
 
 ---
 
@@ -42,4 +52,5 @@ This file summarizes all current test failures and errors, grouped by module. Mo
 - All caching and artwork-related tests pass.
 - FeastService tests have been fixed and now pass.
 - ImageService tests have been fixed and now pass.
-- Remaining failures/errors are likely unrelated to the recent caching refactor and pertain to config and layout logic or their mocks. 
+- Architecture refactoring completed successfully.
+- Remaining failures/errors are likely unrelated to the recent refactoring work and pertain to config and layout logic or their mocks. 
