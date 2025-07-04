@@ -29,7 +29,7 @@
 | [5](#phase-5-configuration-and-error-handling)    | Configuration and Error Handling     | IN PROGRESS  |
 | --- [5.1](#51-centralize-and-standardize-configuration-) | Centralize and Standardize Configuration | ✅ |
 | --- [5.2](#52-improve-error-handling)            | Improve Error Handling               | ✅ |
-| --- [5.3](#53-add-logging)                       | Add Logging                          |   |
+| --- [5.3](#53-add-logging)                       | Add Logging                          | ✅ |
 | --- [5.4](#54-optional-cliscript-error-reporting) | (Optional) CLI/Script Error Reporting |   |
 | [6](#phase-6-testing-and-documentation-week-6)    | Testing and Documentation            | ✅ COMPLETED |
 | --- [6.1](#61-reorganize-tests-)                 | Reorganize Tests                     | ✅ |
@@ -580,21 +580,27 @@ class ImageGenerationPipeline:
 - Exception hierarchy implemented and adopted across all major modules.
 - All tests pass after refactor, confirming robust error handling.
 
-#### 5.3 Add Logging
-**Goal:** Replace ad-hoc print statements with a consistent, configurable logging system.
+#### 5.3 Add Logging ✅ **COMPLETED**
 
-**Tasks:**
-- Create `liturgical_calendar/logging.py` with a `setup_logging()` function and a project-wide logger.
-- Replace all `print` statements (except for CLI output) with appropriate logging calls.
-- Allow logging level to be set via configuration.
-- Ensure logs include timestamps, module names, and log levels.
-- Add logging to key operations: downloads, cache hits/misses, upsampling, errors, etc.
+**What was done:**
+- Created a centralized logging module (`liturgical_calendar/logging.py`) with `setup_logging()` and `get_logger()`.
+- Integrated logging into all major modules, service layers, and CLI scripts.
+- All key events (image generation, cache hits/misses, config load, etc.) and errors are logged at appropriate levels.
+- Removed all print statements for operational/error reporting (except for user-facing CLI output).
+- Logging is initialized at script entry for all CLI/main scripts.
+- Logging configuration (level, format, output) is controlled via the `Settings` class, YAML config, or environment variables (e.g., `LOG_LEVEL`).
+- All tests (unit and integration) pass after logging integration.
+- Added a comprehensive section on logging setup, usage, and troubleshooting to `docs/architecture.md` and a summary to the README.
 
-**Deliverables:**
-- `liturgical_calendar/logging.py`
-- Logging integrated throughout the codebase
-- Logging configuration in `settings.py`
-- Section in `docs/architecture.md` describing logging policy and usage
+**Documentation:**
+- See `docs/architecture.md` for a full section on logging setup, usage, configuration, and troubleshooting.
+- The README now includes a summary and cross-reference to the full logging documentation.
+
+**Success Criteria:**
+- Logging is consistent, robust, and configurable across the codebase.
+- All operational and error events are logged appropriately.
+- Documentation is clear and discoverable for new contributors and users.
+- All tests pass after integration.
 
 #### 5.4 (Optional) CLI/Script Error Reporting
 **Goal:** Ensure that command-line scripts and user-facing entry points provide clear, actionable error messages and exit codes.

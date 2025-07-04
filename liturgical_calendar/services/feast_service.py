@@ -12,6 +12,7 @@ from ..core.season_calculator import SeasonCalculator
 from ..core.readings_manager import ReadingsManager
 from ..data.feasts_data import get_liturgical_feast
 from ..funcs import get_easter, date_to_days, add_delta_days, day_of_week
+from liturgical_calendar.logging import get_logger
 
 
 class FeastService:
@@ -34,6 +35,7 @@ class FeastService:
         """
         self.season_calculator = season_calculator or SeasonCalculator()
         self.readings_manager = readings_manager or ReadingsManager()
+        self.logger = get_logger(__name__)
     
     def get_complete_feast_info(self, date_str: str, transferred: bool = False) -> Dict[str, Any]:
         """
@@ -314,4 +316,29 @@ class FeastService:
         # The week name is now provided directly by week_info()
         return ""
     
+    def get_feast_for_date(self, date_obj):
+        try:
+            self.logger.info(f"Looking up feast for {date_obj}")
+            feast = self.season_calculator.get_feast(date_obj)
+            if feast:
+                self.logger.info(f"Feast found: {feast['name']}")
+            else:
+                self.logger.info(f"No feast found for {date_obj}")
+            return feast
+        except Exception as e:
+            self.logger.exception(f"Error looking up feast for {date_obj}: {e}")
+            raise
+
+    def get_readings_for_date(self, date_obj):
+        try:
+            self.logger.info(f"Getting readings for {date_obj}")
+            readings = self.readings_manager.get_readings(date_obj)
+            if readings:
+                self.logger.info(f"Readings found for {date_obj}")
+            else:
+                self.logger.info(f"No readings found for {date_obj}")
+            return readings
+        except Exception as e:
+            self.logger.exception(f"Error getting readings for {date_obj}: {e}")
+            raise
  

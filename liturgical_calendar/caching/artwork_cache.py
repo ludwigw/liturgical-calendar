@@ -10,6 +10,7 @@ from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.exceptions import (
     ArtworkNotFoundError, ImageGenerationError, CacheError
 )
+from liturgical_calendar.logging import get_logger
 
 # Import get_instagram_image_url from the script (or reimplement if needed)
 def get_instagram_image_url(instagram_url):
@@ -21,10 +22,11 @@ def get_instagram_image_url(instagram_url):
 class ArtworkCache:
     def __init__(self, cache_dir=None):
         self.cache_dir = Path(cache_dir) if cache_dir else Path(Settings.CACHE_DIR)
-        self.cache_dir.mkdir(exist_ok=True)
         self.original_dir = self.cache_dir / Settings.ORIGINALS_SUBDIR
-        self.original_dir.mkdir(exist_ok=True)
         self.processor = ImageProcessor()
+        self.logger = get_logger(__name__)
+        self.cache_dir.mkdir(exist_ok=True, parents=True)
+        self.original_dir.mkdir(exist_ok=True, parents=True)
 
     def get_cached_path(self, source_url):
         """Return the expected cache file path for a given source URL."""
@@ -44,32 +46,28 @@ class ArtworkCache:
         """
         cache_path = self.get_cached_path(source_url)
         try:
-            # Download image
             self.processor.download_image(source_url, cache_path)
-            # Upsample if needed
             if upsample:
                 with Image.open(cache_path) as img:
                     width, height = img.size
                 if width < 1080 or height < 1080:
-                    # Archive original
                     archived = self.processor.archive_original(cache_path, self.original_dir)
                     if not archived:
+                        self.logger.error(f"Could not archive original image before upsampling: {cache_path}")
                         raise CacheError(f"Could not archive original image before upsampling: {cache_path}")
-                    # Upsample
                     orig_backup = self.original_dir / cache_path.name
                     self.processor.upsample_image(orig_backup, cache_path, (1080, 1080))
                 else:
-                    # Archive even if not upsampled
                     self.processor.archive_original(cache_path, self.original_dir)
-                    # Restore the file to the main cache path
                     archived_path = self.original_dir / cache_path.name
                     shutil.copy2(str(archived_path), str(cache_path))
+            self.logger.info(f"Cache saved for key: {source_url}")
             return True
         except (CacheError, ArtworkNotFoundError, ImageGenerationError) as e:
-            # Optionally log or handle the error here
+            self.logger.error(f"Download/cache error for {source_url}: {e}")
             return False
         except Exception as e:
-            # Catch-all for unexpected errors
+            self.logger.exception(f"Unexpected error in download_and_cache for {source_url}: {e}")
             raise CacheError(f"Unexpected error in download_and_cache: {e}")
 
     def get_cache_info(self, source_url):
@@ -99,4 +97,5 @@ class ArtworkCache:
                 if age_days > max_age_days:
                     file.unlink()
                     removed.append(str(file))
+        self.logger.info(f"Removed {len(removed)} old cache files")
         return removed 

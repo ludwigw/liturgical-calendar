@@ -11,6 +11,7 @@ from pathlib import Path
 import json
 from ..funcs import date_to_days
 from liturgical_calendar.exceptions import ConfigError
+from liturgical_calendar.logging import get_logger
 
 
 class ConfigService:
@@ -29,6 +30,7 @@ class ConfigService:
         Args:
             config_file: Optional path to configuration file
         """
+        self.logger = get_logger(__name__)
         self.config_file = config_file or self._get_default_config_path()
         self._config = self._load_config()
         self._defaults = self._get_default_config()
@@ -242,22 +244,28 @@ class ConfigService:
             if dir_path and not os.path.exists(dir_path):
                 try:
                     os.makedirs(dir_path, exist_ok=True)
+                    self.logger.info(f"Created missing directory: {dir_path}")
                 except Exception as e:
+                    self.logger.error(f"Cannot create directory {dir_path}: {e}")
                     raise ConfigError(f"Cannot create directory {dir_path}: {e}")
         
         # Check image settings
         image_settings = self.get_image_settings()
         if image_settings['width'] <= 0 or image_settings['height'] <= 0:
+            self.logger.error("Image dimensions must be positive")
             raise ConfigError("Image dimensions must be positive")
         
         if image_settings['quality'] < 1 or image_settings['quality'] > 100:
+            self.logger.error("Image quality must be between 1 and 100")
             raise ConfigError("Image quality must be between 1 and 100")
         
         # Check artwork settings
         artwork_settings = self.get_artwork_settings()
         if artwork_settings['max_cache_size'] <= 0:
             warnings.append("Artwork cache size should be positive")
+            self.logger.warning("Artwork cache size should be positive")
         
+        self.logger.info("Configuration validated successfully")
         return {
             'valid': True,
             'errors': [],
@@ -335,5 +343,7 @@ class ConfigService:
         try:
             with open(self.config_file, 'w') as f:
                 json.dump(config, f, indent=2)
+            self.logger.info(f"Configuration saved to {self.config_file}")
         except Exception as e:
+            self.logger.error(f"Failed to save configuration: {e}")
             raise ConfigError(f"Failed to save configuration: {e}") 

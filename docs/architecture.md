@@ -257,21 +257,37 @@ Error handling is structured and robust, using custom exception classes defined 
 
 ### Logging
 
-Logging is handled via a project-wide logger defined in `liturgical_calendar/logging.py`:
+The project uses a centralized logging system to provide consistent, configurable, and robust logging across all modules and scripts.
 
-- Use `setup_logging()` to configure log level and format.
-- Replace all `print` statements (except for CLI output) with logging calls (`logger.info`, `logger.warning`, `logger.error`, etc.).
-- Logging level is configurable via settings.
-- Logs include timestamps, module names, and log levels for easy diagnostics.
+### Setup
+- Logging is initialized at the entry point of all CLI scripts using `setup_logging()` from `liturgical_calendar.logging`.
+- Each module or class obtains a logger via `get_logger(__name__)`.
+- Log messages are written to the console by default, with log level and format configurable via the `Settings` class or environment variables.
 
-**Where to log:**
-- Downloads, cache hits/misses, upsampling, errors, and any significant operation.
-- Errors and exceptions should always be logged at `error` or `exception` level.
+### Usage in Code
+- Use `logger.info()` for key events (e.g., image generation start/completion, cache hits/misses).
+- Use `logger.error()` or `logger.exception()` for error reporting and stack traces.
+- Avoid `print()` for operational or error messages; use logging instead.
+- Example:
+  ```python
+  from liturgical_calendar.logging import get_logger
+  logger = get_logger(__name__)
+  logger.info("Starting image generation...")
+  try:
+      ...
+  except Exception as e:
+      logger.exception(f"Error: {e}")
+  ```
 
-**Best Practices:**
-- Use `logger.debug` for detailed internal state, `logger.info` for high-level events, `logger.warning` for recoverable issues, and `logger.error` for failures.
-- Do not log sensitive data.
-- Ensure logs are actionable and not overly verbose in production.
+### Configuration
+- Logging level, format, and output can be configured via the `Settings` class, YAML config, or environment variables (e.g., `LOG_LEVEL`).
+- By default, logs are output to the console. For advanced setups, modify `setup_logging()` in `liturgical_calendar/logging.py`.
+
+### Troubleshooting
+- If you do not see log output, ensure `setup_logging()` is called before any logging statements.
+- Check the configured log level; set `LOG_LEVEL=DEBUG` for verbose output.
+- For issues with log formatting or output, review `liturgical_calendar/logging.py` and your config settings.
+- For deployment (e.g., on Raspberry Pi), ensure the user running the script has permission to write logs if you change the output destination.
 
 ### CLI/Script Error Reporting
 

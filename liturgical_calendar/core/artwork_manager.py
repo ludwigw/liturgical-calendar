@@ -8,6 +8,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from ..data.artwork_data import feasts as artwork_feasts
 from ..data.feasts_data import get_liturgical_feast  # Only if needed for squashed artwork
+from liturgical_calendar.logging import get_logger
 
 
 class ArtworkManager:
@@ -30,9 +31,11 @@ class ArtworkManager:
         feasts: The artwork data dictionary containing easter and christmas season feasts
     """
     
-    def __init__(self):
+    def __init__(self, config=None):
         """Initialize the ArtworkManager with artwork feast data."""
         self.feasts = artwork_feasts
+        self.config = config
+        self.logger = get_logger(__name__)
     
     def lookup_feast_artwork(self, relative_to: str, pointer: Any, cycle_index: int = 0) -> Optional[Dict[str, Any]]:
         """
@@ -228,4 +231,22 @@ class ArtworkManager:
                             'artwork_name': entry.get('name'),
                             'source': entry.get('source', None)
                         })
-        return squashed 
+        return squashed
+
+    def get_artwork_for_feast(self, feast_info):
+        try:
+            feast_name = feast_info.get('name', 'Unknown')
+            self.logger.info(f"Looking up artwork for feast: {feast_name}")
+            artwork = self._lookup_artwork(feast_info)
+            if artwork:
+                self.logger.info(f"Artwork found for feast: {feast_name}")
+            else:
+                self.logger.info(f"No artwork found for feast: {feast_name}")
+            return artwork
+        except Exception as e:
+            self.logger.exception(f"Error looking up artwork for feast {feast_name}: {e}")
+            raise
+
+    def _lookup_artwork(self, feast_info):
+        # ... existing logic ...
+        pass 

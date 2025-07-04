@@ -8,6 +8,7 @@ for different liturgical dates, seasons, and cycles.
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 from liturgical_calendar.exceptions import ReadingsNotFoundError
+from liturgical_calendar.logging import get_logger
 
 
 class ReadingsManager:
@@ -21,8 +22,10 @@ class ReadingsManager:
     - Feast days and special occasions
     """
     
-    def __init__(self):
+    def __init__(self, config=None):
         """Initialize the ReadingsManager."""
+        self.config = config
+        self.logger = get_logger(__name__)
         # Import readings data here to avoid circular imports
         from ..data.readings_data import sunday_readings, weekday_readings, fixed_weekday_readings
         self.sunday_readings = sunday_readings
@@ -126,8 +129,6 @@ class ReadingsManager:
         
         return []
     
-
-    
     def get_readings_for_date(self, date_str: str, liturgical_info: Dict) -> List[str]:
         """
         Get readings for a specific date based on liturgical information.
@@ -149,6 +150,7 @@ class ReadingsManager:
             Returns empty list if no readings found.
         """
         try:
+            self.logger.info(f"Looking up readings for {date_str}")
             date = datetime.strptime(date_str, "%Y-%m-%d").date()
             year = date.year
             
@@ -159,7 +161,10 @@ class ReadingsManager:
             if date.weekday() == 6:  # Sunday is represented by 6
                 week = liturgical_info.get('week')
                 if week:
-                    return self.get_sunday_readings(week, sunday_cycle)
+                    readings = self.get_sunday_readings(week, sunday_cycle)
+                    if readings:
+                        self.logger.info(f"Readings found for {date_str}")
+                    return readings
             else:
                 # It's a weekday - check precedence order
                 
@@ -171,16 +176,20 @@ class ReadingsManager:
                     day_of_week = date.strftime('%A')  # Get the day of the week (e.g., 'Monday')
                     week_based_readings = self.get_weekday_readings(weekday_reading, day_of_week, weekday_cycle)
                     if week_based_readings:
+                        self.logger.info(f"Readings found for {date_str}")
                         return week_based_readings
                 
                 # 2. Check for fixed weekday readings as fallback
                 fixed_readings = self.get_fixed_weekday_readings(date_str, weekday_cycle)
                 if fixed_readings:
+                    self.logger.info(f"Readings found for {date_str}")
                     return fixed_readings
             
+            self.logger.info(f"No readings found for {date_str}")
             return []
             
         except (ValueError, KeyError, TypeError) as e:
+            self.logger.exception(f"Error looking up readings for {date_str}: {e}")
             raise ReadingsNotFoundError(f"Error getting readings for date {date_str}: {e}")
     
     def validate_readings_data(self, readings: Dict) -> bool:
@@ -220,4 +229,8 @@ class ReadingsManager:
         Returns:
             List of weekday week names available in the readings data
         """
-        return list(self.weekday_readings.keys()) 
+        return list(self.weekday_readings.keys())
+
+    def _lookup_readings(self, date_obj):
+        # ... existing logic ...
+        pass 

@@ -13,6 +13,7 @@ from .services.feast_service import FeastService
 from .services.image_service import ImageService
 from .services.config_service import ConfigService
 from .config.settings import Settings
+from liturgical_calendar.logging import setup_logging, get_logger
 
 ##########################################################################
 
@@ -47,12 +48,20 @@ def main():
     else:
         date_str = date.today().strftime("%Y-%m-%d")
     
-    result = liturgical_calendar(date_str)
-    print(f"Date: {date_str}")
-    print(f"Season: {result.get('season', 'Unknown')}")
-    print(f"Week: {result.get('week', 'Unknown')}")
-    print(f"Name: {result.get('name', 'Unknown')}")
-    print(f"Colour: {result.get('colour', 'Unknown')}")
+    setup_logging()
+    logger = get_logger(__name__)
+    try:
+        logger.info("Starting liturgical.py script")
+        result = liturgical_calendar(date_str)
+        print(f"Date: {date_str}")
+        print(f"Season: {result.get('season', 'Unknown')}")
+        print(f"Week: {result.get('week', 'Unknown')}")
+        print(f"Name: {result.get('name', 'Unknown')}")
+        print(f"Colour: {result.get('colour', 'Unknown')}")
+        logger.info("liturgical.py script completed successfully")
+    except Exception as e:
+        logger.exception(f"Error in liturgical.py: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

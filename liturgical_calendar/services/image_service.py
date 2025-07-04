@@ -14,6 +14,7 @@ from ..core.readings_manager import ReadingsManager
 from ..core.season_calculator import SeasonCalculator
 from ..services.feast_service import FeastService
 from liturgical_calendar.exceptions import ImageGenerationError, LiturgicalCalendarError
+from liturgical_calendar.logging import get_logger
 
 
 class ImageService:
@@ -50,6 +51,7 @@ class ImageService:
         )
         self.config = config
         self.pipeline = None  # Will be initialized lazily when needed
+        self.logger = get_logger(__name__)
     
     def generate_liturgical_image(self, date_str: str, 
                                 output_path: Optional[str] = None,
@@ -113,11 +115,15 @@ class ImageService:
                 output_path = None
                 if output_dir:
                     output_path = os.path.join(output_dir, f"liturgical_{date_str}.png")
-                
+                self.logger.info(f"Generating image for {date_str}")
                 result = self.generate_liturgical_image(date_str, output_path, transferred)
+                if result.get('success'):
+                    self.logger.info(f"Image generated successfully: {result.get('file_path')}")
+                else:
+                    self.logger.error(f"Image generation failed for {date_str}: {result.get('error', 'Unknown error')}")
                 results.append(result)
-                
             except (ImageGenerationError, LiturgicalCalendarError) as e:
+                self.logger.error(f"Image generation error for {date_str}: {e}")
                 results.append({
                     'date': date_str,
                     'success': False,
@@ -209,6 +215,7 @@ class ImageService:
             Image generation result dictionary
         """
         if not self.config:
+            self.logger.error("ImageService requires a configuration object to initialize the pipeline")
             raise ImageGenerationError("ImageService requires a configuration object to initialize the pipeline")
         
         # Lazy import to avoid circular dependency
@@ -219,6 +226,7 @@ class ImageService:
         # Extract date from image_data
         date_obj = image_data.get('date')
         if not date_obj:
+            self.logger.error("No date found in image_data")
             raise ImageGenerationError("No date found in image_data")
         
         date_str = date_obj.strftime('%Y-%m-%d')
@@ -228,13 +236,16 @@ class ImageService:
             # Pass the prepared feast and artwork info to the pipeline
             feast_info = image_data
             artwork_info = image_data.get('artwork_info', {})
+            self.logger.info(f"Starting image generation for {date_str}")
             file_path = self.pipeline.generate_image(date_str, output_path, feast_info, artwork_info)
             result = {
                 'image_generated': True,
                 'image_data': image_data,
                 'file_path': str(file_path)
             }
+            self.logger.info(f"Image generated successfully: {file_path}")
         except Exception as e:
+            self.logger.exception(f"Error generating image for {date_str}: {e}")
             raise ImageGenerationError(f"Error generating image: {e}")
         
         return result

@@ -19,6 +19,7 @@ from liturgical_calendar.caching.artwork_cache import ArtworkCache
 from liturgical_calendar.config.settings import Settings
 import sys
 from liturgical_calendar.exceptions import LiturgicalCalendarError
+from liturgical_calendar.logging import setup_logging, get_logger
 
 def get_instagram_image_url(instagram_url):
     """
@@ -109,20 +110,26 @@ def upsample_if_needed(original_path, upsampled_path):
             img.save(upsampled_path, quality=95)
 
 def main():
+    setup_logging()
+    logger = get_logger(__name__)
     try:
+        logger.info("Starting cache_artwork_images script")
         # Optionally load config file from argument or default location
         config_path = None
         if len(sys.argv) > 1 and not sys.argv[1].startswith('-'):
             config_path = sys.argv[1]
         Settings.load_from_file(config_path)  # Loads config from file/env if present
+        logger.info(f"Loaded config from {config_path or 'default'}")
         print("Starting artwork image caching...")
         
         # Use ArtworkCache for all cache operations
         artwork_cache = ArtworkCache()
+        logger.info(f"Cache directory: {artwork_cache.cache_dir.absolute()}")
         print(f"Cache directory: {artwork_cache.cache_dir.absolute()}")
         
         # Extract all source URLs
         source_entries = extract_source_urls_from_feasts()
+        logger.info(f"Found {len(source_entries)} source URLs in artwork data")
         print(f"Found {len(source_entries)} source URLs in artwork data")
         
         # Track progress
@@ -138,6 +145,7 @@ def main():
             name = entry['name']
             path = entry['path']
             
+            logger.info(f"Processing: {name} ({path}) [{i}/{total_images}]")
             print(f"\n[{i}/{total_images}] Processing: {name} ({path})")
             print(f"  Source URL: {source_url}")
             
@@ -146,6 +154,7 @@ def main():
             
             # Check if already cached
             if artwork_cache.is_cached(source_url):
+                logger.info(f"Already cached: {cache_path.name}")
                 print(f"  ✓ Already cached: {cache_path.name}")
                 skipped_images += 1
                 continue
@@ -153,9 +162,11 @@ def main():
             # Download and cache the image
             success = artwork_cache.download_and_cache(source_url)
             if success:
+                logger.info(f"Cached: {cache_path.name}")
                 print(f"  ✓ Cached: {cache_path.name}")
                 cached_images += 1
             else:
+                logger.error(f"Failed to cache: {cache_path.name}")
                 print(f"  ✗ Failed to cache: {cache_path.name}")
                 failed_images += 1
                 failed_downloads.append({'url': source_url, 'name': name, 'path': path})
@@ -163,6 +174,7 @@ def main():
             # Optionally, check image dimensions
             width, height = check_image_dimensions(cache_path)
             if width and height:
+                logger.info(f"Downloaded image: {width}x{height} pixels")
                 print(f"    Downloaded image: {width}x{height} pixels")
                 if width >= 1080 or height >= 1080:
                     print(f"    ✓ High resolution image downloaded")
@@ -187,6 +199,7 @@ def main():
         failed_file = artwork_cache.cache_dir / "failed_downloads.json"
         with open(failed_file, 'w') as f:
             json.dump(failed_downloads, f, indent=2)
+        logger.info(f"Failed downloads saved to: {failed_file}")
         print(f"Failed downloads saved to: {failed_file}")
 
         # Create a mapping file for easy lookup
@@ -204,13 +217,24 @@ def main():
                 }
         with open(mapping_file, 'w') as f:
             json.dump(mapping, f, indent=2)
+        logger.info(f"URL mapping saved to: {mapping_file}")
         print(f"URL mapping saved to: {mapping_file}")
+        logger.info("Artwork caching completed successfully")
     except LiturgicalCalendarError as e:
+        logger.error(f"Liturgical Calendar Error: {e}")
         print(f"Liturgical Calendar Error: {e}")
         sys.exit(1)
     except Exception as e:
+        logger.exception(f"Unexpected error: {e}")
         print(f"Unexpected error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
-    main() 
+    setup_logging()
+    logger = get_logger(__name__)
+    try:
+        logger.info("Starting cache_artwork_images script")
+        main()
+    except Exception as e:
+        logger.exception(f"Error in cache_artwork_images: {e}")
+        sys.exit(1) 

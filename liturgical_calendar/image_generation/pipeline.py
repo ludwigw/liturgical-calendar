@@ -5,10 +5,12 @@ from liturgical_calendar.image_generation.layout_engine import LayoutEngine
 from liturgical_calendar.image_generation.font_manager import FontManager
 from liturgical_calendar.image_generation.image_builder import LiturgicalImageBuilder
 from liturgical_calendar.config.settings import Settings
+from liturgical_calendar.logging import get_logger
 
 class ImageGenerationPipeline:
-    def __init__(self, config):
+    def __init__(self, config=None):
         self.config = config
+        self.logger = get_logger(__name__)
         self.feast_service = FeastService()
         self.artwork_manager = ArtworkManager()
         self.font_manager = FontManager(getattr(config, 'FONTS_DIR', Settings.FONTS_DIR))
@@ -40,16 +42,23 @@ class ImageGenerationPipeline:
         Returns:
             Path to the generated image file
         """
-        if feast_info and artwork_info:
-            # Use pre-prepared data from service layer
-            data = self._prepare_data_from_service(date_str, feast_info, artwork_info)
-        else:
-            # Fallback to original data preparation (for backward compatibility)
-            data = self._prepare_data(date_str)
-        
-        layout, fonts = self._create_layout(data)
-        img = self._render_image(layout, fonts, data)
-        return self._save_image(img, date_str, layout, fonts, data, out_path)
+        try:
+            self.logger.info(f"Starting image generation pipeline for {date_str}")
+            if feast_info and artwork_info:
+                # Use pre-prepared data from service layer
+                data = self._prepare_data_from_service(date_str, feast_info, artwork_info)
+            else:
+                # Fallback to original data preparation (for backward compatibility)
+                data = self._prepare_data(date_str)
+            
+            layout, fonts = self._create_layout(data)
+            img = self._render_image(layout, fonts, data)
+            output_path = self._save_image(img, date_str, layout, fonts, data, out_path)
+            self.logger.info(f"Image generation pipeline completed for {date_str}")
+            return output_path
+        except Exception as e:
+            self.logger.exception(f"Error in image generation pipeline for {date_str}: {e}")
+            raise
 
     def _prepare_data_from_service(self, date_str, feast_info, artwork_info):
         """
