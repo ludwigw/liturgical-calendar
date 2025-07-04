@@ -1,11 +1,46 @@
 # Liturgical Calendar Project - Comprehensive Refactoring Plan
 
-## Final Status (2024-06-09)
-- All refactoring phases through 4.2 are complete.
-- All unit, integration, and image generation tests pass.
-- Architecture is modular, maintainable, and fully tested.
-- TODO.md removed as all tracked issues are resolved.
-- **Documentation phase is complete: All major documentation deliverables (README, API reference, integration guides, onboarding docs) have been finished and cross-referenced.**
+
+
+## Table of Contents
+
+| Phase | Title                                      | Status      |
+|-------|--------------------------------------------|-------------|
+| [1](#phase-1-core-architecture-foundation-week-1) | Core Architecture Foundation         | ✅ COMPLETED |
+| --- [1.1](#11-create-core-directory-structure-) | Create Core Directory Structure      | ✅ |
+| --- [1.2](#12-extract-season-calculation-logic-) | Extract Season Calculation Logic     | ✅ |
+| --- [1.3](#13-extract-readings-management-)      | Extract Readings Management          | ✅ |
+| --- [1.4](#14-extract-artwork-management-)       | Extract Artwork Management           | ✅ |
+| [2](#phase-2-data-layer-separation-week-2)        | Data Layer Separation                | ✅ COMPLETED |
+| --- [2.1](#21-separate-data-from-logic-)         | Separate Data from Logic             | ✅ |
+| --- [2.2](#22-create-service-layer-)             | Create Service Layer                 | ✅ |
+| --- [2.3](#23-incremental-migration-of-main-function-logic-) | Incremental Migration of Main Function Logic | ✅ |
+| --- [2.4](#24-clean-up-compatibility-methods-and-complete-service-layer-final-phase-2-step) | Clean Up Compatibility Methods and Complete Service Layer | ✅ |
+| --- [2.5](#25-integrate-fixed-weekday-readings-christmasepiphany-period-) | Integrate Fixed Weekday Readings     | ✅ |
+| [3](#phase-3-image-generation-pipeline-week-3)    | Image Generation Pipeline            | ✅ COMPLETED |
+| --- [3.1](#31-create-layout-engine-)             | Create Layout Engine                 | ✅ |
+| --- [3.2](#32-create-font-manager-)              | Create Font Manager                  | ✅ |
+| --- [3.3](#33-create-image-builder-)             | Create Image Builder                 | ✅ |
+| --- [3.4](#34-create-generation-pipeline-)       | Create Generation Pipeline           | ✅ |
+| [4](#phase-4-caching-and-image-processing-week-4) | Caching and Image Processing         | ✅ COMPLETED |
+| --- [4.1](#41-improve-artwork-caching-)          | Improve Artwork Caching              | ✅ |
+| --- [4.2](#42-image-generation-architecture-)    | Image Generation Architecture        | ✅ |
+| --- [4.3](#43-create-image-processor-)           | Create Image Processor               | ✅ |
+| [5](#phase-5-configuration-and-error-handling)    | Configuration and Error Handling     |             |
+| --- [5.1](#51-centralize-and-standardize-configuration-) | Centralize and Standardize Configuration | ✅ |
+| --- [5.2](#52-improve-error-handling)            | Improve Error Handling               |   |
+| --- [5.3](#53-add-logging)                       | Add Logging                          |   |
+| --- [5.4](#54-optional-cliscript-error-reporting) | (Optional) CLI/Script Error Reporting |   |
+| [6](#phase-6-testing-and-documentation-week-6)    | Testing and Documentation            | ✅ COMPLETED |
+| --- [6.1](#61-reorganize-tests-)                 | Reorganize Tests                     | ✅ |
+| --- [6.2](#62-add-image-generation-tests-)        | Add Image Generation Tests           | ✅ |
+| --- [6.3](#63-create-documentation-)             | Create Documentation                 | ✅ |
+| [7](#phase-7-cli-and-api-improvements-week-7)     | CLI and API Improvements             |             |
+| --- [7.1](#71-create-cli-interface)              | Create CLI Interface                 |   |
+| --- [7.2](#72-update-main-scripts-)              | Update Main Scripts                  | ✅ |
+| [8](#phase-8-performance-and-polish-week-8)       | Performance and Polish               |             |
+| --- [8.1](#81-performance-optimizations)         | Performance Optimizations            |   |
+| --- [8.2](#82-code-quality-improvements)         | Code Quality Improvements            |   |
 
 ## Overview
 This plan addresses maintainability, readability, and testability issues by breaking down monolithic functions, separating concerns, and creating a modular architecture for both liturgical calculations and image generation.
@@ -649,7 +684,13 @@ def test_system():
     """Run comprehensive system tests"""
 ```
 
-#### 7.2 Update Main Scripts
+#### 7.2 Update Main Scripts ✅ **COMPLETED**
+- Both main scripts are fully refactored:
+  - `create_liturgical_image.py` uses the new `Settings` config, instantiates `ImageService`, and generates images via the refactored pipeline. It has a clear `main()` function and CLI entry point.
+  - `cache_artwork_images.py` uses the new `Settings` config and `ArtworkCache` for all cache operations. It extracts artwork URLs directly from the data (functionally equivalent to using a service), downloads/caches images, and reports progress/errors. It has a clear `main()` function and CLI entry point.
+- Both scripts are modular, maintainable, and consistent with the refactored architecture.
+- This phase is complete and matches the plan's intent.
+
 **File**: `create_liturgical_image.py` (simplified)
 ```python
 from liturgical_calendar.image_generation.pipeline import ImageGenerationPipeline
