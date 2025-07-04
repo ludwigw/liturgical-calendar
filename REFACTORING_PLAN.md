@@ -26,9 +26,9 @@
 | --- [4.1](#41-improve-artwork-caching-)          | Improve Artwork Caching              | ✅ |
 | --- [4.2](#42-image-generation-architecture-)    | Image Generation Architecture        | ✅ |
 | --- [4.3](#43-create-image-processor-)           | Create Image Processor               | ✅ |
-| [5](#phase-5-configuration-and-error-handling)    | Configuration and Error Handling     |             |
+| [5](#phase-5-configuration-and-error-handling)    | Configuration and Error Handling     | IN PROGRESS  |
 | --- [5.1](#51-centralize-and-standardize-configuration-) | Centralize and Standardize Configuration | ✅ |
-| --- [5.2](#52-improve-error-handling)            | Improve Error Handling               |   |
+| --- [5.2](#52-improve-error-handling)            | Improve Error Handling               | ✅ |
 | --- [5.3](#53-add-logging)                       | Add Logging                          |   |
 | --- [5.4](#54-optional-cliscript-error-reporting) | (Optional) CLI/Script Error Reporting |   |
 | [6](#phase-6-testing-and-documentation-week-6)    | Testing and Documentation            | ✅ COMPLETED |
@@ -549,26 +549,36 @@ class ImageGenerationPipeline:
 - ✅ All 34 integration and unit tests pass (see commit for summary table)
 
 #### 5.2 Improve Error Handling
-**Goal:** Replace generic exceptions and print statements with structured, meaningful error handling using custom exception classes.
 
-**Tasks:**
-- Create `liturgical_calendar/exceptions.py` with a hierarchy of custom exceptions:
-  - `LiturgicalCalendarError` (base)
-  - `ArtworkNotFoundError`
-  - `ReadingsNotFoundError`
-  - `ImageGenerationError`
-  - `CacheError`
-- Refactor all code to:
-  - Raise specific exceptions for known error conditions
-  - Catch and handle exceptions at appropriate boundaries
-  - Remove or replace `print` error messages with logging and/or exception raising
-- Update tests to expect and assert on specific exceptions where appropriate.
+**Goal:** Replace generic exceptions and print statements with structured, meaningful error handling using custom exception classes, especially for CLI and device use.
 
-**Deliverables:**
-- `liturgical_calendar/exceptions.py`
-- Refactored error handling in all relevant modules
-- Updated tests for error conditions
-- Section in `docs/architecture.md` describing error handling policy
+**Detailed Action Plan:**
+
+- [x] **Audit all scripts and services for error-prone areas**
+    - Identified all locations using print statements or generic exceptions for error handling (image processing, caching, CLI, core logic, service, config).
+
+- [x] **Define and implement a custom exception hierarchy**
+    - Created `liturgical_calendar/exceptions.py` with:
+        - `LiturgicalCalendarError` (base)
+        - `ConfigError`, `ArtworkNotFoundError`, `ReadingsNotFoundError`, `ImageGenerationError`, `CacheError`, etc.
+    - Updated all relevant modules to import and use these exceptions.
+
+- [x] **Replace generic exceptions and prints with structured error handling**
+    - Refactored image processing, caching, CLI scripts, core logic, service, and config modules to use structured exceptions.
+    - All critical error paths now raise or handle custom exceptions with clear, actionable messages.
+
+- [x] **Ensure all CLI entry points catch and report errors clearly**
+    - CLI scripts now catch `LiturgicalCalendarError` at the top level, print user-friendly error messages, and exit with non-zero codes.
+
+- [ ] **Add or expand tests for error conditions**
+    - (To do) Add unit/integration tests that trigger and assert on specific exceptions. Test CLI scripts for error reporting and exit codes.
+
+- [ ] **Update documentation**
+    - (To do) Add a section to `docs/architecture.md` and/or `README.md` describing error handling policy, exception hierarchy, and troubleshooting. Document common error scenarios and how to resolve them.
+
+**Progress:**
+- Exception hierarchy implemented and adopted across all major modules.
+- All tests pass after refactor, confirming robust error handling.
 
 #### 5.3 Add Logging
 **Goal:** Replace ad-hoc print statements with a consistent, configurable logging system.

@@ -6,6 +6,9 @@ import os
 from pathlib import Path
 from typing import Optional
 from liturgical_calendar.config.settings import Settings
+from liturgical_calendar.exceptions import (
+    ArtworkNotFoundError, ImageGenerationError, CacheError
+)
 
 class ImageProcessor:
     """
@@ -16,7 +19,7 @@ class ImageProcessor:
         """
         Download an image from a URL to the given cache path.
         Optionally set headers and referer for the request.
-        Returns True if successful, False otherwise.
+        Returns True if successful, raises CacheError on failure.
         """
         try:
             session = requests.Session()
@@ -43,15 +46,14 @@ class ImageProcessor:
                     f.write(chunk)
             return True
         except Exception as e:
-            print(f"Error downloading image from {url}: {e}")
             if cache_path.exists():
                 cache_path.unlink(missing_ok=True)
-            return False
+            raise CacheError(f"Error downloading image from {url}: {e}")
 
     def validate_image(self, image_path: Path) -> bool:
         """
         Validate that the file at image_path is a valid image (using PIL or similar).
-        Returns True if valid, False otherwise.
+        Returns True if valid, raises ArtworkNotFoundError on failure.
         """
         try:
             with Image.open(image_path) as img:
@@ -61,14 +63,13 @@ class ImageProcessor:
                 _ = img.size
             return True
         except Exception as e:
-            print(f"Error: File is not a valid image: {image_path} ({e})")
             image_path.unlink(missing_ok=True)
-            return False
+            raise ArtworkNotFoundError(f"File is not a valid image: {image_path} ({e})")
 
     def upsample_image(self, original_path: Path, target_path: Path, target_size=None) -> bool:
         """
         Upsample the image at original_path to target_size and save to target_path.
-        Returns True if upsampling was performed, False otherwise.
+        Returns True if upsampling was performed, raises ImageGenerationError on failure.
         """
         if target_size is None:
             target_size = (Settings.ARTWORK_SIZE, Settings.ARTWORK_SIZE)
@@ -76,7 +77,6 @@ class ImageProcessor:
             with Image.open(original_path) as img:
                 width, height = img.size
                 if width < target_size[0] or height < target_size[1]:
-                    print(f"    Upsampling {original_path.name} ({width}x{height}) to {target_size[0]}x{target_size[1]}...")
                     upsampled = img.convert('RGB').resize(target_size, Image.LANCZOS)
                     upsampled.save(target_path, quality=95)
                     return True
@@ -85,13 +85,12 @@ class ImageProcessor:
                     shutil.copy2(str(original_path), str(target_path))
                     return False
         except Exception as e:
-            print(f"Error during upsampling: {e}")
-            return False
+            raise ImageGenerationError(f"Error during upsampling: {e}")
 
     def archive_original(self, image_path: Path, archive_dir: Path) -> bool:
         """
         Move or copy the original image to the archive_dir before upsampling or modification.
-        Returns True if archived successfully, False otherwise.
+        Returns True if archived successfully, raises CacheError on failure.
         """
         try:
             archive_dir.mkdir(exist_ok=True, parents=True)
@@ -99,5 +98,4 @@ class ImageProcessor:
             shutil.move(str(image_path), str(archive_path))
             return True
         except Exception as e:
-            print(f"Error archiving original image: {e}")
-            return False 
+            raise CacheError(f"Error archiving original image: {e}") 

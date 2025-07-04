@@ -7,6 +7,7 @@ for different liturgical dates, seasons, and cycles.
 
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple
+from liturgical_calendar.exceptions import ReadingsNotFoundError
 
 
 class ReadingsManager:
@@ -180,9 +181,7 @@ class ReadingsManager:
             return []
             
         except (ValueError, KeyError, TypeError) as e:
-            # Log error in a production environment
-            print(f"Error getting readings for date {date_str}: {e}")
-            return []
+            raise ReadingsNotFoundError(f"Error getting readings for date {date_str}: {e}")
     
     def validate_readings_data(self, readings: Dict) -> bool:
         """

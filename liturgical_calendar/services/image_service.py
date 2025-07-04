@@ -13,6 +13,7 @@ from ..core.artwork_manager import ArtworkManager
 from ..core.readings_manager import ReadingsManager
 from ..core.season_calculator import SeasonCalculator
 from ..services.feast_service import FeastService
+from liturgical_calendar.exceptions import ImageGenerationError, LiturgicalCalendarError
 
 
 class ImageService:
@@ -116,7 +117,7 @@ class ImageService:
                 result = self.generate_liturgical_image(date_str, output_path, transferred)
                 results.append(result)
                 
-            except Exception as e:
+            except (ImageGenerationError, LiturgicalCalendarError) as e:
                 results.append({
                     'date': date_str,
                     'success': False,
@@ -208,7 +209,7 @@ class ImageService:
             Image generation result dictionary
         """
         if not self.config:
-            raise RuntimeError("ImageService requires a configuration object to initialize the pipeline")
+            raise ImageGenerationError("ImageService requires a configuration object to initialize the pipeline")
         
         # Lazy import to avoid circular dependency
         if self.pipeline is None:
@@ -218,7 +219,7 @@ class ImageService:
         # Extract date from image_data
         date_obj = image_data.get('date')
         if not date_obj:
-            raise ValueError("No date found in image_data")
+            raise ImageGenerationError("No date found in image_data")
         
         date_str = date_obj.strftime('%Y-%m-%d')
         
@@ -234,11 +235,7 @@ class ImageService:
                 'file_path': str(file_path)
             }
         except Exception as e:
-            result = {
-                'image_generated': False,
-                'image_data': image_data,
-                'error': str(e)
-            }
+            raise ImageGenerationError(f"Error generating image: {e}")
         
         return result
     

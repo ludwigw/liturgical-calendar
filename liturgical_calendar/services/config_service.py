@@ -10,6 +10,7 @@ from typing import Dict, Any, Optional, Union
 from pathlib import Path
 import json
 from ..funcs import date_to_days
+from liturgical_calendar.exceptions import ConfigError
 
 
 class ConfigService:
@@ -242,15 +243,15 @@ class ConfigService:
                 try:
                     os.makedirs(dir_path, exist_ok=True)
                 except Exception as e:
-                    errors.append(f"Cannot create directory {dir_path}: {e}")
+                    raise ConfigError(f"Cannot create directory {dir_path}: {e}")
         
         # Check image settings
         image_settings = self.get_image_settings()
         if image_settings['width'] <= 0 or image_settings['height'] <= 0:
-            errors.append("Image dimensions must be positive")
+            raise ConfigError("Image dimensions must be positive")
         
         if image_settings['quality'] < 1 or image_settings['quality'] > 100:
-            errors.append("Image quality must be between 1 and 100")
+            raise ConfigError("Image quality must be between 1 and 100")
         
         # Check artwork settings
         artwork_settings = self.get_artwork_settings()
@@ -258,8 +259,8 @@ class ConfigService:
             warnings.append("Artwork cache size should be positive")
         
         return {
-            'valid': len(errors) == 0,
-            'errors': errors,
+            'valid': True,
+            'errors': [],
             'warnings': warnings
         }
     
@@ -335,4 +336,4 @@ class ConfigService:
             with open(self.config_file, 'w') as f:
                 json.dump(config, f, indent=2)
         except Exception as e:
-            raise RuntimeError(f"Failed to save configuration: {e}") 
+            raise ConfigError(f"Failed to save configuration: {e}") 
