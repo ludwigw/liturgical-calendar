@@ -172,13 +172,6 @@ FeastService → ArtworkManager.get_artwork_for_date()
 FeastService → Return complete feast information
 ```
 
-## Migration Strategy
-
-### Current State
-- ImageGenerationPipeline bypasses service layer
-- Compatibility methods exist for backward compatibility
-- Some orchestration logic is duplicated
-
 ## Benefits
 
 ### Maintainability
