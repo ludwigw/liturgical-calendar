@@ -5,6 +5,7 @@ from liturgical_calendar.funcs import get_cache_filename
 from PIL import Image
 import time
 import shutil
+from .image_processor import ImageProcessor
 
 # Import get_instagram_image_url from the script (or reimplement if needed)
 def get_instagram_image_url(instagram_url):
@@ -19,6 +20,7 @@ class ArtworkCache:
         self.cache_dir.mkdir(exist_ok=True)
         self.original_dir = self.cache_dir / "original"
         self.original_dir.mkdir(exist_ok=True)
+        self.processor = ImageProcessor()
 
     def get_cached_path(self, source_url):
         """Return the expected cache file path for a given source URL."""
@@ -45,69 +47,40 @@ class ArtworkCache:
             direct_url = get_instagram_image_url(source_url)
             if direct_url:
                 image_url = direct_url
-        try:
-            session = requests.Session()
-            headers = {
-                'User-Agent': 'Mozilla/5.0',
-                'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'DNT': '1',
-                'Connection': 'keep-alive',
-                'Sec-Fetch-Dest': 'image',
-                'Sec-Fetch-Mode': 'no-cors',
-                'Sec-Fetch-Site': 'cross-site',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            }
-            if original_instagram_url:
-                headers['Referer'] = original_instagram_url
-            session.headers.update(headers)
-            response = session.get(image_url, timeout=30, stream=True)
-            response.raise_for_status()
-            with open(cache_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            # Validate as image
+        # Download
+        headers = None
+        referer = original_instagram_url if original_instagram_url else None
+        if not self.processor.download_image(image_url, cache_path, headers, referer):
+            return False
+        # Validate
+        if not self.processor.validate_image(cache_path):
+            return False
+        # Upsample if needed
+        if upsample:
             try:
                 with Image.open(cache_path) as img:
-                    img.verify()  # PIL verifies file integrity
-                # Reopen to get size (verify() leaves file closed)
-                with Image.open(cache_path) as img:
                     width, height = img.size
-                    if upsample and (width < 1080 or height < 1080):
-                        # Archive the original file before upsampling
-                        orig_backup = self.original_dir / cache_path.name
-                        try:
-                            shutil.move(str(cache_path), str(orig_backup))
-                            with Image.open(orig_backup) as orig_img:
-                                print(f"    Upsampling {cache_path.name} ({width}x{height}) to 1080x1080...")
-                                upsampled = orig_img.convert('RGB').resize((1080, 1080), Image.LANCZOS)
-                                upsampled.save(cache_path, quality=95)
-                        except Exception as up_ex:
-                            print(f"Error during upsampling or archival: {up_ex}")
-                            # If upsampling fails, restore the original to cache (if possible)
-                            if not cache_path.exists() and orig_backup.exists():
-                                shutil.move(str(orig_backup), str(cache_path))
-                            return False
-                    elif upsample:
-                        # Archive the original even if not upsampled
-                        orig_backup = self.original_dir / cache_path.name
-                        try:
-                            shutil.copy2(str(cache_path), str(orig_backup))
-                        except Exception as arch_ex:
-                            print(f"Warning: Could not archive original image: {arch_ex}")
+                if width < 1080 or height < 1080:
+                    # Archive original
+                    archived = self.processor.archive_original(cache_path, self.original_dir)
+                    if not archived:
+                        print(f"Warning: Could not archive original image before upsampling: {cache_path}")
+                        return False
+                    # Upsample
+                    orig_backup = self.original_dir / cache_path.name
+                    if not self.processor.upsample_image(orig_backup, cache_path, (1080, 1080)):
+                        print(f"Error: Upsampling failed for {orig_backup}")
+                        return False
+                else:
+                    # Archive even if not upsampled
+                    self.processor.archive_original(cache_path, self.original_dir)
+                    # Restore the file to the main cache path
+                    archived_path = self.original_dir / cache_path.name
+                    shutil.copy2(str(archived_path), str(cache_path))
             except Exception as e:
-                # Not a valid image, delete file
-                print(f"Error: Downloaded file is not a valid image: {cache_path} ({e})")
-                cache_path.unlink(missing_ok=True)
+                print(f"Error during upsampling/archive: {e}")
                 return False
-            return True
-        except Exception as e:
-            print(f"Error downloading image from {image_url}: {e}")
-            if cache_path.exists():
-                cache_path.unlink(missing_ok=True)
-            return False
+        return True
 
     def get_cache_info(self, source_url):
         """Return info about the cached file (size, modified time, dimensions if image)."""
