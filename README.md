@@ -133,3 +133,35 @@ IMAGE_WIDTH=2048 python create_liturgical_image.py 2024-12-25
 ```
 
 See `liturgical_calendar/config/settings.py` for all available config options.
+
+## Testing
+
+The test suite is organized as follows:
+
+- `tests/unit/`: Unit tests for individual classes and functions (fast, isolated, use mocks/stubs).
+- `tests/integration/`: Integration and end-to-end tests (test full workflows, real data, script entry points).
+- `tests/fixtures/`: Sample data for use in tests (JSON, YAML, etc.).
+
+### Running All Tests
+
+To run all tests:
+
+```sh
+PYTHONPATH=. python -m unittest discover -s tests -p 'test*.py' -v
+```
+
+### Running Only Unit or Integration Tests
+
+To run only unit tests:
+
+```sh
+PYTHONPATH=. python -m unittest discover -s tests/unit -p 'test*.py' -v
+```
+
+To run only integration tests:
+
+```sh
+PYTHONPATH=. python -m unittest discover -s tests/integration -p 'test*.py' -v
+```
+
+All tests must pass before committing changes. See the project rules for commit and test summary requirements.

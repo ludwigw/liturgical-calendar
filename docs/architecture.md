@@ -288,4 +288,22 @@ See the README for usage examples and more details.
 ---
 
 **See also:**  
-- `REFACTORING_PLAN.md` Phase 5 for implementation details and migration steps. 
+- `REFACTORING_PLAN.md` Phase 5 for implementation details and migration steps.
+
+## Test Organization
+
+The test suite is organized for clarity and maintainability:
+
+- `tests/unit/`: Unit tests for individual modules/classes (fast, isolated, use mocks/stubs)
+- `tests/integration/`: Integration and end-to-end tests (full workflows, real data, script entry points)
+- `tests/fixtures/`: Sample data for use in tests
+
+**How to run tests:**
+- All tests: `PYTHONPATH=. python -m unittest discover -s tests -p 'test*.py' -v`
+- Only unit: `PYTHONPATH=. python -m unittest discover -s tests/unit -p 'test*.py' -v`
+- Only integration: `PYTHONPATH=. python -m unittest discover -s tests/integration -p 'test*.py' -v`
+
+**Rationale:**
+- Clear separation of test types makes it easy to find, run, and maintain tests.
+- Enables targeted testing (e.g., run only fast unit tests during development).
+- Fixtures directory supports reusable sample data for robust testing. 

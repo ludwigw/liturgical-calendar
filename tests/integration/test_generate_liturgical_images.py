@@ -50,7 +50,7 @@ dates_to_test = [
     '2023-12-28', '2024-12-28', '2025-12-28',  # The Holy Family / The Holy Innocents
 ]
 
-script_path = Path(__file__).parent.parent / 'create_liturgical_image.py'
+script_path = Path(__file__).parent.parent.parent / 'create_liturgical_image.py'
 
 for date in dates_to_test:
     print(f'Generating image for {date}...')

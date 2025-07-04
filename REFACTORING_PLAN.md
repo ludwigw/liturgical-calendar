@@ -572,25 +572,15 @@ class ImageGenerationPipeline:
 
 ### Phase 6: Testing and Documentation (Week 6)
 
-#### 6.1 Reorganize Tests
-```
-tests/
-├── unit/
-│   ├── test_season_calculator.py
-│   ├── test_readings_manager.py
-│   ├── test_artwork_manager.py
-│   ├── test_layout_engine.py
-│   ├── test_image_builder.py
-│   └── test_caching.py
-├── integration/
-│   ├── test_liturgical_calendar.py
-│   ├── test_image_generation.py
-│   └── test_end_to_end.py
-└── fixtures/
-    ├── sample_dates.json
-    ├── sample_artwork.json
-    └── sample_readings.json
-```
+#### 6.1 Reorganize Tests ✅ **COMPLETED**
+- Test suite reorganized for clarity and maintainability:
+  - `tests/unit/`: Unit tests for individual modules/classes (fast, isolated, use mocks/stubs)
+  - `tests/integration/`: Integration and end-to-end tests (full workflows, real data, script entry points)
+  - `tests/fixtures/`: Sample data for use in tests
+- Updated test discovery and imports as needed.
+- Fixed script path in integration test to point to the correct main script location.
+- All tests pass after the move and path fix.
+- Documentation (`README.md`, `docs/architecture.md`) updated to describe the new test structure and how to run each suite.
 
 #### 6.2 Add Image Generation Tests ✅ **COMPLETED**
 - Comprehensive unit tests for all image generation components:
