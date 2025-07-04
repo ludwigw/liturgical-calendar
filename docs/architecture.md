@@ -206,3 +206,80 @@ FeastService → Return complete feast information
 - Clear data flow and responsibilities
 - Well-defined interfaces
 - Consistent patterns throughout codebase 
+
+## Configuration, Error Handling, and Logging
+
+### Configuration Management
+
+All configuration for the liturgical calendar project is centralized in `liturgical_calendar/config/settings.py`. This includes:
+
+- **Image generation settings:** (width, height, fonts, padding, colors)
+- **Caching settings:** (cache directory, max cache size, cleanup policy)
+- **API/network settings:** (timeouts, retries, user-agent)
+- **Feature toggles:** (enable/disable upsampling, logging level)
+
+**How it works:**
+- The `Settings` class (or module-level constants) provides a single source of truth for all configuration.
+- All modules import settings from this file, ensuring consistency and easy updates.
+- Optionally, settings can be loaded or overridden from a config file (YAML, JSON, or .env) for deployment flexibility.
+
+**Best Practices:**
+- Never hardcode values in scripts or services—always use the settings module.
+- Document each config option with comments for maintainability.
+
+---
+
+### Error Handling
+
+Error handling is structured and robust, using custom exception classes defined in `liturgical_calendar/exceptions.py`:
+
+- `LiturgicalCalendarError` (base class)
+- `ArtworkNotFoundError`
+- `ReadingsNotFoundError`
+- `ImageGenerationError`
+- `CacheError`
+- (Extend as needed for new error types)
+
+**How it works:**
+- Code raises specific exceptions for known error conditions (e.g., missing artwork, invalid image, failed download).
+- Exceptions are caught and handled at service or CLI boundaries, providing user-friendly messages and clean error reporting.
+- Print statements for errors are replaced with logging and/or exception raising.
+- Tests assert on specific exceptions for error conditions.
+
+**Best Practices:**
+- Raise the most specific exception possible.
+- Catch exceptions at the highest level where recovery or user feedback is possible.
+- Avoid catching broad exceptions unless re-raising or logging.
+
+---
+
+### Logging
+
+Logging is handled via a project-wide logger defined in `liturgical_calendar/logging.py`:
+
+- Use `setup_logging()` to configure log level and format.
+- Replace all `print` statements (except for CLI output) with logging calls (`logger.info`, `logger.warning`, `logger.error`, etc.).
+- Logging level is configurable via settings.
+- Logs include timestamps, module names, and log levels for easy diagnostics.
+
+**Where to log:**
+- Downloads, cache hits/misses, upsampling, errors, and any significant operation.
+- Errors and exceptions should always be logged at `error` or `exception` level.
+
+**Best Practices:**
+- Use `logger.debug` for detailed internal state, `logger.info` for high-level events, `logger.warning` for recoverable issues, and `logger.error` for failures.
+- Do not log sensitive data.
+- Ensure logs are actionable and not overly verbose in production.
+
+---
+
+### CLI/Script Error Reporting
+
+- All CLI scripts (e.g., `create_liturgical_image.py`, `cache_artwork_images.py`) wrap their main entry points in try/except blocks.
+- On error, scripts print a user-friendly message and exit with a non-zero code.
+- Optionally, a `--verbose` or `--debug` flag can enable more detailed logging output for troubleshooting.
+
+---
+
+**See also:**  
+- `REFACTORING_PLAN.md` Phase 5 for implementation details and migration steps. 

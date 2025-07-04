@@ -500,49 +500,81 @@ class ImageGenerationPipeline:
 ### Phase 5: Configuration and Error Handling (Week 5)
 
 #### 5.1 Centralize Configuration
-**File**: `liturgical_calendar/config/settings.py`
-```python
-class Settings:
-    def __init__(self, config_file=None):
-        self.load_config(config_file)
-    
-    # Image generation settings
-    IMAGE_WIDTH = 1404
-    IMAGE_HEIGHT = 1872
-    FONTS_DIR = "fonts"
-    
-    # Caching settings
-    CACHE_DIR = "cache"
-    MAX_CACHE_SIZE = "1GB"
-    
-    # API settings
-    REQUEST_TIMEOUT = 30
-    MAX_RETRIES = 3
-```
+**Goal:** Move all hardcoded values (paths, timeouts, image sizes, etc.) into a single, well-documented configuration module/class.
+
+**Tasks:**
+- Create `liturgical_calendar/config/settings.py` with a `Settings` class or module-level constants.
+- Move all configuration values from scripts, services, and core modules into this file:
+  - Image generation settings (width, height, fonts, padding, colors)
+  - Caching settings (cache directory, max cache size, cleanup policy)
+  - API/network settings (timeouts, retries, user-agent)
+  - Feature toggles (e.g., enable/disable upsampling, logging level)
+- Allow loading from a config file (YAML, JSON, or .env) for overrides.
+- Update all code to use the centralized settings.
+- Add documentation/comments for each config option.
+
+**Deliverables:**
+- `liturgical_calendar/config/settings.py`
+- Updated imports/usages throughout the codebase
+- Section in `docs/architecture.md` describing configuration management
 
 #### 5.2 Improve Error Handling
-**File**: `liturgical_calendar/exceptions.py`
-```python
-class LiturgicalCalendarError(Exception): pass
-class ArtworkNotFoundError(LiturgicalCalendarError): pass
-class ReadingsNotFoundError(LiturgicalCalendarError): pass
-class ImageGenerationError(LiturgicalCalendarError): pass
-class CacheError(LiturgicalCalendarError): pass
-```
+**Goal:** Replace generic exceptions and print statements with structured, meaningful error handling using custom exception classes.
+
+**Tasks:**
+- Create `liturgical_calendar/exceptions.py` with a hierarchy of custom exceptions:
+  - `LiturgicalCalendarError` (base)
+  - `ArtworkNotFoundError`
+  - `ReadingsNotFoundError`
+  - `ImageGenerationError`
+  - `CacheError`
+- Refactor all code to:
+  - Raise specific exceptions for known error conditions
+  - Catch and handle exceptions at appropriate boundaries
+  - Remove or replace `print` error messages with logging and/or exception raising
+- Update tests to expect and assert on specific exceptions where appropriate.
+
+**Deliverables:**
+- `liturgical_calendar/exceptions.py`
+- Refactored error handling in all relevant modules
+- Updated tests for error conditions
+- Section in `docs/architecture.md` describing error handling policy
 
 #### 5.3 Add Logging
-**File**: `liturgical_calendar/logging.py`
-```python
-import logging
+**Goal:** Replace ad-hoc print statements with a consistent, configurable logging system.
 
-def setup_logging(level=logging.INFO):
-    logging.basicConfig(
-        level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
+**Tasks:**
+- Create `liturgical_calendar/logging.py` with a `setup_logging()` function and a project-wide logger.
+- Replace all `print` statements (except for CLI output) with appropriate logging calls.
+- Allow logging level to be set via configuration.
+- Ensure logs include timestamps, module names, and log levels.
+- Add logging to key operations: downloads, cache hits/misses, upsampling, errors, etc.
 
-logger = logging.getLogger(__name__)
-```
+**Deliverables:**
+- `liturgical_calendar/logging.py`
+- Logging integrated throughout the codebase
+- Logging configuration in `settings.py`
+- Section in `docs/architecture.md` describing logging policy and usage
+
+#### 5.4 (Optional) CLI/Script Error Reporting
+**Goal:** Ensure that command-line scripts and user-facing entry points provide clear, actionable error messages and exit codes.
+
+**Tasks:**
+- Wrap main script entry points in try/except blocks that catch custom exceptions and print user-friendly messages.
+- Ensure non-zero exit codes on failure.
+- Optionally, add a `--verbose` or `--debug` flag to control logging output.
+
+**Deliverables:**
+- Updated CLI scripts (e.g., `create_liturgical_image.py`, `cache_artwork_images.py`)
+- User-facing error messages and exit codes
+
+---
+
+**Documentation:**
+- For each sub-phase, add/update sections in `docs/architecture.md`:
+  - Configuration management (where/how to set config, override, environment variables)
+  - Error handling (exception hierarchy, where to catch/raise, user-facing errors)
+  - Logging (setup, usage patterns, log levels, where logs go)
 
 ### Phase 6: Testing and Documentation (Week 6)
 
