@@ -20,3 +20,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 liturgical_calendar = 'liturgical_calendar.liturgical:main'
+litcal = 'liturgical_calendar.cli:main'
