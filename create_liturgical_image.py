@@ -40,20 +40,28 @@ def get_date_str(date):
     return date.strftime('%Y-%m-%d')
 
 def main():
-    setup_logging()
+    # Parse --verbose flag
+    verbose = False
+    args = sys.argv[1:]
+    if '--verbose' in args:
+        verbose = True
+        args.remove('--verbose')
+    setup_logging(level='DEBUG' if verbose else 'INFO')
     logger = get_logger(__name__)
+    if verbose:
+        print("[INFO] Verbose mode enabled (log level: DEBUG)")
     try:
         logger.info("Starting create_liturgical_image script")
         # Optionally load config file from argument or default location
         config_path = None
-        if len(sys.argv) > 2:
-            config_path = sys.argv[2]
+        if len(args) > 1:
+            config_path = args[1]
         Settings.load_from_file(config_path)  # Loads config from file/env if present
         logger.info(f"Loaded config from {config_path or 'default'}")
         # Parse date argument
-        if len(sys.argv) > 1:
+        if len(args) > 0:
             try:
-                date = datetime.datetime.strptime(sys.argv[1], '%Y-%m-%d').date()
+                date = datetime.datetime.strptime(args[0], '%Y-%m-%d').date()
             except Exception:
                 logger.error('Invalid date format. Use YYYY-MM-DD.')
                 print('Invalid date format. Use YYYY-MM-DD.')
@@ -61,13 +69,11 @@ def main():
         else:
             date = datetime.date.today()
         date_str = get_date_str(date)
-
         # Create ImageService with config
         image_service = ImageService(config=SimpleConfig)
         logger.info(f"Generating image for {date_str}")
         # Generate image using the service
         result = image_service.generate_liturgical_image(date_str)
-        
         if result.get('success'):
             print(f"Saved image to {result.get('file_path')}")
             print(f"Feast: {result.get('feast_info', {}).get('name', 'Unknown')}")
@@ -87,4 +93,10 @@ def main():
         sys.exit(1)
 
 if __name__ == "__main__":
+    if '--help' in sys.argv or '-h' in sys.argv:
+        print("Usage: python create_liturgical_image.py [YYYY-MM-DD] [config.yaml] [--verbose]")
+        print("  [YYYY-MM-DD]   Optional date to generate image for (default: today)")
+        print("  [config.yaml]  Optional path to config file")
+        print("  --verbose      Enable verbose (DEBUG) logging output")
+        sys.exit(0)
     main() 

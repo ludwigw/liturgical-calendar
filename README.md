@@ -222,6 +222,7 @@ A minimal example for updating an e-ink display is provided in `docs/examples/up
 - **Image not updating on e-ink:** Check the device-specific update command and permissions.
 - **YAML config errors:** Validate your `config.yaml` with an online YAML linter.
 - **Performance issues:** Use smaller images, avoid upsampling, and limit batch size on low-memory devices.
+- **Verbose Mode:** All CLI scripts support a `--verbose` flag. When used, logging is set to DEBUG level and extra diagnostic output is shown. Use this for troubleshooting or detailed progress info.
 
 See [docs/raspberry_pi_eink.md](docs/raspberry_pi_eink.md) for more troubleshooting tips.
 

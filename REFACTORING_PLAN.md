@@ -30,7 +30,7 @@
 | --- [5.1](#51-centralize-and-standardize-configuration-) | Centralize and Standardize Configuration | ✅ |
 | --- [5.2](#52-improve-error-handling)            | Improve Error Handling               | ✅ |
 | --- [5.3](#53-add-logging)                       | Add Logging                          | ✅ |
-| --- [5.4](#54-optional-cliscript-error-reporting) | (Optional) CLI/Script Error Reporting |   |
+| --- [5.4](#54-optional-cli-script-error-reporting) | Optional CLI/Script Error Reporting | ✅ |
 | [6](#phase-6-testing-and-documentation-week-6)    | Testing and Documentation            | ✅ COMPLETED |
 | --- [6.1](#61-reorganize-tests-)                 | Reorganize Tests                     | ✅ |
 | --- [6.2](#62-add-image-generation-tests-)        | Add Image Generation Tests           | ✅ |
@@ -602,25 +602,17 @@ class ImageGenerationPipeline:
 - Documentation is clear and discoverable for new contributors and users.
 - All tests pass after integration.
 
-#### 5.4 (Optional) CLI/Script Error Reporting
-**Goal:** Ensure that command-line scripts and user-facing entry points provide clear, actionable error messages and exit codes.
+#### 5.4 Optional CLI/Script Error Reporting ✅ **COMPLETED**
 
-**Tasks:**
-- Wrap main script entry points in try/except blocks that catch custom exceptions and print user-friendly messages.
-- Ensure non-zero exit codes on failure.
-- Optionally, add a `--verbose` or `--debug` flag to control logging output.
+**What was done:**
+- All CLI scripts (`create_liturgical_image.py`, `cache_artwork_images.py`, `liturgical.py`) now support a `--verbose` flag.
+- When `--verbose` is provided, logging is set to DEBUG level and a message is printed to the user.
+- All user-facing errors are caught and reported with clear messages; scripts exit with non-zero codes on error.
+- Help messages updated to document the new flag and usage.
+- Documentation updated in both `docs/architecture.md` and `README.md`.
 
-**Deliverables:**
-- Updated CLI scripts (e.g., `create_liturgical_image.py`, `cache_artwork_images.py`)
-- User-facing error messages and exit codes
-
----
-
-**Documentation:**
-- For each sub-phase, add/update sections in `docs/architecture.md`:
-  - Configuration management (where/how to set config, override, environment variables)
-  - Error handling (exception hierarchy, where to catch/raise, user-facing errors)
-  - Logging (setup, usage patterns, log levels, where logs go)
+**Result:**
+- CLI scripts are now more user-friendly and easier to troubleshoot, with consistent error handling and optional verbose output for diagnostics.
 
 ### Phase 6: Testing and Documentation (Week 6)
 

@@ -110,55 +110,55 @@ def upsample_if_needed(original_path, upsampled_path):
             img.save(upsampled_path, quality=95)
 
 def main():
-    setup_logging()
+    # Parse --verbose flag
+    verbose = False
+    args = sys.argv[1:]
+    if '--verbose' in args:
+        verbose = True
+        args.remove('--verbose')
+    setup_logging(level='DEBUG' if verbose else 'INFO')
     logger = get_logger(__name__)
+    if verbose:
+        print("[INFO] Verbose mode enabled (log level: DEBUG)")
     try:
         logger.info("Starting cache_artwork_images script")
         # Optionally load config file from argument or default location
         config_path = None
-        if len(sys.argv) > 1 and not sys.argv[1].startswith('-'):
-            config_path = sys.argv[1]
+        if len(args) > 0 and not args[0].startswith('-'):
+            config_path = args[0]
         Settings.load_from_file(config_path)  # Loads config from file/env if present
         logger.info(f"Loaded config from {config_path or 'default'}")
         print("Starting artwork image caching...")
-        
         # Use ArtworkCache for all cache operations
         artwork_cache = ArtworkCache()
         logger.info(f"Cache directory: {artwork_cache.cache_dir.absolute()}")
         print(f"Cache directory: {artwork_cache.cache_dir.absolute()}")
-        
         # Extract all source URLs
         source_entries = extract_source_urls_from_feasts()
         logger.info(f"Found {len(source_entries)} source URLs in artwork data")
         print(f"Found {len(source_entries)} source URLs in artwork data")
-        
         # Track progress
         total_images = len(source_entries)
         cached_images = 0
         failed_images = 0
         skipped_images = 0
         failed_downloads = []
-        
         # Process each source URL
         for i, entry in enumerate(source_entries, 1):
             source_url = entry['url']
             name = entry['name']
             path = entry['path']
-            
             logger.info(f"Processing: {name} ({path}) [{i}/{total_images}]")
             print(f"\n[{i}/{total_images}] Processing: {name} ({path})")
             print(f"  Source URL: {source_url}")
-            
             # Use ArtworkCache for cache filename and path
             cache_path = artwork_cache.get_cached_path(source_url)
-            
             # Check if already cached
             if artwork_cache.is_cached(source_url):
                 logger.info(f"Already cached: {cache_path.name}")
                 print(f"  ✓ Already cached: {cache_path.name}")
                 skipped_images += 1
                 continue
-            
             # Download and cache the image
             success = artwork_cache.download_and_cache(source_url)
             if success:
@@ -170,7 +170,6 @@ def main():
                 print(f"  ✗ Failed to cache: {cache_path.name}")
                 failed_images += 1
                 failed_downloads.append({'url': source_url, 'name': name, 'path': path})
-            
             # Optionally, check image dimensions
             width, height = check_image_dimensions(cache_path)
             if width and height:
@@ -182,10 +181,8 @@ def main():
                     print(f"    ⚠ Medium resolution image downloaded")
                 else:
                     print(f"    ⚠ Low resolution image downloaded")
-
             # Add a short delay to avoid rate-limiting
             time.sleep(1)
-        
         print(f"\nSummary:")
         print(f"  Cached images: {cached_images}")
         print(f"  Skipped (already cached): {skipped_images}")
@@ -194,47 +191,24 @@ def main():
             print("  Failed URLs:")
             for fail in failed_downloads:
                 print(f"    {fail['url']} ({fail['name']}, {fail['path']})")
-
         # Save failed downloads to a JSON file
         failed_file = artwork_cache.cache_dir / "failed_downloads.json"
         with open(failed_file, 'w') as f:
             json.dump(failed_downloads, f, indent=2)
-        logger.info(f"Failed downloads saved to: {failed_file}")
-        print(f"Failed downloads saved to: {failed_file}")
-
-        # Create a mapping file for easy lookup
-        mapping_file = artwork_cache.cache_dir / "url_mapping.json"
-        mapping = {}
-        for entry in source_entries:
-            source_url = entry['url']
-            cache_path = artwork_cache.get_cached_path(source_url)
-            if cache_path.exists():
-                mapping[source_url] = {
-                    'filename': cache_path.name,
-                    'name': entry['name'],
-                    'path': entry['path'],
-                    'size': cache_path.stat().st_size
-                }
-        with open(mapping_file, 'w') as f:
-            json.dump(mapping, f, indent=2)
-        logger.info(f"URL mapping saved to: {mapping_file}")
-        print(f"URL mapping saved to: {mapping_file}")
         logger.info("Artwork caching completed successfully")
     except LiturgicalCalendarError as e:
         logger.error(f"Liturgical Calendar Error: {e}")
         print(f"Liturgical Calendar Error: {e}")
         sys.exit(1)
     except Exception as e:
-        logger.exception(f"Unexpected error: {e}")
-        print(f"Unexpected error: {e}")
+        logger.exception(f"Error in cache_artwork_images: {e}")
+        print(f"Error in cache_artwork_images: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
-    setup_logging()
-    logger = get_logger(__name__)
-    try:
-        logger.info("Starting cache_artwork_images script")
-        main()
-    except Exception as e:
-        logger.exception(f"Error in cache_artwork_images: {e}")
-        sys.exit(1) 
+    if '--help' in sys.argv or '-h' in sys.argv:
+        print("Usage: python cache_artwork_images.py [config.yaml] [--verbose]")
+        print("  [config.yaml]  Optional path to config file")
+        print("  --verbose      Enable verbose (DEBUG) logging output")
+        sys.exit(0)
+    main() 

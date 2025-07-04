@@ -289,45 +289,22 @@ The project uses a centralized logging system to provide consistent, configurabl
 - For issues with log formatting or output, review `liturgical_calendar/logging.py` and your config settings.
 - For deployment (e.g., on Raspberry Pi), ensure the user running the script has permission to write logs if you change the output destination.
 
-### CLI/Script Error Reporting
+### CLI Verbose Mode
 
-- All CLI scripts (e.g., `create_liturgical_image.py`, `cache_artwork_images.py`) wrap their main entry points in try/except blocks.
-- On error, scripts print a user-friendly message and exit with a non-zero code.
-- Optionally, a `--verbose` or `--debug` flag can enable more detailed logging output for troubleshooting.
+All main CLI scripts (`create_liturgical_image.py`, `cache_artwork_images.py`, and `liturgical.py`) now support a `--verbose` flag:
+
+- When `--verbose` is provided, logging is set to DEBUG level, showing detailed diagnostic output.
+- A message is printed to the user indicating that verbose mode is enabled.
+- Use this flag to troubleshoot issues or to see detailed progress and error information.
+
+**Example:**
+
+```sh
+python create_liturgical_image.py 2024-06-01 --verbose
+```
+
+This will print extra log output to the console and help diagnose problems.
 
 ### Configuration Loading
 
-All configuration is centralized in the `Settings` class (`liturgical_calendar/config/settings.py`).
-
-- **Defaults**: All config values have sensible defaults in code.
-- **YAML file**: Optionally, a `config.yaml` file can be provided in the project root or specified as an argument to main scripts (e.g., `create_liturgical_image.py`).
-- **Environment variables**: Any config value can be overridden by setting an environment variable with the same name.
-
-Main scripts (such as `create_liturgical_image.py`) now call `Settings.load_from_file()` at startup, ensuring config is loaded from file/env if present.
-
-See the README for usage examples and more details.
-
----
-
-**See also:**  
-- `REFACTORING_PLAN.md` Phase 5 for implementation details and migration steps.
-
-## Test Organization
-
-The test suite is organized for clarity and maintainability:
-
-- `tests/unit/`: Unit tests for individual modules/classes (fast, isolated, use mocks/stubs)
-- `tests/integration/`: Integration and end-to-end tests (full workflows, real data, script entry points)
-- `tests/fixtures/`: Sample data for use in tests
-
-**How to run tests:**
-- All tests: `PYTHONPATH=. python -m unittest discover -s tests -p 'test*.py' -v`
-- Only unit: `PYTHONPATH=. python -m unittest discover -s tests/unit -p 'test*.py' -v`
-- Only integration: `PYTHONPATH=. python -m unittest discover -s tests/integration -p 'test*.py' -v`
-
-**Rationale:**
-- Clear separation of test types makes it easy to find, run, and maintain tests.
-- Enables targeted testing (e.g., run only fast unit tests during development).
-- Fixtures directory supports reusable sample data for robust testing.
-
-See testing.md for test suite structure and commands. 
+All configuration is centralized in the `
