@@ -1,16 +1,24 @@
+"""
+Font management utilities for liturgical calendar image generation.
+"""
 from pathlib import Path
+from typing import Any, Dict, Tuple
+
 from PIL import ImageFont
-from typing import Dict, Tuple, Any
+
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.logging import get_logger
 
+
 class FontManager:
+    """Manages font loading and caching for image generation."""
     def __init__(self, fonts_dir: Path = None):
         self.fonts_dir = Path(fonts_dir) if fonts_dir else Path(Settings.FONTS_DIR)
         self._cache: Dict[Tuple[str, int], Any] = {}
         self.logger = get_logger(__name__)
 
     def get_font(self, font_name: str, size: int):
+        """Return a font object for the given parameters."""
         try:
             self.logger.info(f"Loading font: {font_name} at size {size}")
             key = (font_name, size)
@@ -32,4 +40,4 @@ class FontManager:
         return width, height
 
     def get_text_metrics(self, font: Any) -> Tuple[int, int]:
-        return font.getmetrics() 
+        return font.getmetrics()

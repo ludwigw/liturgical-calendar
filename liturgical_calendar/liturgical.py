@@ -1,19 +1,20 @@
 """
+Main entry point for liturgical calendar calculations and CLI usage.
+
 This Python module will return the name, season, week number and liturgical
 colour for any day in the Gregorian calendar, according to the Anglican
 tradition of the Church of England.
 """
 
 import sys
-from datetime import datetime, date
+from datetime import date, datetime
 
-from .funcs import get_easter, get_advent_sunday, date_to_days, day_of_week, add_delta_days, colour_code, get_week_number, render_week_name
-from .data.feasts_data import feasts, get_liturgical_feast
+from liturgical_calendar.logging import get_logger, setup_logging
+
+from .config.settings import Settings
+from .services.config_service import ConfigService
 from .services.feast_service import FeastService
 from .services.image_service import ImageService
-from .services.config_service import ConfigService
-from .config.settings import Settings
-from liturgical_calendar.logging import setup_logging, get_logger
 
 ##########################################################################
 
@@ -22,10 +23,11 @@ feast_service = FeastService()
 image_service = ImageService()
 config_service = ConfigService()
 
+
 def liturgical_calendar(s_date: str, transferred: bool = False):
     """
-    Return the liturgical colour for a given day
-    This func contains the main logic
+    Return the liturgical colour for a given day.
+    This function contains the main logic for liturgical calendar calculation.
     """
     if isinstance(s_date, datetime):
         s_date = s_date.date().strftime("%Y-%m-%d")
@@ -34,20 +36,22 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     # If string, assume it's already in YYYY-MM-DD format
     return feast_service.get_complete_feast_info(s_date, transferred)
 
+
 def main():
+    """Main entry point for running the script as a CLI."""
     # Parse --verbose flag
     verbose = False
     args = sys.argv[1:]
-    if '--verbose' in args:
+    if "--verbose" in args:
         verbose = True
-        args.remove('--verbose')
-    setup_logging(level='DEBUG' if verbose else 'INFO')
+        args.remove("--verbose")
+    setup_logging(level="DEBUG" if verbose else "INFO")
     logger = get_logger(__name__)
     if verbose:
         print("[INFO] Verbose mode enabled (log level: DEBUG)")
     # Optionally load config file from argument or default location
     config_path = None
-    if len(args) > 1 and not args[1].startswith('-'):
+    if len(args) > 1 and not args[1].startswith("-"):
         config_path = args[1]
     Settings.load_from_file(config_path)  # Loads config from file/env if present
     if len(args) > 0:
@@ -72,9 +76,12 @@ def main():
         print(f"Error in liturgical.py: {e}")
         sys.exit(1)
 
+
 if __name__ == "__main__":
-    if '--help' in sys.argv or '-h' in sys.argv:
-        print("Usage: python -m liturgical_calendar.liturgical [YYYY-MM-DD] [config.yaml] [--verbose]")
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print(
+            "Usage: python -m liturgical_calendar.liturgical [YYYY-MM-DD] [config.yaml] [--verbose]"
+        )
         print("  [YYYY-MM-DD]   Optional date to query (default: today)")
         print("  [config.yaml]  Optional path to config file")
         print("  --verbose      Enable verbose (DEBUG) logging output")
