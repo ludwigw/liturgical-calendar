@@ -1,3 +1,7 @@
+"""
+Layout engine for generating liturgical calendar images.
+"""
+
 from typing import Any, Dict, List
 
 

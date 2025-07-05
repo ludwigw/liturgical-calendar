@@ -1,3 +1,6 @@
+"""
+Image generation pipeline for the liturgical calendar project.
+"""
 from pathlib import Path
 
 from liturgical_calendar.config.settings import Settings
@@ -10,6 +13,7 @@ from liturgical_calendar.services.feast_service import FeastService
 
 
 class ImageGenerationPipeline:
+    """Pipeline for generating liturgical calendar images from input data."""
     def __init__(self, config=None):
         self.config = config
         self.logger = get_logger(__name__)

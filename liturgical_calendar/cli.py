@@ -1,3 +1,6 @@
+"""
+Command-line interface for the liturgical calendar project. Supports image generation, artwork caching, and info queries.
+"""
 import argparse
 import datetime
 import sys
@@ -38,6 +41,7 @@ FONTS_DIR = Settings.FONTS_DIR
 
 
 class SimpleConfig:
+    """Simple configuration holder for image generation settings."""
     IMAGE_WIDTH = WIDTH
     IMAGE_HEIGHT = HEIGHT
     BG_COLOR = BG_COLOR
@@ -54,10 +58,12 @@ class SimpleConfig:
 
 
 def get_date_str(date):
+    """Return a date string in YYYY-MM-DD format from a date object."""
     return date.strftime("%Y-%m-%d")
 
 
 def main(today_func=datetime.date.today):
+    """Main CLI entry point for parsing arguments and dispatching commands."""
     parser = argparse.ArgumentParser(
         prog="litcal",
         description="Liturgical Calendar CLI: generate images, cache artwork, query info, and more.",

@@ -1,3 +1,6 @@
+"""
+Logging utilities for the liturgical calendar project. Provides setup and logger access.
+"""
 import logging
 import sys
 

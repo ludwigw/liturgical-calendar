@@ -1,3 +1,6 @@
+"""
+Image builder for constructing liturgical calendar images.
+"""
 import os
 
 from PIL import Image, ImageDraw
@@ -8,6 +11,7 @@ from liturgical_calendar.utils.file_system import safe_save_image
 
 
 class LiturgicalImageBuilder:
+    """Builds images for the liturgical calendar using provided data and settings."""
     def __init__(self, config=None):
         self.config = config
         self.logger = get_logger(__name__)
@@ -62,12 +66,7 @@ class LiturgicalImageBuilder:
     def build_image(
         self, date_str, liturgical_info, artwork_info, layout, fonts, out_path
     ):
-        """
-        Orchestrate the full image build given all layout info and resources with enhanced error handling.
-        layout: dict with keys for header, artwork, title, readings, etc.
-        fonts: dict of loaded fonts
-        out_path: where to save the image
-        """
+        """Construct and return a liturgical calendar image for the given parameters."""
         try:
             self.logger.info(f"Building image for {date_str}")
             img = self.create_base_image()

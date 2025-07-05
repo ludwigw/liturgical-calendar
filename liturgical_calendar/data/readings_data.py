@@ -1,3 +1,7 @@
+"""
+Scripture readings data for the liturgical calendar.
+"""
+
 sunday_readings = {
     # Advent
     "Advent 1": {

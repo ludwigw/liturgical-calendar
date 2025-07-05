@@ -1,4 +1,6 @@
 """
+Main entry point for liturgical calendar calculations and CLI usage.
+
 This Python module will return the name, season, week number and liturgical
 colour for any day in the Gregorian calendar, according to the Anglican
 tradition of the Church of England.
@@ -24,8 +26,8 @@ config_service = ConfigService()
 
 def liturgical_calendar(s_date: str, transferred: bool = False):
     """
-    Return the liturgical colour for a given day
-    This func contains the main logic
+    Return the liturgical colour for a given day.
+    This function contains the main logic for liturgical calendar calculation.
     """
     if isinstance(s_date, datetime):
         s_date = s_date.date().strftime("%Y-%m-%d")
@@ -36,6 +38,7 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
 
 
 def main():
+    """Main entry point for running the script as a CLI."""
     # Parse --verbose flag
     verbose = False
     args = sys.argv[1:]

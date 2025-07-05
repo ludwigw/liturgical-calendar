@@ -1,6 +1,5 @@
 """
-Artwork data for liturgical calendar feasts.
-Contains feast artwork information organized by easter and christmas seasons.
+Artwork metadata and sources for the liturgical calendar.
 """
 
 # Feast artwork data organized by season and date

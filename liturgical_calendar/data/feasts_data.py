@@ -1,3 +1,6 @@
+"""
+Feasts and commemorations data for the liturgical calendar.
+"""
 # Feast data for the liturgical calendar
 # Copy the full 'feasts' dictionary from feasts.py into the variable below
 

@@ -1,3 +1,7 @@
+"""
+Image processing utilities for the liturgical calendar project.
+"""
+
 import shutil
 import time
 from pathlib import Path
@@ -17,9 +21,7 @@ from liturgical_calendar.utils.file_system import safe_save_image
 
 
 class ImageProcessor:
-    """
-    Handles low-level image file operations: download, validation, upsampling, and archiving.
-    """
+    """Processes images for caching and use in the liturgical calendar."""
 
     def __init__(self, config=None):
         self.config = config
@@ -192,6 +194,7 @@ class ImageProcessor:
             raise CacheError(f"Error archiving original image: {e}")
 
     def process_image(self, image_path, output_path, options=None):
+        """Process and return an image for the given parameters."""
         try:
             self.logger.info(f"Processing image: {image_path}")
             # ... existing logic ...
