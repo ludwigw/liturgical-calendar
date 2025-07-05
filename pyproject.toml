@@ -9,13 +9,15 @@ packages = [{include = "liturgical_calendar"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 python-dateutil = "^2.8.2"
-Pillow = "^8.0.0"
-PyYAML = "^5.4"
+Pillow = "^11.0.0"
+PyYAML = "^6.0"
 requests = "^2.25"
 
 [tool.poetry.group.dev.dependencies]
-pylint = "^2.17.4"
+pylint = "^3.1.0"
+astroid = "^3.1.0"
 autopep8 = "^2.0.4"
+black = "^25.1.0"
 
 [build-system]
 requires = ["poetry-core"]

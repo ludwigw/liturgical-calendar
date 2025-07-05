@@ -4,6 +4,7 @@ from typing import Dict, Tuple, Any
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.logging import get_logger
 
+
 class FontManager:
     def __init__(self, fonts_dir: Path = None):
         self.fonts_dir = Path(fonts_dir) if fonts_dir else Path(Settings.FONTS_DIR)
@@ -32,4 +33,4 @@ class FontManager:
         return width, height
 
     def get_text_metrics(self, font: Any) -> Tuple[int, int]:
-        return font.getmetrics() 
+        return font.getmetrics()

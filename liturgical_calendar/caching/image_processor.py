@@ -8,10 +8,13 @@ from pathlib import Path
 from typing import Optional
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.exceptions import (
-    ArtworkNotFoundError, ImageGenerationError, CacheError
+    ArtworkNotFoundError,
+    ImageGenerationError,
+    CacheError,
 )
 from liturgical_calendar.logging import get_logger
 from liturgical_calendar.utils.file_system import safe_save_image
+
 
 class ImageProcessor:
     """
@@ -22,9 +25,15 @@ class ImageProcessor:
         self.config = config
         self.logger = get_logger(__name__)
 
-    def download_image(self, url: str, cache_path: Path, headers: Optional[dict] = None, 
-                      referer: Optional[str] = None, max_retries: int = 3, 
-                      retry_delay: float = 5.0) -> bool:
+    def download_image(
+        self,
+        url: str,
+        cache_path: Path,
+        headers: Optional[dict] = None,
+        referer: Optional[str] = None,
+        max_retries: int = 3,
+        retry_delay: float = 5.0,
+    ) -> bool:
         """
         Download an image from a URL to the given cache path with retry logic.
         Optionally set headers and referer for the request.
@@ -34,71 +43,89 @@ class ImageProcessor:
             try:
                 session = requests.Session()
                 req_headers = headers or {
-                    'User-Agent': Settings.USER_AGENT,
-                    'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-                    'Accept-Language': 'en-US,en;q=0.9',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'DNT': '1',
-                    'Connection': 'keep-alive',
-                    'Sec-Fetch-Dest': 'image',
-                    'Sec-Fetch-Mode': 'no-cors',
-                    'Sec-Fetch-Site': 'cross-site',
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
+                    "User-Agent": Settings.USER_AGENT,
+                    "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Accept-Encoding": "gzip, deflate, br",
+                    "DNT": "1",
+                    "Connection": "keep-alive",
+                    "Sec-Fetch-Dest": "image",
+                    "Sec-Fetch-Mode": "no-cors",
+                    "Sec-Fetch-Site": "cross-site",
+                    "Cache-Control": "no-cache",
+                    "Pragma": "no-cache",
                 }
                 if referer:
-                    req_headers['Referer'] = referer
+                    req_headers["Referer"] = referer
                 session.headers.update(req_headers)
-                response = session.get(url, timeout=Settings.REQUEST_TIMEOUT, stream=True)
+                response = session.get(
+                    url, timeout=Settings.REQUEST_TIMEOUT, stream=True
+                )
                 response.raise_for_status()
-                with open(cache_path, 'wb') as f:
+                with open(cache_path, "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         f.write(chunk)
                 self.logger.info(f"Image downloaded successfully: {cache_path}")
                 return True
-                
+
             except requests.ConnectionError as e:
                 if attempt < max_retries - 1:
-                    delay = retry_delay * (2 ** attempt)  # Exponential backoff
-                    self.logger.warning(f"Network connection error (attempt {attempt + 1}/{max_retries}) for {url}: {e}")
+                    delay = retry_delay * (2**attempt)  # Exponential backoff
+                    self.logger.warning(
+                        f"Network connection error (attempt {attempt + 1}/{max_retries}) for {url}: {e}"
+                    )
                     self.logger.info(f"Retrying in {delay:.1f} seconds...")
                     time.sleep(delay)
                     continue
                 else:
-                    self.logger.error(f"Failed to download {url} after {max_retries} attempts due to connection error: {e}")
+                    self.logger.error(
+                        f"Failed to download {url} after {max_retries} attempts due to connection error: {e}"
+                    )
                     if cache_path.exists():
                         cache_path.unlink(missing_ok=True)
-                    raise CacheError(f"Network connection failed after {max_retries} attempts: {e}")
-                    
+                    raise CacheError(
+                        f"Network connection failed after {max_retries} attempts: {e}"
+                    )
+
             except requests.Timeout as e:
                 if attempt < max_retries - 1:
-                    delay = retry_delay * (2 ** attempt)  # Exponential backoff
-                    self.logger.warning(f"Request timeout (attempt {attempt + 1}/{max_retries}) for {url}: {e}")
+                    delay = retry_delay * (2**attempt)  # Exponential backoff
+                    self.logger.warning(
+                        f"Request timeout (attempt {attempt + 1}/{max_retries}) for {url}: {e}"
+                    )
                     self.logger.info(f"Retrying in {delay:.1f} seconds...")
                     time.sleep(delay)
                     continue
                 else:
-                    self.logger.error(f"Failed to download {url} after {max_retries} attempts due to timeout: {e}")
+                    self.logger.error(
+                        f"Failed to download {url} after {max_retries} attempts due to timeout: {e}"
+                    )
                     if cache_path.exists():
                         cache_path.unlink(missing_ok=True)
-                    raise CacheError(f"Request timeout after {max_retries} attempts: {e}")
-                    
+                    raise CacheError(
+                        f"Request timeout after {max_retries} attempts: {e}"
+                    )
+
             except requests.HTTPError as e:
                 # Don't retry HTTP errors (4xx, 5xx) as they're likely permanent
                 self.logger.error(f"HTTP error downloading {url}: {e}")
                 if cache_path.exists():
                     cache_path.unlink(missing_ok=True)
                 raise CacheError(f"HTTP error downloading {url}: {e}")
-                
+
             except Exception as e:
                 if attempt < max_retries - 1:
-                    delay = retry_delay * (2 ** attempt)  # Exponential backoff
-                    self.logger.warning(f"Unexpected error (attempt {attempt + 1}/{max_retries}) for {url}: {e}")
+                    delay = retry_delay * (2**attempt)  # Exponential backoff
+                    self.logger.warning(
+                        f"Unexpected error (attempt {attempt + 1}/{max_retries}) for {url}: {e}"
+                    )
                     self.logger.info(f"Retrying in {delay:.1f} seconds...")
                     time.sleep(delay)
                     continue
                 else:
-                    self.logger.error(f"Failed to download {url} after {max_retries} attempts due to unexpected error: {e}")
+                    self.logger.error(
+                        f"Failed to download {url} after {max_retries} attempts due to unexpected error: {e}"
+                    )
                     if cache_path.exists():
                         cache_path.unlink(missing_ok=True)
                     raise CacheError(f"Unexpected error downloading {url}: {e}")
@@ -121,7 +148,9 @@ class ImageProcessor:
             self.logger.error(f"File is not a valid image: {image_path} ({e})")
             raise ArtworkNotFoundError(f"File is not a valid image: {image_path} ({e})")
 
-    def upsample_image(self, original_path: Path, target_path: Path, target_size=None) -> bool:
+    def upsample_image(
+        self, original_path: Path, target_path: Path, target_size=None
+    ) -> bool:
         """
         Upsample the image at original_path to target_size and save to target_path.
         Returns True if upsampling was performed, raises ImageGenerationError on failure.
@@ -132,8 +161,10 @@ class ImageProcessor:
             with Image.open(original_path) as img:
                 width, height = img.size
                 if width < target_size[0] or height < target_size[1]:
-                    self.logger.info(f"Upsampling {original_path.name} ({width}x{height}) to {target_size[0]}x{target_size[1]}")
-                    upsampled = img.convert('RGB').resize(target_size, Image.LANCZOS)
+                    self.logger.info(
+                        f"Upsampling {original_path.name} ({width}x{height}) to {target_size[0]}x{target_size[1]}"
+                    )
+                    upsampled = img.convert("RGB").resize(target_size, Image.LANCZOS)
                     safe_save_image(upsampled, target_path, quality=95)
                     self.logger.info(f"Image upsampled successfully: {target_path}")
                     return True
@@ -167,4 +198,4 @@ class ImageProcessor:
             self.logger.info(f"Image processed successfully: {output_path}")
         except Exception as e:
             self.logger.exception(f"Error processing image {image_path}: {e}")
-            raise 
+            raise

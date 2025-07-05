@@ -1,6 +1,7 @@
 import os
 import yaml
 
+
 class Settings:
     """
     Centralized configuration for the liturgical calendar project.
@@ -12,6 +13,7 @@ class Settings:
         - Environment variables with matching names (e.g., IMAGE_WIDTH) override both defaults and file values.
         - Precedence: ENV > config file > code default.
     """
+
     # Image generation settings
     IMAGE_WIDTH = 1404  # px
     IMAGE_HEIGHT = 1872  # px
@@ -24,7 +26,7 @@ class Settings:
     TITLE_LINE_HEIGHT = 1.2
     COLUMN_FONT_SIZE = 36
     BG_COLOR = (255, 255, 255)  # White background
-    TEXT_COLOR = (74, 74, 74)   # Default text color
+    TEXT_COLOR = (74, 74, 74)  # Default text color
     LINE_COLOR = (151, 151, 151)  # Divider line color
 
     # Caching settings
@@ -32,24 +34,24 @@ class Settings:
     ORIGINALS_SUBDIR = "original"
     MAX_CACHE_SIZE = None  # e.g., "1GB" (not enforced yet)
     CACHE_CLEANUP_DAYS = 30  # Remove files older than this
-    
+
     # Build settings
     BUILD_DIR = "build"  # Directory for generated images
-    
+
     # Fallback/placeholder settings
     PLACEHOLDER_COLOR = (230, 230, 230)  # Light gray color for missing artwork
 
     # API/network settings
     REQUEST_TIMEOUT = 30  # seconds
     MAX_RETRIES = 3
-    USER_AGENT = 'Mozilla/5.0'
+    USER_AGENT = "Mozilla/5.0"
 
     # Feature toggles
     ENABLE_UPSAMPLING = True
     LOGGING_LEVEL = "INFO"  # Can be overridden
 
     @classmethod
-    def load_from_file(cls, path='config.yaml'):
+    def load_from_file(cls, path="config.yaml"):
         """
         Load configuration from a YAML file, then apply environment variable overrides.
         ENV variables must match the class attribute names (e.g., IMAGE_WIDTH).
