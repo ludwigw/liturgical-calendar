@@ -319,6 +319,6 @@ A unified CLI (`python -m liturgical_calendar.cli` or `litcal` if installed) pro
 - `validate-config [--config CONFIG] [--verbose]`: Validate the config file.
 - `version`: Print CLI version.
 
-All subcommands support `--config` and `--verbose` global options. See the README and CLI_DESIGN.md for usage examples and advanced options.
+All subcommands support `--config` and `--verbose` global options. See the README for usage examples and advanced options.
 
 **Note:** The CLI replaces legacy scripts (e.g., `create_liturgical_image.py`). Use the CLI for all workflows going forward.

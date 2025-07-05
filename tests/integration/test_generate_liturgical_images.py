@@ -50,11 +50,12 @@ dates_to_test = [
     '2023-12-28', '2024-12-28', '2025-12-28',  # The Holy Family / The Holy Innocents
 ]
 
-script_path = Path(__file__).parent.parent.parent / 'create_liturgical_image.py'
+# Use the CLI instead of the old script
+cli_module = 'liturgical_calendar.cli'
 
 for date in dates_to_test:
     print(f'Generating image for {date}...')
-    result = subprocess.run([sys.executable, str(script_path), date], capture_output=True, text=True)
+    result = subprocess.run([sys.executable, '-m', cli_module, 'generate', date], capture_output=True, text=True)
     print(result.stdout)
     if result.returncode != 0:
         print(f'Error for {date}:')

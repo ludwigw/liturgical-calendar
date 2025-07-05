@@ -14,7 +14,7 @@
 Generate today's liturgical image with default settings:
 
 ```sh
-python create_liturgical_image.py
+python -m liturgical_calendar.cli generate
 ```
 
 Or get liturgical info for today at the command line:
@@ -65,9 +65,9 @@ python -m liturgical_calendar.cli validate-config
 python -m liturgical_calendar.cli version
 ```
 
-See [CLI_DESIGN.md](CLI_DESIGN.md) for design details and advanced usage.
+See the [Architecture Overview](docs/architecture.md) for design details and advanced usage.
 
-**Note:** The CLI replaces the old script-based entry points (`create_liturgical_image.py`, etc.). Use the CLI for all new workflows.
+**Note:** The CLI provides a unified interface for all project functionality. Use the CLI for all workflows.
 
 ## Documentation
 
@@ -193,20 +193,20 @@ There is a sample app which uses this library called
 The project uses a centralized `Settings` class for all configuration. Configuration values can be set in three ways:
 
 1. **Defaults in code**: Sensible defaults are provided in `liturgical_calendar/config/settings.py`.
-2. **YAML config file**: You can provide a `config.yaml` file in the project root, or specify a path to a config file as the second argument to `create_liturgical_image.py`.
+2. **YAML config file**: You can provide a `config.yaml` file in the project root, or specify a path to a config file using the `--config` option.
 3. **Environment variables**: Any config value can be overridden by setting an environment variable with the same name (case-insensitive, underscores).
 
 ### Usage Example
 
 ```sh
 # Use defaults
-python create_liturgical_image.py 2024-12-25
+python -m liturgical_calendar.cli generate 2024-12-25
 
 # Use a custom config file
-python create_liturgical_image.py 2024-12-25 my_config.yaml
+python -m liturgical_calendar.cli generate 2024-12-25 --config my_config.yaml
 
 # Override with environment variable
-IMAGE_WIDTH=2048 python create_liturgical_image.py 2024-12-25
+IMAGE_WIDTH=2048 python -m liturgical_calendar.cli generate 2024-12-25
 ```
 
 See `liturgical_calendar/config/settings.py` for all available config options.
