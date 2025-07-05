@@ -20,6 +20,7 @@ from liturgical_calendar.config.settings import Settings
 import sys
 from liturgical_calendar.exceptions import LiturgicalCalendarError
 from liturgical_calendar.logging import setup_logging, get_logger
+from liturgical_calendar.utils.file_system import safe_save_image, safe_write_file
 
 def get_instagram_image_url(instagram_url):
     """
@@ -104,10 +105,10 @@ def upsample_if_needed(original_path, upsampled_path):
         if width < Settings.ARTWORK_SIZE or height < Settings.ARTWORK_SIZE:
             print(f"    Upsampling {original_path.name} ({width}x{height}) to {Settings.ARTWORK_SIZE}x{Settings.ARTWORK_SIZE}...")
             upsampled = img.resize((Settings.ARTWORK_SIZE, Settings.ARTWORK_SIZE), Image.LANCZOS)
-            upsampled.save(upsampled_path, quality=95)
+            safe_save_image(upsampled, upsampled_path, quality=95)
         else:
             print(f"    Copying {original_path.name} ({width}x{height}) - already {Settings.ARTWORK_SIZE} or larger.")
-            img.save(upsampled_path, quality=95)
+            safe_save_image(img, upsampled_path, quality=95)
 
 def main():
     # Parse --verbose flag
@@ -193,8 +194,10 @@ def main():
                 print(f"    {fail['url']} ({fail['name']}, {fail['path']})")
         # Save failed downloads to a JSON file
         failed_file = artwork_cache.cache_dir / "failed_downloads.json"
-        with open(failed_file, 'w') as f:
-            json.dump(failed_downloads, f, indent=2)
+        def write_json(path):
+            with open(path, 'w') as f:
+                json.dump(failed_downloads, f, indent=2)
+        safe_write_file(failed_file, write_json, estimated_size=4096)
         logger.info("Artwork caching completed successfully")
     except LiturgicalCalendarError as e:
         logger.error(f"Liturgical Calendar Error: {e}")

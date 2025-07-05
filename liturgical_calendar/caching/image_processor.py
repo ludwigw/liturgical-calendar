@@ -11,6 +11,7 @@ from liturgical_calendar.exceptions import (
     ArtworkNotFoundError, ImageGenerationError, CacheError
 )
 from liturgical_calendar.logging import get_logger
+from liturgical_calendar.utils.file_system import safe_save_image
 
 class ImageProcessor:
     """
@@ -133,7 +134,7 @@ class ImageProcessor:
                 if width < target_size[0] or height < target_size[1]:
                     self.logger.info(f"Upsampling {original_path.name} ({width}x{height}) to {target_size[0]}x{target_size[1]}")
                     upsampled = img.convert('RGB').resize(target_size, Image.LANCZOS)
-                    upsampled.save(target_path, quality=95)
+                    safe_save_image(upsampled, target_path, quality=95)
                     self.logger.info(f"Image upsampled successfully: {target_path}")
                     return True
                 else:

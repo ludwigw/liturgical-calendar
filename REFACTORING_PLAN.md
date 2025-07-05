@@ -38,8 +38,8 @@
 | [7](#phase-7-cli-and-api-improvements-week-7)     | CLI and API Improvements             |             |
 | --- [7.1](#71-create-cli-interface)              | Create CLI Interface                 | ✅ |
 | --- [7.2](#72-update-main-scripts-)              | Update Main Scripts                  | ✅ |
-| [8](#phase-8-performance-and-polish-week-8)       | Performance and Polish               | ⚠️ PARTIALLY COMPLETED |
-| --- [8.1](#81-error-recovery-for-raspberry-pi)    | Error Recovery for Raspberry Pi      | ⚠️ PARTIALLY COMPLETED |
+| [8](#phase-8-performance-and-polish-week-8)       | Performance and Polish               | ✅ COMPLETED |
+| --- [8.1](#81-error-recovery-for-raspberry-pi)    | Error Recovery for Raspberry Pi      | ✅ COMPLETED |
 
 ## Overview
 This plan addresses maintainability, readability, and testability issues by breaking down monolithic functions, separating concerns, and creating a modular architecture for both liturgical calculations and image generation.
@@ -704,7 +704,7 @@ def main():
 
 ### Phase 8: Error Recovery for Raspberry Pi (Week 8)
 
-#### 8.1 Error Recovery for Raspberry Pi ⚠️ **PARTIALLY COMPLETED**
+#### 8.1 Error Recovery for Raspberry Pi ✅ **COMPLETED**
 
 **Goal:** Implement comprehensive error recovery for reliable daily operation on Raspberry Pi with e-ink displays.
 
@@ -751,15 +751,17 @@ def main():
   - ✅ Dramatically faster subsequent runs (seconds vs minutes)
   - ✅ Proper cache hit/miss logging
 
-##### E. File System Error Handling ❌ **NOT COMPLETED**
-- **File**: `liturgical_calendar/image_generation/image_builder.py`
-- **Changes**: Need to add disk space checks and permission error handling
+##### E. File System Error Handling ✅ **COMPLETED**
+- **File**: `liturgical_calendar/utils/file_system.py` (new utility module)
+- **Changes**: Created reusable file system utility with robust error handling
 - **Features**:
-  - ❌ Check available disk space before writing images
-  - ❌ Handle permission errors gracefully
-  - ❌ Provide clear error messages for file system issues
-  - ❌ Implement cleanup on partial failures
-  - ✅ Use Settings for all file paths (BUILD_DIR, CACHE_DIR) - Already done
+  - ✅ Check available disk space before writing images
+  - ✅ Handle permission errors gracefully
+  - ✅ Provide clear error messages for file system issues
+  - ✅ Implement cleanup on partial failures
+  - ✅ Use Settings for all file paths (BUILD_DIR, CACHE_DIR)
+  - ✅ Atomic file writes with temporary files
+  - ✅ Comprehensive unit tests for all error scenarios - Already done
 
 ##### F. Code Refactoring ✅ **COMPLETED**
 - **File**: `liturgical_calendar/core/artwork_manager.py` and `liturgical_calendar/image_generation/pipeline.py`

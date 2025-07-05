@@ -12,6 +12,7 @@ import json
 from ..funcs import date_to_days
 from liturgical_calendar.exceptions import ConfigError
 from liturgical_calendar.logging import get_logger
+from liturgical_calendar.utils.file_system import safe_write_file
 
 
 class ConfigService:
@@ -335,15 +336,13 @@ class ConfigService:
             self._save_config(default_config)
             return default_config
     
-    def _save_config(self, config: Optional[Dict[str, Any]] = None) -> None:
+    def _save_config(self, config: Dict[str, Any]) -> None:
         """Save configuration to file."""
-        if config is None:
-            config = self._config
-        
-        try:
-            with open(self.config_file, 'w') as f:
+        def write_json(path):
+            with open(path, 'w') as f:
                 json.dump(config, f, indent=2)
-            self.logger.info(f"Configuration saved to {self.config_file}")
+        try:
+            safe_write_file(self.config_file, write_json, estimated_size=4096)
         except Exception as e:
-            self.logger.error(f"Failed to save configuration: {e}")
-            raise ConfigError(f"Failed to save configuration: {e}") 
+            self.logger.error(f"Failed to save config file {self.config_file}: {e}")
+            raise ConfigError(f"Failed to save config file {self.config_file}: {e}") 

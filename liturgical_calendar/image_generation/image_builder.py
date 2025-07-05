@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.logging import get_logger
+from liturgical_calendar.utils.file_system import safe_save_image
 
 class LiturgicalImageBuilder:
     def __init__(self, config=None):
@@ -46,8 +47,6 @@ class LiturgicalImageBuilder:
         
         image.paste(art_img, position)
         return image
-
-
 
     def draw_text(self, image, text, position, font, color):
         draw = ImageDraw.Draw(image)
@@ -112,16 +111,16 @@ class LiturgicalImageBuilder:
             line_rect = layout['readings']['vertical_line']['rect']
             draw.rectangle(line_rect, fill=layout['colors']['line'])
 
-            # Save with error handling
+            # Save with enhanced error handling using utility functions
             try:
-                img.save(out_path, quality=95)
+                safe_save_image(img, out_path, quality=95)
                 self.logger.info(f"Image build completed for {date_str}: {out_path}")
             except Exception as e:
                 self.logger.error(f"Error saving image for {date_str}: {e}")
                 # Try saving with different format
                 try:
                     out_path_png = str(out_path).replace('.jpg', '.png')
-                    img.save(out_path_png)
+                    safe_save_image(img, out_path_png, quality=95)
                     self.logger.info(f"Image saved as PNG for {date_str}: {out_path_png}")
                     return out_path_png
                 except Exception as e2:
