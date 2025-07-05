@@ -53,7 +53,7 @@ class SimpleConfig:
 def get_date_str(date):
     return date.strftime('%Y-%m-%d')
 
-def main():
+def main(today_func=datetime.date.today):
     parser = argparse.ArgumentParser(
         prog="litcal",
         description="Liturgical Calendar CLI: generate images, cache artwork, query info, and more."
@@ -105,7 +105,7 @@ def main():
                 print('Invalid date format. Use YYYY-MM-DD.')
                 sys.exit(1)
         else:
-            date = datetime.date.today()
+            date = today_func()
         date_str = get_date_str(date)
         # Create ImageService with config
         image_service = ImageService(config=SimpleConfig)
@@ -191,7 +191,7 @@ def main():
         if args.date:
             date_str = args.date
         else:
-            date_str = dtdate.today().strftime("%Y-%m-%d")
+            date_str = today_func().strftime("%Y-%m-%d")
         try:
             result = liturgical_calendar(date_str)
             print(f"Date: {date_str}")
