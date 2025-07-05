@@ -4,7 +4,7 @@ name: Test
 on:
   push:
   pull_request:
-    branches: [master]
+    branches: [main, master]
 
 jobs:
   test:
@@ -14,38 +14,56 @@ jobs:
       matrix:
         python-version: ["3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      # install & configure poetry
+          
       - name: Install Poetry
-        uses: snok/install-poetry@v1.2.1
+        uses: snok/install-poetry@v1.8.0
         with:
           virtualenvs-create: true
-      # install dependencies
+          virtualenvs-in-project: true
+          
       - name: Install dependencies
         run: poetry install
+        
+      - name: Run tests
+        run: |
+          poetry run python -m unittest discover -s tests -p 'test*.py' -v
+          
       - name: Run pylint
-        run: "poetry run pylint --rcfile=.pylintrc liturgical_calendar"
+        run: poetry run pylint --rcfile=.pylintrc liturgical_calendar
+        
+      - name: Run CLI tests
+        run: |
+          poetry run python -m liturgical_calendar.cli --help
+          poetry run python -m liturgical_calendar.cli version
+          poetry run python -m liturgical_calendar.cli info
 
   build:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
-      # install & configure poetry
+          python-version: "3.11"
+          
       - name: Install Poetry
-        uses: snok/install-poetry@v1.2.1
+        uses: snok/install-poetry@v1.8.0
         with:
           virtualenvs-create: true
-      # install dependencies
+          virtualenvs-in-project: true
+          
       - name: Install dependencies
         run: poetry install
+        
       - name: Build Python package
         run: poetry build

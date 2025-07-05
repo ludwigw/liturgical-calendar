@@ -1,35 +1,41 @@
 ---
-name: Publish
+name: Build Package
 
 on:
   release:
     types: [published]
 
 jobs:
-  publish:
+  build:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
-    permissions:
-      # This permission is required for trusted publishing.
-      id-token: write
-      contents: read
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
+          
       - name: Install Poetry
-        uses: snok/install-poetry@v1.2.1
+        uses: snok/install-poetry@v1.8.0
         with:
           virtualenvs-create: true
+          virtualenvs-in-project: true
+          
       - name: Parse the git tag
         id: get_tag
-        run: echo ::set-output name=TAG::$(echo $GITHUB_REF | cut -d / -f 3)
+        run: echo "TAG=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
+        
       - name: Bump poetry version
         run: poetry version ${{ steps.get_tag.outputs.TAG }}
-      - name: Mint token
-        id: mint
-        uses: tschm/token-mint-action@v1.0.3
-      - name: Publish to PyPI
-        run: poetry publish -n --build --username __token__ --password '${{ steps.mint.outputs.api-token }}'
+        
+      - name: Build Python package
+        run: poetry build
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: dist/
