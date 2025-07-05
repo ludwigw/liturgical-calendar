@@ -31,7 +31,7 @@ class ImageGenerationPipeline:
 
     def generate_image(self, date_str, out_path=None, feast_info=None, artwork_info=None):
         """
-        Generate an image for the given date.
+        Generate an image for the given date with enhanced error handling.
         
         Args:
             date_str: Date string in YYYY-MM-DD format
@@ -44,6 +44,8 @@ class ImageGenerationPipeline:
         """
         try:
             self.logger.info(f"Starting image generation pipeline for {date_str}")
+            
+            # Prepare data with graceful degradation
             if feast_info and artwork_info:
                 # Use pre-prepared data from service layer
                 data = self._prepare_data_from_service(date_str, feast_info, artwork_info)
@@ -51,9 +53,27 @@ class ImageGenerationPipeline:
                 # Fallback to original data preparation (for backward compatibility)
                 data = self._prepare_data(date_str)
             
-            layout, fonts = self._create_layout(data)
-            img = self._render_image(layout, fonts, data)
-            output_path = self._save_image(img, date_str, layout, fonts, data, out_path)
+            # Create layout and fonts
+            try:
+                layout, fonts = self._create_layout(data)
+            except Exception as e:
+                self.logger.error(f"Error creating layout for {date_str}: {e}")
+                raise
+            
+            # Render image
+            try:
+                img = self._render_image(layout, fonts, data)
+            except Exception as e:
+                self.logger.error(f"Error rendering image for {date_str}: {e}")
+                raise
+            
+            # Save image
+            try:
+                output_path = self._save_image(img, date_str, layout, fonts, data, out_path)
+            except Exception as e:
+                self.logger.error(f"Error saving image for {date_str}: {e}")
+                raise
+            
             self.logger.info(f"Image generation pipeline completed for {date_str}")
             return output_path
         except Exception as e:
@@ -79,15 +99,7 @@ class ImageGenerationPipeline:
         artwork = artwork_info if artwork_info and artwork_info.get('cached_file') else None
         next_artwork = None
         if not (artwork and artwork.get('cached_file')):
-            from datetime import timedelta
-            search_date = date
-            for _ in range(366):
-                search_date += timedelta(days=1)
-                next_artwork_candidate = self.artwork_manager.get_artwork_for_date(search_date.strftime('%Y-%m-%d'))
-                if next_artwork_candidate and next_artwork_candidate.get('cached_file'):
-                    next_artwork = next_artwork_candidate
-                    next_artwork['date'] = search_date.strftime('%-d %B, %Y')
-                    break
+            next_artwork = self.artwork_manager.find_next_artwork(date_str)
         return {
             'date': date,
             'date_str': date_str,
@@ -109,15 +121,7 @@ class ImageGenerationPipeline:
         artwork = artwork_candidate if artwork_candidate and artwork_candidate.get('cached_file') else None
         next_artwork = None
         if not (artwork and artwork.get('cached_file')):
-            from datetime import timedelta
-            search_date = date
-            for _ in range(366):
-                search_date += timedelta(days=1)
-                next_artwork_candidate = self.artwork_manager.get_artwork_for_date(search_date.strftime('%Y-%m-%d'))
-                if next_artwork_candidate and next_artwork_candidate.get('cached_file'):
-                    next_artwork = next_artwork_candidate
-                    next_artwork['date'] = search_date.strftime('%-d %B, %Y')
-                    break
+            next_artwork = self.artwork_manager.find_next_artwork(date_str)
         return {
             'date': date,
             'date_str': date_str,
@@ -198,7 +202,7 @@ class ImageGenerationPipeline:
 
     def _save_image(self, img, date_str, layout, fonts, data, out_path=None):
         # Use builder to do the full build and save
-        build_dir = Path(__file__).parent.parent.parent / 'build'
+        build_dir = Path(Settings.BUILD_DIR)
         build_dir.mkdir(exist_ok=True)
         if out_path is None:
             out_path = build_dir / f"liturgical_{date_str}.png"

@@ -2,6 +2,7 @@ import requests
 from PIL import Image
 import shutil
 import os
+import time
 
 from pathlib import Path
 from typing import Optional
@@ -20,42 +21,86 @@ class ImageProcessor:
         self.config = config
         self.logger = get_logger(__name__)
 
-    def download_image(self, url: str, cache_path: Path, headers: Optional[dict] = None, referer: Optional[str] = None) -> bool:
+    def download_image(self, url: str, cache_path: Path, headers: Optional[dict] = None, 
+                      referer: Optional[str] = None, max_retries: int = 3, 
+                      retry_delay: float = 5.0) -> bool:
         """
-        Download an image from a URL to the given cache path.
+        Download an image from a URL to the given cache path with retry logic.
         Optionally set headers and referer for the request.
         Returns True if successful, raises CacheError on failure.
         """
-        try:
-            session = requests.Session()
-            req_headers = headers or {
-                'User-Agent': Settings.USER_AGENT,
-                'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'DNT': '1',
-                'Connection': 'keep-alive',
-                'Sec-Fetch-Dest': 'image',
-                'Sec-Fetch-Mode': 'no-cors',
-                'Sec-Fetch-Site': 'cross-site',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
-            }
-            if referer:
-                req_headers['Referer'] = referer
-            session.headers.update(req_headers)
-            response = session.get(url, timeout=Settings.REQUEST_TIMEOUT, stream=True)
-            response.raise_for_status()
-            with open(cache_path, 'wb') as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            self.logger.info(f"Image downloaded successfully: {cache_path}")
-            return True
-        except Exception as e:
-            if cache_path.exists():
-                cache_path.unlink(missing_ok=True)
-            self.logger.error(f"Error downloading image from {url}: {e}")
-            raise CacheError(f"Error downloading image from {url}: {e}")
+        for attempt in range(max_retries):
+            try:
+                session = requests.Session()
+                req_headers = headers or {
+                    'User-Agent': Settings.USER_AGENT,
+                    'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'DNT': '1',
+                    'Connection': 'keep-alive',
+                    'Sec-Fetch-Dest': 'image',
+                    'Sec-Fetch-Mode': 'no-cors',
+                    'Sec-Fetch-Site': 'cross-site',
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+                if referer:
+                    req_headers['Referer'] = referer
+                session.headers.update(req_headers)
+                response = session.get(url, timeout=Settings.REQUEST_TIMEOUT, stream=True)
+                response.raise_for_status()
+                with open(cache_path, 'wb') as f:
+                    for chunk in response.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                self.logger.info(f"Image downloaded successfully: {cache_path}")
+                return True
+                
+            except requests.ConnectionError as e:
+                if attempt < max_retries - 1:
+                    delay = retry_delay * (2 ** attempt)  # Exponential backoff
+                    self.logger.warning(f"Network connection error (attempt {attempt + 1}/{max_retries}) for {url}: {e}")
+                    self.logger.info(f"Retrying in {delay:.1f} seconds...")
+                    time.sleep(delay)
+                    continue
+                else:
+                    self.logger.error(f"Failed to download {url} after {max_retries} attempts due to connection error: {e}")
+                    if cache_path.exists():
+                        cache_path.unlink(missing_ok=True)
+                    raise CacheError(f"Network connection failed after {max_retries} attempts: {e}")
+                    
+            except requests.Timeout as e:
+                if attempt < max_retries - 1:
+                    delay = retry_delay * (2 ** attempt)  # Exponential backoff
+                    self.logger.warning(f"Request timeout (attempt {attempt + 1}/{max_retries}) for {url}: {e}")
+                    self.logger.info(f"Retrying in {delay:.1f} seconds...")
+                    time.sleep(delay)
+                    continue
+                else:
+                    self.logger.error(f"Failed to download {url} after {max_retries} attempts due to timeout: {e}")
+                    if cache_path.exists():
+                        cache_path.unlink(missing_ok=True)
+                    raise CacheError(f"Request timeout after {max_retries} attempts: {e}")
+                    
+            except requests.HTTPError as e:
+                # Don't retry HTTP errors (4xx, 5xx) as they're likely permanent
+                self.logger.error(f"HTTP error downloading {url}: {e}")
+                if cache_path.exists():
+                    cache_path.unlink(missing_ok=True)
+                raise CacheError(f"HTTP error downloading {url}: {e}")
+                
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    delay = retry_delay * (2 ** attempt)  # Exponential backoff
+                    self.logger.warning(f"Unexpected error (attempt {attempt + 1}/{max_retries}) for {url}: {e}")
+                    self.logger.info(f"Retrying in {delay:.1f} seconds...")
+                    time.sleep(delay)
+                    continue
+                else:
+                    self.logger.error(f"Failed to download {url} after {max_retries} attempts due to unexpected error: {e}")
+                    if cache_path.exists():
+                        cache_path.unlink(missing_ok=True)
+                    raise CacheError(f"Unexpected error downloading {url}: {e}")
 
     def validate_image(self, image_path: Path) -> bool:
         """

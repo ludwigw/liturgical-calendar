@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Any
 from ..data.artwork_data import feasts as artwork_feasts
 from ..data.feasts_data import get_liturgical_feast  # Only if needed for squashed artwork
 from liturgical_calendar.logging import get_logger
+from liturgical_calendar.config.settings import Settings
 
 
 class ArtworkManager:
@@ -147,15 +148,22 @@ class ArtworkManager:
         source_url = selected_entry.get('source')
         if source_url:
             cache_filename = get_cache_filename(source_url)
-            cached_path = Path(__file__).parent.parent.parent / 'cache' / cache_filename
+            cached_path = Path(Settings.CACHE_DIR) / cache_filename
             if cached_path.exists():
                 result['cached_file'] = str(cached_path)
                 result['cached'] = True
             else:
                 result['cached_file'] = None
                 result['cached'] = False
+        else:
+            result['cached_file'] = None
+            result['cached'] = False
         
         return result
+
+
+
+
     
     def get_cached_artwork_path(self, source_url: str) -> Optional[str]:
         """
@@ -170,21 +178,36 @@ class ArtworkManager:
         from ..funcs import get_cache_filename
         
         cache_filename = get_cache_filename(source_url)
-        cached_path = Path(__file__).parent.parent.parent / 'cache' / cache_filename
+        cached_path = Path(Settings.CACHE_DIR) / cache_filename
         return str(cached_path) if cached_path.exists() else None
     
     def find_next_artwork(self, current_date: str) -> Optional[Dict[str, Any]]:
         """
-        Find the next artwork after a given date.
+        Find the next artwork after a given date that has a cached file.
         
         Args:
             current_date: Date string in YYYY-MM-DD format
             
         Returns:
-            Next artwork entry or None if not found
+            Next artwork entry with 'date' field added, or None if not found
         """
-        # This is a placeholder - would need to implement date iteration logic
-        # For now, return None as this functionality isn't currently used
+        from datetime import datetime, timedelta
+        
+        # Parse the current date
+        current_date_obj = datetime.strptime(current_date, "%Y-%m-%d").date()
+        
+        # Look ahead up to 366 days for the next artwork with cached file
+        for days_ahead in range(1, 367):
+            check_date = current_date_obj + timedelta(days=days_ahead)
+            check_date_str = check_date.strftime("%Y-%m-%d")
+            
+            # Get artwork for this future date
+            artwork = self.get_artwork_for_date(check_date_str)
+            if artwork and artwork.get('cached_file'):
+                # Add the date to the artwork info for display
+                artwork['date'] = check_date.strftime('%-d %B, %Y')
+                return artwork
+        
         return None
     
     def validate_artwork_data(self, artwork_entry: Dict[str, Any]) -> bool:

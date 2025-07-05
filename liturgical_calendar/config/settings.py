@@ -32,6 +32,12 @@ class Settings:
     ORIGINALS_SUBDIR = "original"
     MAX_CACHE_SIZE = None  # e.g., "1GB" (not enforced yet)
     CACHE_CLEANUP_DAYS = 30  # Remove files older than this
+    
+    # Build settings
+    BUILD_DIR = "build"  # Directory for generated images
+    
+    # Fallback/placeholder settings
+    PLACEHOLDER_COLOR = (230, 230, 230)  # Light gray color for missing artwork
 
     # API/network settings
     REQUEST_TIMEOUT = 30  # seconds

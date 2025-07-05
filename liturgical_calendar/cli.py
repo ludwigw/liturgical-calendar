@@ -70,6 +70,8 @@ def main():
 
     # cache-artwork
     cache_parser = subparsers.add_parser('cache-artwork', help='Download/cache all artwork images')
+    cache_parser.add_argument('--max-retries', type=int, default=3, help='Maximum retry attempts for failed downloads (default: 3)')
+    cache_parser.add_argument('--retry-delay', type=float, default=5.0, help='Base delay between retries in seconds (default: 5.0)')
 
     # info
     info_parser = subparsers.add_parser('info', help='Show liturgical info for a date')
@@ -150,32 +152,35 @@ def main():
                         url = entry_list.get('source')
                         if url:
                             urls.add(url)
+            
             cache = ArtworkCache()
             total = len(urls)
-            cached = 0
-            failed = 0
-            for i, url in enumerate(sorted(urls), 1):
-                print(f"[{i}/{total}] Caching: {url}")
-                logger.info(f"Caching artwork: {url}")
-                try:
-                    if cache.is_cached(url):
-                        print("  ✓ Already cached")
-                        logger.info(f"Already cached: {url}")
-                        cached += 1
-                        continue
-                    success = cache.download_and_cache(url)
-                    if success:
-                        print("  ✓ Cached successfully")
-                        cached += 1
-                    else:
-                        print("  ✗ Failed to cache")
-                        failed += 1
-                except Exception as e:
-                    print(f"  ✗ Error: {e}")
-                    logger.error(f"Error caching {url}: {e}")
-                    failed += 1
-            print(f"\nSummary: {cached} cached, {failed} failed, {total} total.")
-            logger.info(f"Cache-artwork completed: {cached} cached, {failed} failed, {total} total.")
+            
+            print(f"Found {total} unique artwork URLs to cache")
+            print(f"Retry settings: max_retries={args.max_retries}, retry_delay={args.retry_delay}s")
+            
+            # Use batch caching with retry logic
+            result = cache.cache_multiple_artwork(
+                sorted(urls), 
+                max_retries=args.max_retries, 
+                retry_delay=args.retry_delay
+            )
+            
+            # Report results
+            print(f"\nSummary: {result['success']} cached, {result['failed']} failed, {result['total']} total.")
+            if result['failed_urls']:
+                print(f"Failed URLs: {len(result['failed_urls'])}")
+                if args.verbose:
+                    for url in result['failed_urls']:
+                        print(f"  - {url}")
+            
+            logger.info(f"Cache-artwork completed: {result['success']} cached, {result['failed']} failed, {result['total']} total.")
+            
+            # Exit with error code if any failed
+            if result['failed'] > 0:
+                print(f"Warning: {result['failed']} artwork items failed to cache")
+                # Don't exit with error code for partial failures - this allows the system to continue
+                
         except Exception as e:
             logger.exception(f"Error in cache-artwork: {e}")
             print(f"Error in cache-artwork: {e}")

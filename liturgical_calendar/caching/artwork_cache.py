@@ -37,16 +37,36 @@ class ArtworkCache:
         """Check if the image for the given source URL is already cached."""
         return self.get_cached_path(source_url).exists()
 
-    def download_and_cache(self, source_url, original_instagram_url=None, upsample=True):
+    def download_and_cache(self, source_url, original_instagram_url=None, upsample=True, 
+                          max_retries=3, retry_delay=5.0):
         """
         Download an image from the source URL and save it to the cache. Returns True if successful.
         - For Instagram URLs, use the direct image link.
         - After download, validate as image. If invalid, delete and return False.
         - Optionally upsample to 1080x1080 if smaller, archiving the original first.
+        - Includes retry logic for network failures.
         """
         cache_path = self.get_cached_path(source_url)
+        
+        # Check if already cached
+        if cache_path.exists():
+            self.logger.info(f"Image already cached for {source_url}, skipping download")
+            return True
+        
+        # Convert Instagram URLs to direct image URLs
+        download_url = source_url
+        if 'instagram.com' in source_url:
+            direct_url = get_instagram_image_url(source_url)
+            if direct_url:
+                download_url = direct_url
+                self.logger.info(f"Converting Instagram URL to direct image URL: {source_url} -> {download_url}")
+            else:
+                self.logger.warning(f"Could not convert Instagram URL to direct image URL: {source_url}")
+        
         try:
-            self.processor.download_image(source_url, cache_path)
+            # Use retry logic from ImageProcessor
+            self.processor.download_image(download_url, cache_path, 
+                                        max_retries=max_retries, retry_delay=retry_delay)
             if upsample:
                 with Image.open(cache_path) as img:
                     width, height = img.size
@@ -98,4 +118,49 @@ class ArtworkCache:
                     file.unlink()
                     removed.append(str(file))
         self.logger.info(f"Removed {len(removed)} old cache files")
-        return removed 
+        return removed
+
+    def cache_multiple_artwork(self, source_urls, max_retries=3, retry_delay=5.0):
+        """
+        Cache multiple artwork URLs and return success/failure counts for monitoring.
+        
+        Args:
+            source_urls: List of source URLs to cache
+            max_retries: Maximum number of retry attempts for each download
+            retry_delay: Base delay between retries (exponential backoff)
+            
+        Returns:
+            dict: {'success': int, 'failed': int, 'total': int, 'failed_urls': list}
+        """
+        total = len(source_urls)
+        success_count = 0
+        failed_count = 0
+        failed_urls = []
+        
+        self.logger.info(f"Starting batch cache operation for {total} artwork items")
+        
+        for i, url in enumerate(source_urls, 1):
+            self.logger.info(f"Processing artwork {i}/{total}: {url}")
+            try:
+                success = self.download_and_cache(url, max_retries=max_retries, retry_delay=retry_delay)
+                if success:
+                    success_count += 1
+                    self.logger.info(f"Successfully cached artwork {i}/{total}")
+                else:
+                    failed_count += 1
+                    failed_urls.append(url)
+                    self.logger.warning(f"Failed to cache artwork {i}/{total}: {url}")
+            except Exception as e:
+                failed_count += 1
+                failed_urls.append(url)
+                self.logger.error(f"Exception while caching artwork {i}/{total}: {url} - {e}")
+        
+        result = {
+            'success': success_count,
+            'failed': failed_count,
+            'total': total,
+            'failed_urls': failed_urls
+        }
+        
+        self.logger.info(f"Batch cache operation completed: {success_count} successful, {failed_count} failed out of {total} total")
+        return result 
