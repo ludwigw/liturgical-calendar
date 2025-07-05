@@ -1,15 +1,92 @@
 # Liturgical Calendar
 
+## Features
+
+- Calculates Anglican liturgical seasons, feasts, and colors for any date
+- Generates images for e-ink or digital displays
+- Centralized, extensible configuration (YAML/env)
+- Raspberry Pi & e-ink display support
+- Fully tested with `unittest`
+- Modular, maintainable codebase
+
+## Quickstart
+
+Generate today's liturgical image with default settings:
+
+```sh
+python -m liturgical_calendar.cli generate
+```
+
+Or get liturgical info for today at the command line:
+
+```sh
+liturgical_calendar
+```
+
+## Command-Line Interface (CLI)
+
+The project now provides a unified CLI for all major functions. You can run it as:
+
+```sh
+python -m liturgical_calendar.cli [subcommand] [options]
+```
+
+Or, if installed as a script:
+
+```sh
+litcal [subcommand] [options]
+```
+
+### Subcommands
+
+- `generate [DATE] [--output PATH] [--config CONFIG] [--verbose]`  
+  Generate a liturgical image for a given date (default: today).
+- `info [DATE] [--config CONFIG] [--verbose]`  
+  Print liturgical info (season, feast, readings) for a date.
+- `cache-artwork [--config CONFIG] [--verbose]`  
+  Download/cache all artwork images.
+- `validate-config [--config CONFIG] [--verbose]`  
+  Validate the current config file and print any issues.
+- `version`  
+  Print version and exit.
+
+### Global Options
+- `--config CONFIG` (path to config file)
+- `--verbose` (set log level to DEBUG)
+- `--help` (show help for any command)
+
+### Example Usage
+
+```sh
+python -m liturgical_calendar.cli generate 2024-12-25 --output christmas.png --verbose
+python -m liturgical_calendar.cli info 2024-12-25
+python -m liturgical_calendar.cli cache-artwork
+python -m liturgical_calendar.cli validate-config
+python -m liturgical_calendar.cli version
+```
+
+See the [Architecture Overview](docs/architecture.md) for design details and advanced usage.
+
+**Note:** The CLI provides a unified interface for all project functionality. Use the CLI for all workflows.
+
+## Documentation
+
+- [Architecture Overview](docs/architecture.md)
+- [Liturgical Logic & Edge Cases](docs/liturgical_logic.md)
+- [API Reference](docs/api_reference.md)
+- [Image Generation](docs/image_generation.md)
+- [Caching](docs/caching.md)
+- [Testing](docs/testing.md)
+- [Raspberry Pi & E-Ink Integration](docs/raspberry_pi_eink.md)
+- [Example Scripts](docs/examples/)
+
+---
+
 This Python module will return the name, season, week number and liturgical
 colour for any day in the Gregorian calendar, according to the Anglican
 tradition of the Church of England.
 
-This module's algorithm is a direct port to Python of
-[`DateTime::Calendar::Liturgical::Christian`](https://github.com/gitpan/DateTime-Calendar-Liturgical-Christian),
-which was originally written in Perl and loaded with the calendar of the Episcopal
-Church of the USA. It has now been fed with data from the Church of England's
-[Calendar of saints](https://en.wikipedia.org/wiki/Calendar_of_saints_(Church_of_England))
-and substantially modified to suit the Anglican calendar.
+
 
 The output of this module is compared against the
 [Church of England Lectionary](https://www.chpublishing.co.uk/features/lectionary),
@@ -110,3 +187,100 @@ Pull requests are always welcome, either to address bugs or add new features.
 
 There is a sample app which uses this library called
 [Liturgical Colour App](https://github.com/djjudas21/liturgical-colour-app).
+
+## Configuration
+
+The project uses a centralized `Settings` class for all configuration. Configuration values can be set in three ways:
+
+1. **Defaults in code**: Sensible defaults are provided in `liturgical_calendar/config/settings.py`.
+2. **YAML config file**: You can provide a `config.yaml` file in the project root, or specify a path to a config file using the `--config` option.
+3. **Environment variables**: Any config value can be overridden by setting an environment variable with the same name (case-insensitive, underscores).
+
+### Usage Example
+
+```sh
+# Use defaults
+python -m liturgical_calendar.cli generate 2024-12-25
+
+# Use a custom config file
+python -m liturgical_calendar.cli generate 2024-12-25 --config my_config.yaml
+
+# Override with environment variable
+IMAGE_WIDTH=2048 python -m liturgical_calendar.cli generate 2024-12-25
+```
+
+See `liturgical_calendar/config/settings.py` for all available config options.
+
+## Testing
+
+The test suite is organized as follows:
+
+- `tests/unit/`: Unit tests for individual classes and functions (fast, isolated, use mocks/stubs).
+- `tests/integration/`: Integration and end-to-end tests (test full workflows, real data, script entry points).
+- `tests/fixtures/`: Sample data for use in tests (JSON, YAML, etc.).
+
+### Running All Tests
+
+To run all tests:
+
+```sh
+PYTHONPATH=. python -m unittest discover -s tests -p 'test*.py' -v
+```
+
+### Running Only Unit or Integration Tests
+
+To run only unit tests:
+
+```sh
+PYTHONPATH=. python -m unittest discover -s tests/unit -p 'test*.py' -v
+```
+
+To run only integration tests:
+
+```sh
+PYTHONPATH=. python -m unittest discover -s tests/integration -p 'test*.py' -v
+```
+
+All tests must pass before committing changes. See the project rules for commit and test summary requirements.
+
+## Raspberry Pi & E-Ink Integration
+
+This project can be run on a Raspberry Pi to update an e-ink display with the current liturgical calendar image. See [docs/raspberry_pi_eink.md](docs/raspberry_pi_eink.md) for a full integration guide, including:
+- System requirements and installation
+- Scheduling regular updates (e.g., with cron)
+- E-ink display tips (image size, color mode, conversion)
+- Performance notes for low-resource devices
+- Troubleshooting
+
+A minimal example for updating an e-ink display is provided in `docs/examples/update_eink_display.py`.
+
+## Requirements & Dependencies
+
+- Python 3.8+
+- Pillow, PyYAML, etc. (see requirements.txt)
+- On Raspberry Pi/ARM: You may need to install system packages for Pillow (e.g., libjpeg, zlib, libfreetype6-dev). See the Pi integration guide for details.
+
+## Troubleshooting
+
+### Common Issues
+- **Missing fonts:** Ensure the required fonts are present in the `fonts/` directory or update the config.
+- **Pillow install errors on Pi:** Install system dependencies: `sudo apt-get install libjpeg-dev zlib1g-dev libfreetype6-dev`
+- **Image not updating on e-ink:** Check the device-specific update command and permissions.
+- **YAML config errors:** Validate your `config.yaml` with an online YAML linter.
+- **Performance issues:** Use smaller images, avoid upsampling, and limit batch size on low-memory devices.
+- **Verbose Mode:** All CLI scripts support a `--verbose` flag. When used, logging is set to DEBUG level and extra diagnostic output is shown. Use this for troubleshooting or detailed progress info.
+
+See [docs/raspberry_pi_eink.md](docs/raspberry_pi_eink.md) for more troubleshooting tips.
+
+## Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+- All changes must pass the full test suite before committing (see Testing section).
+- Include a summary table of test results in each commit message.
+- Open issues or pull requests for bugs, features, or questions.
+
+## License
+
+[Specify your license here, or link to LICENSE file]

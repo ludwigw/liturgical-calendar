@@ -1,0 +1,37 @@
+# Cursor Rules for Liturgical Calendar Project
+
+## Testing Framework
+- Use `unittest` for all testing, not `pytest`
+- **CRITICAL**: Always run ALL tests before committing changes
+- **REQUIRED**: Use `PYTHONPATH=. python -m unittest discover -s tests -p 'test*.py' -v` to run all tests at once
+- **REQUIRED**: When committing changes to a file, the test results appended to the commit message must include the tests for that file.
+- **NOTE**: `unittest discover` may not work without setting PYTHONPATH due to import issues
+- Always include a complete test summary table in commit messages showing all test suites and their results
+
+## Code Changes and Logic Preservation
+- **DEFAULT**: Use existing logic that is known to work rather than rewriting calculations from scratch
+- **REQUIRED**: Before rewriting any liturgical calculation logic, explain why the existing logic needs to be changed and get explicit permission
+- When refactoring, preserve the core calculation logic and only change the API/structure around it
+- If you encounter test failures after changing logic, first verify that the original logic was working correctly before making changes
+
+## Data and Functionality Preservation
+- **CRITICAL**: If tests that previously passed are now failing, and the underlying data hasn't changed, the refactor broke the logic for accessing that data
+- **DEFAULT EXPECTATION**: Existing functionality should continue to work after refactoring
+- **REQUIRED**: When tests fail after refactoring, investigate whether the refactor broke the data access logic, not assume the data is missing
+
+## Project Structure
+- Do not modify any files in `tests/feasts_test*` without explicit permission
+- The liturgical calendar logic is complex and has been tested extensively - changes should be incremental and well-justified
+
+## Documentation
+- Reference `docs/liturgical_logic.md` for liturgical calendar concepts and edge cases
+- Update documentation when making significant changes to liturgical logic 
+
+## Commit Messages
+- All commit messages must follow the Conventional Commits specification (e.g., feat:, fix:, refactor:, docs:, etc.).
+- Always append a summary table of the tests run and their pass/fail rates in the footer of the commit message. 
+
+# Stashing During Refactor/Debug
+- Always `git stash` any uncommitted changes before checking out a different branch or resetting files to HEAD, especially during a refactor or when testing another branch's/test's behavior.
+- After testing, use `git stash pop` to restore your work and continue the refactor.
+- This ensures no work is lost and you can safely compare behaviors between branches or commits. 

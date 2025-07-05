@@ -162,5 +162,6 @@ liturgical_calendar/lectionary.csv
 
 cache/
 
-fonts/
+# fonts/
 squashed_artworks.json
+vanderbilt/build/

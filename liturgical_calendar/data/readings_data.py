@@ -503,3 +503,63 @@ weekday_readings = {
     },
 
 }
+
+# Fixed weekday readings for specific dates in the Christmas/Epiphany period
+# These are not part of the week-based system and have their own readings
+fixed_weekday_readings = {
+    # Dec 29-31: Fixed weekday readings
+    "12-29": {
+        "1": ["Jonah 1", "Colossians 1:1-14"],
+        "2": ["Isaiah 57:15-end", "John 1:1-18"]
+    },
+    "12-30": {
+        "1": ["Jonah 2", "Colossians 1:15-23"],
+        "2": ["Isaiah 59:1-15a", "John 1:19-28"]
+    },
+    "12-31": {
+        "1": ["Jonah 3-4", "Colossians 1:24-2:7"],
+        "2": ["Isaiah 59:15b-end", "John 1:29-34"]
+    },
+    # Jan 2-5: Fixed weekday readings
+    "01-02": {
+        "1": ["Ruth 1", "Colossians 2:8-end"],
+        "2": ["Isaiah 60:1-12", "John 1:35-42"]
+    },
+    "01-03": {
+        "1": ["Ruth 2", "Colossians 3:1-11"],
+        "2": ["Isaiah 60:13-end", "John 1:43-end"]
+    },
+    "01-04": {
+        "1": ["Ruth 3", "Colossian 3:12-4:1"],
+        "2": ["Isaiah 61", "John 2:1-12"]
+    },
+    "01-05": {
+        "1": ["Ruth 4:1-17", "Colossian 4:2-end"],
+        "2": ["Isaiah 62", "John 2:13-end"]
+    },
+    # Jan 7-12: Fixed weekday readings (until Epiphany 1)
+    "01-07": {
+        "1": ["Jeremiah 23:1-8", "Matthew 20: 1-16"],
+        "2": ["Isaiah 63:7-end", "1 John 3"]
+    },
+    "01-08": {
+        "1": ["Jeremiah 30:1-17", "Matthew 20:17-28"],
+        "2": ["Isaiah 64", "1 John 4:7-end"]
+    },
+    "01-09": {
+        "1": ["Jeremiah 30:18-31:9", "Matthew 20:29-end"],
+        "2": ["Isaiah 65:1-16", "1 John 5:1-12"]
+    },
+    "01-10": {
+        "1": ["Jeremiah 31:10-17", "Matthew 23:1-12"],
+        "2": ["Isaiah 65:17-end", "1 John 5:13-end"]
+    },
+    "01-11": {
+        "1": ["Jeremiah 33:14-end", "Matthew 23:13-28"],
+        "2": ["Isaiah 66:1-11", "2 John"]
+    },
+    "01-12": {
+        "1": ["Micah 5:2-end", "Matthew 23:29-end"],
+        "2": ["Isaiah 66:12-23", "3 John"]
+    }
+}

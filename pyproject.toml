@@ -9,6 +9,9 @@ packages = [{include = "liturgical_calendar"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 python-dateutil = "^2.8.2"
+Pillow = "^8.0.0"
+PyYAML = "^5.4"
+requests = "^2.25"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^2.17.4"
@@ -20,3 +23,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 liturgical_calendar = 'liturgical_calendar.liturgical:main'
+litcal = 'liturgical_calendar.cli:main'
