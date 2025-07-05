@@ -1,15 +1,16 @@
 import argparse
-import sys
 import datetime
+import sys
 from pathlib import Path
-from liturgical_calendar.services.image_service import ImageService
-from liturgical_calendar.config.settings import Settings
-from liturgical_calendar.exceptions import LiturgicalCalendarError
-from liturgical_calendar.logging import setup_logging, get_logger
-from liturgical_calendar.liturgical import liturgical_calendar
-from liturgical_calendar.services.config_service import ConfigService
+
 from liturgical_calendar.caching.artwork_cache import ArtworkCache
+from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.data.artwork_data import feasts as artwork_feasts
+from liturgical_calendar.exceptions import LiturgicalCalendarError
+from liturgical_calendar.liturgical import liturgical_calendar
+from liturgical_calendar.logging import get_logger, setup_logging
+from liturgical_calendar.services.config_service import ConfigService
+from liturgical_calendar.services.image_service import ImageService
 
 # Placeholder imports for future integration
 # from liturgical_calendar.services.image_service import ImageService
@@ -222,7 +223,6 @@ def main(today_func=datetime.date.today):
             sys.exit(1)
     elif args.command == "info":
         logger.info("Starting info command")
-        from datetime import date as dtdate
 
         if args.date:
             date_str = args.date

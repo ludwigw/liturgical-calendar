@@ -1,6 +1,8 @@
 from pathlib import Path
+from typing import Any, Dict, Tuple
+
 from PIL import ImageFont
-from typing import Dict, Tuple, Any
+
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.logging import get_logger
 

@@ -6,15 +6,16 @@ image generation, and output formatting. It provides a clean interface
 for generating liturgical calendar images.
 """
 
-from typing import Dict, Any, Optional, List
-from pathlib import Path
 import os
+from typing import Any, Dict, List, Optional
+
+from liturgical_calendar.exceptions import ImageGenerationError, LiturgicalCalendarError
+from liturgical_calendar.logging import get_logger
+
 from ..core.artwork_manager import ArtworkManager
 from ..core.readings_manager import ReadingsManager
 from ..core.season_calculator import SeasonCalculator
 from ..services.feast_service import FeastService
-from liturgical_calendar.exceptions import ImageGenerationError, LiturgicalCalendarError
-from liturgical_calendar.logging import get_logger
 
 
 class ImageService:

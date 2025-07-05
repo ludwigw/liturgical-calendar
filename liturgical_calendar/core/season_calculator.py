@@ -5,16 +5,17 @@ This module contains the SeasonCalculator class which handles all season-related
 calculations including determining liturgical seasons, week numbers, and weekday readings.
 """
 
-from datetime import date, timedelta
+from datetime import date
 from typing import Dict
+
 from ..funcs import (
-    get_easter,
-    get_advent_sunday,
+    add_delta_days,
     date_to_days,
     day_of_week,
-    add_delta_days,
-    render_week_name,
+    get_advent_sunday,
+    get_easter,
     get_week_number,
+    render_week_name,
 )
 
 
@@ -26,7 +27,6 @@ class SeasonCalculator:
 
     def __init__(self):
         """Initialize the SeasonCalculator."""
-        pass
 
     def determine_season(self, f_date: date) -> str:
         """
@@ -100,8 +100,8 @@ class SeasonCalculator:
         else:
             christmasday = date_to_days(year, 12, 25)
         advent_sunday = get_advent_sunday(year)
-        easter_point = days - easterday
-        christmas_point = days - christmasday
+        days - easterday
+        days - christmasday
         dayofweek = day_of_week(f_date.year, f_date.month, f_date.day)
         week_start_sunday_days = days - dayofweek
         week_start_sunday = add_delta_days(week_start_sunday_days)

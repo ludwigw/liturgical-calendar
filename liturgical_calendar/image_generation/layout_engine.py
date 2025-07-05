@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict, Any
+from typing import Any, Dict, List
 
 
 class LayoutEngine:
@@ -290,7 +290,6 @@ class LayoutEngine:
             reading_y += line_height
         # Vertical line
         line_x = col1_x + week_w + 28
-        cap_height = serif_ascent_col
         line_top = col_baseline_y - serif_ascent_col - 6
         last_baseline = reading_y - line_height + serif_ascent_col
         line_bottom = last_baseline + 24

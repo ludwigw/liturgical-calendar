@@ -7,12 +7,14 @@ operations that need feast information.
 """
 
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from ..core.season_calculator import SeasonCalculator
-from ..core.readings_manager import ReadingsManager
-from ..data.feasts_data import get_liturgical_feast
-from ..funcs import get_easter, date_to_days, add_delta_days, day_of_week
+from typing import Any, Dict, List, Optional
+
 from liturgical_calendar.logging import get_logger
+
+from ..core.readings_manager import ReadingsManager
+from ..core.season_calculator import SeasonCalculator
+from ..data.feasts_data import get_liturgical_feast
+from ..funcs import date_to_days, day_of_week, get_easter
 
 
 class FeastService:
@@ -60,7 +62,7 @@ class FeastService:
         year = date_obj.year
         month = date_obj.month
         day = date_obj.day
-        dayofweek = day_of_week(year, month, day)
+        day_of_week(year, month, day)
 
         # Calculate key dates and points
         easter_month, easter_day = get_easter(year)
@@ -161,7 +163,7 @@ class FeastService:
             if not has_principal_feast:
                 # Calculate season for Sunday using new API
                 week_info = self.season_calculator.week_info(date_obj)
-                season = week_info["season"]
+                week_info["season"]
                 week_name = week_info["week_name"]
                 # Use the week name as the Sunday name (original logic with week number)
                 possibles.append({"prec": 5, "type": "Sunday", "name": week_name})

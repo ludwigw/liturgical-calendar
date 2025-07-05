@@ -5,24 +5,14 @@ tradition of the Church of England.
 """
 
 import sys
-from datetime import datetime, date
+from datetime import date, datetime
 
-from .funcs import (
-    get_easter,
-    get_advent_sunday,
-    date_to_days,
-    day_of_week,
-    add_delta_days,
-    colour_code,
-    get_week_number,
-    render_week_name,
-)
-from .data.feasts_data import feasts, get_liturgical_feast
+from liturgical_calendar.logging import get_logger, setup_logging
+
+from .config.settings import Settings
+from .services.config_service import ConfigService
 from .services.feast_service import FeastService
 from .services.image_service import ImageService
-from .services.config_service import ConfigService
-from .config.settings import Settings
-from liturgical_calendar.logging import setup_logging, get_logger
 
 ##########################################################################
 

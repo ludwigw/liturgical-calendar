@@ -3,15 +3,17 @@ Artwork management for liturgical calendar images.
 Handles feast artwork lookup, image source retrieval, and caching.
 """
 
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Any
-from ..data.artwork_data import feasts as artwork_feasts
-from ..data.feasts_data import (
-    get_liturgical_feast,
-)  # Only if needed for squashed artwork
-from liturgical_calendar.logging import get_logger
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 from liturgical_calendar.config.settings import Settings
+from liturgical_calendar.logging import get_logger
+
+from ..data.artwork_data import feasts as artwork_feasts
+from ..data.feasts_data import (  # Only if needed for squashed artwork
+    get_liturgical_feast,
+)
 
 
 class ArtworkManager:
@@ -76,8 +78,8 @@ class ArtworkManager:
             dict: Artwork object with 'source', 'name', 'url' (if exists), 'martyr' (if exists),
                   'cached_file' (if cached), and 'cached' (bool) keys
         """
+        from ..funcs import date_to_days, get_cache_filename, get_easter
         from .readings_manager import ReadingsManager
-        from ..funcs import get_easter, date_to_days, get_cache_filename
 
         # Create ReadingsManager instance
         readings_manager = ReadingsManager()

@@ -1,16 +1,16 @@
-import requests
-from PIL import Image
 import shutil
-import os
 import time
-
 from pathlib import Path
 from typing import Optional
+
+import requests
+from PIL import Image
+
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.exceptions import (
     ArtworkNotFoundError,
-    ImageGenerationError,
     CacheError,
+    ImageGenerationError,
 )
 from liturgical_calendar.logging import get_logger
 from liturgical_calendar.utils.file_system import safe_save_image

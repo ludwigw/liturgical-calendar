@@ -6,7 +6,8 @@ for different liturgical dates, seasons, and cycles.
 """
 
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
+
 from liturgical_calendar.exceptions import ReadingsNotFoundError
 from liturgical_calendar.logging import get_logger
 
@@ -28,9 +29,9 @@ class ReadingsManager:
         self.logger = get_logger(__name__)
         # Import readings data here to avoid circular imports
         from ..data.readings_data import (
+            fixed_weekday_readings,
             sunday_readings,
             weekday_readings,
-            fixed_weekday_readings,
         )
 
         self.sunday_readings = sunday_readings

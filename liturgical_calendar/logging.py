@@ -1,5 +1,6 @@
 import logging
 import sys
+
 from liturgical_calendar.config.settings import Settings
 
 _LOGGER = None

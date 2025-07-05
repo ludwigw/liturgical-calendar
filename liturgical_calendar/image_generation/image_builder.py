@@ -1,6 +1,7 @@
-from PIL import Image, ImageDraw, ImageFont
-from pathlib import Path
 import os
+
+from PIL import Image, ImageDraw
+
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.logging import get_logger
 from liturgical_calendar.utils.file_system import safe_save_image

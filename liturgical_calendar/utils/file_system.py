@@ -10,7 +10,8 @@ This module provides utilities for:
 import os
 import shutil
 from pathlib import Path
-from typing import Union, Optional, Callable
+from typing import Callable, Optional, Union
+
 from liturgical_calendar.logging import get_logger
 
 logger = get_logger(__name__)

@@ -1,18 +1,19 @@
-import os
-from pathlib import Path
-import requests
-from liturgical_calendar.funcs import get_cache_filename
-from PIL import Image
-import time
 import shutil
-from .image_processor import ImageProcessor
+import time
+from pathlib import Path
+
+from PIL import Image
+
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.exceptions import (
     ArtworkNotFoundError,
-    ImageGenerationError,
     CacheError,
+    ImageGenerationError,
 )
+from liturgical_calendar.funcs import get_cache_filename
 from liturgical_calendar.logging import get_logger
+
+from .image_processor import ImageProcessor
 
 
 # Import get_instagram_image_url from the script (or reimplement if needed)

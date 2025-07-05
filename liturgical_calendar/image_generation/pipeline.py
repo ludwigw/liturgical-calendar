@@ -1,11 +1,12 @@
 from pathlib import Path
-from liturgical_calendar.services.feast_service import FeastService
+
+from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.core.artwork_manager import ArtworkManager
-from liturgical_calendar.image_generation.layout_engine import LayoutEngine
 from liturgical_calendar.image_generation.font_manager import FontManager
 from liturgical_calendar.image_generation.image_builder import LiturgicalImageBuilder
-from liturgical_calendar.config.settings import Settings
+from liturgical_calendar.image_generation.layout_engine import LayoutEngine
 from liturgical_calendar.logging import get_logger
+from liturgical_calendar.services.feast_service import FeastService
 
 
 class ImageGenerationPipeline:

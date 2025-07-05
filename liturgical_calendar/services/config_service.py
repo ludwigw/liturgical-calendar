@@ -5,14 +5,15 @@ This service layer provides a centralized way to access and modify
 configuration settings for the liturgical calendar application.
 """
 
-import os
-from typing import Dict, Any, Optional, Union
-from pathlib import Path
 import json
-from ..funcs import date_to_days
+import os
+from typing import Any, Dict, Optional
+
 from liturgical_calendar.exceptions import ConfigError
 from liturgical_calendar.logging import get_logger
 from liturgical_calendar.utils.file_system import safe_write_file
+
+from ..funcs import date_to_days
 
 
 class ConfigService:
@@ -238,7 +239,6 @@ class ConfigService:
         Returns:
             Dictionary with validation results
         """
-        errors = []
         warnings = []
 
         # Check required directories
