@@ -243,6 +243,56 @@ PYTHONPATH=. python -m unittest discover -s tests/integration -p 'test*.py' -v
 
 All tests must pass before committing changes. See the project rules for commit and test summary requirements.
 
+## Code Quality & Linting
+
+This project maintains high code quality standards through automated linting and formatting:
+
+### Pre-commit Hooks
+
+Pre-commit hooks are configured to automatically check code quality before each commit:
+
+```sh
+# Install pre-commit hooks (run once after cloning)
+pre-commit install
+
+# Run all hooks manually
+pre-commit run --all-files
+```
+
+The hooks include:
+- **Black**: Code formatting
+- **isort**: Import sorting
+- **pylint**: Code quality and style checking
+- **autoflake**: Remove unused imports
+- **Custom test runner**: Ensures all tests pass
+
+### Manual Linting
+
+You can run linting tools manually:
+
+```sh
+# Format code
+black liturgical_calendar/
+
+# Sort imports
+isort liturgical_calendar/
+
+# Check code quality
+pylint --rcfile=.pylintrc liturgical_calendar/
+
+# Remove unused imports
+autoflake --in-place --remove-all-unused-imports --recursive liturgical_calendar/
+```
+
+### Code Quality Standards
+
+- **Pylint Score**: Maintained at 9.5+/10
+- **Test Coverage**: All functionality covered by unit and integration tests
+- **Documentation**: All modules, classes, and functions have docstrings
+- **Style**: Consistent formatting with Black
+- **Imports**: Properly ordered and no unused imports
+- **Exception Handling**: Proper exception chaining throughout
+
 ## Raspberry Pi & E-Ink Integration
 
 This project can be run on a Raspberry Pi to update an e-ink display with the current liturgical calendar image. See [docs/raspberry_pi_eink.md](docs/raspberry_pi_eink.md) for a full integration guide, including:
@@ -284,3 +334,26 @@ We welcome contributions! Please follow these guidelines:
 ## License
 
 [Specify your license here, or link to LICENSE file]
+
+## Development: Linting and Code Quality
+
+This project enforces strict code quality:
+
+- **Pylint**: All code must pass with a score of 10.00/10 and all standard checks enabled.
+- **Pre-commit hooks**: Formatting (black, isort), autoflake, linting, and tests are run automatically before every commit.
+- **Continuous Integration**: All pushes and pull requests are checked by GitHub Actions:
+  - **Tests**: All unit and integration tests must pass.
+  - **Linting**: All code must pass pylint with a score of 10.00/10.
+  - **Pre-commit hooks**: Formatting, linting, and tests are run before every commit.
+  - **CLI checks**: The CLI is tested for help/version/info/validation commands.
+  - **Packaging**: On release, the package is built and versioned automatically.
+
+**How to use:**
+- Install pre-commit: `pip install pre-commit`
+- Enable hooks: `pre-commit install`
+- Run all hooks manually: `pre-commit run --all-files`
+- Run pylint manually: `pylint liturgical_calendar/`
+
+You cannot merge unless all checks pass.
+
+See [docs/testing.md](docs/testing.md) for full details and troubleshooting.
