@@ -2,6 +2,7 @@
 Image generation pipeline for the liturgical calendar project.
 """
 
+import datetime
 from pathlib import Path
 
 from liturgical_calendar.config.settings import Settings
@@ -116,8 +117,6 @@ class ImageGenerationPipeline:
         Returns:
             Data dictionary for image generation
         """
-        import datetime
-
         date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
         friendly_date = date.strftime("%-d %B, %Y")
         info = feast_info
@@ -140,8 +139,6 @@ class ImageGenerationPipeline:
         """
         Original data preparation method (for backward compatibility).
         """
-        import datetime
-
         date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
         friendly_date = date.strftime("%-d %B, %Y")
         info = self.feast_service.get_liturgical_info(date_str)

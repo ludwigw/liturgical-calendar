@@ -14,7 +14,7 @@ from liturgical_calendar.logging import get_logger
 from ..core.readings_manager import ReadingsManager
 from ..core.season_calculator import SeasonCalculator
 from ..data.feasts_data import get_liturgical_feast
-from ..funcs import date_to_days, day_of_week, get_easter
+from ..funcs import date_to_days, day_of_week, get_advent_sunday, get_easter
 
 
 class FeastService:
@@ -131,8 +131,6 @@ class FeastService:
         """Get the date of Advent Sunday for the given year."""
         # This would need to be implemented or imported from existing code
         # For now, using a placeholder
-        from ..funcs import get_advent_sunday
-
         return get_advent_sunday(year)
 
     def _collect_possible_feasts(

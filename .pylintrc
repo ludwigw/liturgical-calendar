@@ -15,7 +15,7 @@ disable=line-too-long,
     too-many-nested-blocks,
     import-error,
     unspecified-encoding,
-    import-outside-toplevel,
+
     too-many-lines,
     duplicate-key,
     too-many-instance-attributes,

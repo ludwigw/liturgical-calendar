@@ -10,6 +10,7 @@ import os
 from typing import Any, Dict, List, Optional
 
 from liturgical_calendar.exceptions import ImageGenerationError
+from liturgical_calendar.image_generation.pipeline import ImageGenerationPipeline
 from liturgical_calendar.logging import get_logger
 
 from ..core.artwork_manager import ArtworkManager
@@ -238,10 +239,8 @@ class ImageService:
                 "ImageService requires a configuration object to initialize the pipeline"
             )
 
-        # Lazy import to avoid circular dependency
+        # Initialize pipeline if not already done
         if self.pipeline is None:
-            from ..image_generation.pipeline import ImageGenerationPipeline
-
             self.pipeline = ImageGenerationPipeline(self.config)
 
         # Extract date from image_data

@@ -2,7 +2,9 @@
 Helper functions for date manipulation
 """
 
+import hashlib
 from datetime import date, timedelta
+from urllib.parse import urlparse
 
 from dateutil.easter import easter
 
@@ -216,9 +218,6 @@ def get_cache_filename(source_url):
     Generate a cache filename based on the source URL.
     Uses a hash of the URL to ensure unique filenames.
     """
-    import hashlib
-    from urllib.parse import urlparse
-
     # Create a hash of the URL
     url_hash = hashlib.md5(source_url.encode()).hexdigest()
     # Try to extract a meaningful name from the URL

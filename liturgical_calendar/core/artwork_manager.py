@@ -3,17 +3,19 @@ Artwork management for liturgical calendar images.
 Handles feast artwork lookup, image source retrieval, and caching.
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from liturgical_calendar.config.settings import Settings
+from liturgical_calendar.funcs import date_to_days, get_cache_filename, get_easter
 from liturgical_calendar.logging import get_logger
 
 from ..data.artwork_data import feasts as artwork_feasts
 from ..data.feasts_data import (  # Only if needed for squashed artwork
     get_liturgical_feast,
 )
+from .readings_manager import ReadingsManager
 
 
 class ArtworkManager:
@@ -78,9 +80,6 @@ class ArtworkManager:
             dict: Artwork object with 'source', 'name', 'url' (if exists), 'martyr' (if exists),
                   'cached_file' (if cached), and 'cached' (bool) keys
         """
-        from ..funcs import date_to_days, get_cache_filename, get_easter
-        from .readings_manager import ReadingsManager
-
         # Create ReadingsManager instance
         readings_manager = ReadingsManager()
 
@@ -187,8 +186,6 @@ class ArtworkManager:
         Returns:
             Path to cached file if it exists, None otherwise
         """
-        from ..funcs import get_cache_filename
-
         cache_filename = get_cache_filename(source_url)
         cached_path = Path(Settings.CACHE_DIR) / cache_filename
         return str(cached_path) if cached_path.exists() else None
@@ -203,8 +200,6 @@ class ArtworkManager:
         Returns:
             Next artwork entry with 'date' field added, or None if not found
         """
-        from datetime import timedelta
-
         # Parse the current date
         current_date_obj = datetime.strptime(current_date, "%Y-%m-%d").date()
 

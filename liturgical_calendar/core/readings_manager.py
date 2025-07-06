@@ -8,6 +8,12 @@ for different liturgical dates, seasons, and cycles.
 from datetime import datetime
 from typing import Dict, List, Tuple
 
+from liturgical_calendar.data.feasts_data import feasts
+from liturgical_calendar.data.readings_data import (
+    fixed_weekday_readings,
+    sunday_readings,
+    weekday_readings,
+)
 from liturgical_calendar.exceptions import ReadingsNotFoundError
 from liturgical_calendar.logging import get_logger
 
@@ -28,11 +34,6 @@ class ReadingsManager:
         self.config = config
         self.logger = get_logger(__name__)
         # Import readings data here to avoid circular imports
-        from ..data.readings_data import (
-            fixed_weekday_readings,
-            sunday_readings,
-            weekday_readings,
-        )
 
         self.sunday_readings = sunday_readings
         self.weekday_readings = weekday_readings
@@ -127,9 +128,6 @@ class ReadingsManager:
         # If no readings in feast_data, try to look up from feast data structure
         feast_name = feast_data.get("name", "")
         if feast_name:
-            # Import feast data here to avoid circular imports
-            from ..data.feasts_data import feasts
-
             # Look through both easter and christmas feast data
             for feast_type in ["easter", "christmas"]:
                 if feast_type in feasts:
