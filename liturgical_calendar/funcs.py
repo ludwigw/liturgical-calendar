@@ -2,8 +2,12 @@
 Helper functions for date manipulation
 """
 
+import hashlib
 from datetime import date, timedelta
+from urllib.parse import urlparse
+
 from dateutil.easter import easter
+
 
 def get_easter(year: int) -> tuple:
     """
@@ -47,8 +51,10 @@ def get_advent_sunday(year: int) -> int:
     # Move forward to the next Sunday if needed
     while possible_advent.weekday() != 6:  # 6 = Sunday in Python's weekday()
         possible_advent += timedelta(days=1)
-    offset = (possible_advent - christmas).days
+    delta = possible_advent - christmas
+    offset = delta.days
     return offset
+
 
 def date_to_days(year: int, month: int, day: int) -> int:
     """
@@ -73,6 +79,7 @@ def date_to_days(year: int, month: int, day: int) -> int:
     epoch = date(1, 1, 1)
     delta = f_date - epoch
     return delta.days
+
 
 def day_of_week(year: int, month: int, day: int) -> int:
     """
@@ -105,6 +112,7 @@ def day_of_week(year: int, month: int, day: int) -> int:
 
     # Rewrite 7=Sunday as 0=Sunday
     return 0 if weekday == 7 else weekday
+
 
 def add_delta_days(days: int) -> tuple:
     """
@@ -143,36 +151,40 @@ def colour_code(colour: str) -> str:
         The corresponding hex code for the named colour
     """
     codes = {
-        'white': '#ffffff',
-        'red': '#ce0002',
-        'rose': '#eb597a',
-        'purple': '#664fa6',
-        'green': '#279942',
-        'not given': '#000000'
+        "white": "#ffffff",
+        "red": "#ce0002",
+        "rose": "#eb597a",
+        "purple": "#664fa6",
+        "green": "#279942",
+        "not given": "#000000",
     }
 
     return codes.get(colour)
 
-def get_week_number(given_date: date) -> int:
-  """
-  Return the week number of the year where the week starts on a Sunday
-  See docs/liturgical_logic.md §3 for Proper N/Trinity N and week number logic.
 
-  Parameters
-  ----------
-    given_date: date
-    The date as a datetime.date object
-  Return
-  ------
-    week: int
-    The week number of the year
-  """
-  start_of_year = date(given_date.year, 1, 1)
-  start_of_year_weekday = start_of_year.weekday()
-  if start_of_year_weekday != 6:
-    start_of_year += timedelta(days=(6 - start_of_year_weekday))
-  delta_days = (given_date - start_of_year).days
-  return delta_days // 7 + 1
+def get_week_number(given_date: date) -> int:
+    """
+    Return the week number of the year where the week starts on a Sunday
+    See docs/liturgical_logic.md §3 for Proper N/Trinity N and week number logic.
+
+    Parameters
+    ----------
+      given_date: date
+      The date as a datetime.date object
+    Return
+    ------
+      week: int
+      The week number of the year
+    """
+    start_of_year = date(given_date.year, 1, 1)
+    start_of_year_weekday = start_of_year.weekday()
+    if start_of_year_weekday != 6:
+        days_to_sunday = 6 - start_of_year_weekday
+        start_of_year += timedelta(days=days_to_sunday)
+    delta = given_date - start_of_year
+    delta_days = delta.days
+    return delta_days // 7 + 1
+
 
 def render_week_name(season, weekno, easter_point=None):
     """
@@ -181,41 +193,40 @@ def render_week_name(season, weekno, easter_point=None):
     """
     if weekno and weekno > 0:
         # Check if this is the first week of Trinity (easter_point 56-62)
-        if season == 'Trinity' and easter_point is not None and 56 <= easter_point < 63:
-            week = 'Trinity'
-        elif season == 'Trinity':
+        if season == "Trinity" and easter_point is not None and 56 <= easter_point < 63:
+            week = "Trinity"
+        elif season == "Trinity":
             week = f"Proper {weekno}"
-        elif season == 'Ordinary Time':
+        elif season == "Ordinary Time":
             week = f"Proper {weekno}"
         else:
             weekname = season
             week = f"{weekname} {weekno}"
 
         # Deal with Pre-Lent and Pre-Advent week names (but don't change season)
-        if season in ['Pre-Lent', 'Pre-Advent']:
-            weekname = season.removeprefix('Pre-')
+        if season in ["Pre-Lent", "Pre-Advent"]:
+            weekname = season.removeprefix("Pre-")
             week = f"{weekno} before {weekname}"
     else:
         week = season
 
     return week, season
 
+
 def get_cache_filename(source_url):
     """
     Generate a cache filename based on the source URL.
     Uses a hash of the URL to ensure unique filenames.
     """
-    import hashlib
-    from urllib.parse import urlparse
     # Create a hash of the URL
     url_hash = hashlib.md5(source_url.encode()).hexdigest()
     # Try to extract a meaningful name from the URL
     parsed = urlparse(source_url)
-    path_parts = parsed.path.split('/')
+    path_parts = parsed.path.split("/")
     # Look for the post ID in Instagram URLs
-    if 'instagram.com' in source_url:
+    if "instagram.com" in source_url:
         for part in path_parts:
-            if part and part != 'p':
+            if part and part != "p":
                 return f"instagram_{part}_{url_hash[:8]}.jpg"
     # Fallback to just the hash
     return f"image_{url_hash}.jpg"

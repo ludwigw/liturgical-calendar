@@ -1,9 +1,11 @@
-import unittest
-import tempfile
 import os
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
+
 from liturgical_calendar.utils import file_system
+
 
 class TestFileSystemUtils(unittest.TestCase):
     def setUp(self):
@@ -17,15 +19,25 @@ class TestFileSystemUtils(unittest.TestCase):
     @mock.patch("shutil.disk_usage")
     def test_check_disk_space_sufficient(self, mock_disk_usage):
         # Simulate plenty of free space
-        mock_disk_usage.return_value = mock.Mock(total=100000000, used=1000000, free=90000000)
-        self.assertTrue(file_system.check_disk_space(self.test_dir, required_bytes=1024, min_free_mb=1))
+        mock_disk_usage.return_value = mock.Mock(
+            total=100000000, used=1000000, free=90000000
+        )
+        self.assertTrue(
+            file_system.check_disk_space(
+                self.test_dir, required_bytes=1024, min_free_mb=1
+            )
+        )
 
     @mock.patch("shutil.disk_usage")
     def test_check_disk_space_insufficient(self, mock_disk_usage):
         # Simulate not enough free space
-        mock_disk_usage.return_value = mock.Mock(total=100000000, used=99000000, free=100000)
+        mock_disk_usage.return_value = mock.Mock(
+            total=100000000, used=99000000, free=100000
+        )
         with self.assertRaises(OSError):
-            file_system.check_disk_space(self.test_dir, required_bytes=1024*1024*10, min_free_mb=10)
+            file_system.check_disk_space(
+                self.test_dir, required_bytes=1024 * 1024 * 10, min_free_mb=10
+            )
 
     def test_ensure_directory_creates_and_checks_writable(self):
         # Directory should be created and writable
@@ -49,7 +61,10 @@ class TestFileSystemUtils(unittest.TestCase):
         def write_func(path):
             with open(path, "w") as f:
                 f.write("hello world")
-        result = file_system.safe_write_file(self.test_file, write_func, estimated_size=100)
+
+        result = file_system.safe_write_file(
+            self.test_file, write_func, estimated_size=100
+        )
         self.assertTrue(result)
         self.assertTrue(self.test_file.exists())
         with open(self.test_file) as f:
@@ -59,6 +74,7 @@ class TestFileSystemUtils(unittest.TestCase):
         # Simulate PermissionError during write
         def write_func(path):
             raise PermissionError("No write access")
+
         with self.assertRaises(OSError):
             file_system.safe_write_file(self.test_file, write_func, estimated_size=100)
         self.assertFalse(self.test_file.exists())
@@ -67,6 +83,7 @@ class TestFileSystemUtils(unittest.TestCase):
         # Simulate generic error during write
         def write_func(path):
             raise RuntimeError("Something went wrong")
+
         with self.assertRaises(RuntimeError):
             file_system.safe_write_file(self.test_file, write_func, estimated_size=100)
         self.assertFalse(self.test_file.exists())
@@ -82,11 +99,13 @@ class TestFileSystemUtils(unittest.TestCase):
 
     def test_safe_save_image(self):
         from PIL import Image
+
         img = Image.new("RGB", (10, 10), color="red")
         out_path = self.test_dir / "testimg.jpg"
         result = file_system.safe_save_image(img, out_path, quality=80)
         self.assertTrue(result)
         self.assertTrue(out_path.exists())
 
+
 if __name__ == "__main__":
-    unittest.main() 
+    unittest.main()

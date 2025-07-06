@@ -1,8 +1,14 @@
+"""
+Logging utilities for the liturgical calendar project. Provides setup and logger access.
+"""
+
 import logging
 import sys
+
 from liturgical_calendar.config.settings import Settings
 
 _LOGGER = None
+
 
 def setup_logging(level=None, log_file=None, log_format=None):
     """
@@ -16,23 +22,22 @@ def setup_logging(level=None, log_file=None, log_format=None):
     if _LOGGER is not None:
         return _LOGGER
     if level is None:
-        level = getattr(Settings, 'LOG_LEVEL', 'INFO')
+        level = getattr(Settings, "LOG_LEVEL", "INFO")
     if log_file is None:
-        log_file = getattr(Settings, 'LOG_FILE', None)
+        log_file = getattr(Settings, "LOG_FILE", None)
     if log_format is None:
-        log_format = getattr(Settings, 'LOG_FORMAT', '%(asctime)s %(levelname)s [%(name)s] %(message)s')
+        log_format = getattr(
+            Settings, "LOG_FORMAT", "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+        )
     handlers = []
     if log_file:
         handlers.append(logging.FileHandler(log_file))
     else:
         handlers.append(logging.StreamHandler(sys.stderr))
-    logging.basicConfig(
-        level=level,
-        format=log_format,
-        handlers=handlers
-    )
-    _LOGGER = logging.getLogger('liturgical_calendar')
+    logging.basicConfig(level=level, format=log_format, handlers=handlers)
+    _LOGGER = logging.getLogger("liturgical_calendar")
     return _LOGGER
+
 
 def get_logger(name=None):
     """
@@ -40,4 +45,4 @@ def get_logger(name=None):
     """
     if _LOGGER is None:
         setup_logging()
-    return logging.getLogger(name or 'liturgical_calendar') 
+    return logging.getLogger(name or "liturgical_calendar")

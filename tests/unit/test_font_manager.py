@@ -1,26 +1,31 @@
 import unittest
-import os
 from pathlib import Path
-from liturgical_calendar.image_generation.font_manager import FontManager
-from liturgical_calendar.config.settings import Settings
 
-FONTS_DIR = Settings.FONTS_DIR
-SANS_FONT = 'HankenGrotesk-Medium.ttf'
-SERIF_FONT = 'HappyTimes-Regular.otf'
+from liturgical_calendar.config.settings import Settings
+from liturgical_calendar.image_generation.font_manager import FontManager
+
+FONTS_DIR = (
+    Path(Settings.FONTS_DIR)
+    if not isinstance(Settings.FONTS_DIR, Path)
+    else Settings.FONTS_DIR
+)
+SANS_FONT = "HankenGrotesk-Medium.ttf"
+SERIF_FONT = "HappyTimes-Regular.otf"
+
 
 class TestFontManager(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.font_manager = FontManager(FONTS_DIR)
-        cls.sans_font_path = FONTS_DIR / SANS_FONT
-        cls.serif_font_path = FONTS_DIR / SERIF_FONT
+        cls.font_manager = FontManager(str(FONTS_DIR))
+        cls.sans_font_path = Path(FONTS_DIR) / SANS_FONT
+        cls.serif_font_path = Path(FONTS_DIR) / SERIF_FONT
 
     def test_get_font_loads_font(self):
         if not self.sans_font_path.exists():
             self.skipTest(f"Font file {self.sans_font_path} not found.")
         font = self.font_manager.get_font(SANS_FONT, 24)
         self.assertIsNotNone(font)
-        self.assertTrue(hasattr(font, 'getmetrics'))
+        self.assertTrue(hasattr(font, "getmetrics"))
 
     def test_get_font_caching(self):
         if not self.sans_font_path.exists():
@@ -53,5 +58,6 @@ class TestFontManager(unittest.TestCase):
         with self.assertRaises(OSError):
             self.font_manager.get_font("not_a_real_font.ttf", 24)
 
-if __name__ == '__main__':
-    unittest.main() 
+
+if __name__ == "__main__":
+    unittest.main()

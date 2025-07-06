@@ -68,4 +68,4 @@ See `docs/examples/update_eink_display.py` for a script that generates today's i
 - [docs/testing.md](testing.md)
 - [docs/image_generation.md](image_generation.md)
 - [docs/caching.md](caching.md)
-- [docs/liturgical_logic.md](liturgical_logic.md) 
+- [docs/liturgical_logic.md](liturgical_logic.md)
