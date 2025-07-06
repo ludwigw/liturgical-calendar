@@ -2,7 +2,7 @@
 Layout engine for generating liturgical calendar images.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 
 class LayoutEngine:
@@ -234,7 +234,6 @@ class LayoutEngine:
         readings: list,
         fonts: Dict[str, Any],
         width: int,
-        padding: int,
         start_y: int,
         line_height: int,
         font_manager=None,
@@ -298,7 +297,3 @@ class LayoutEngine:
             "vertical_line": vertical_line,
             "last_baseline": last_baseline,
         }
-
-    def wrap_text(self, text: str, font: Any, max_width: int) -> List[str]:
-        """Wrap text to fit within max_width using the given font. Returns a list of lines."""
-        return []

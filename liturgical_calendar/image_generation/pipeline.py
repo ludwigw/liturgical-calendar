@@ -84,16 +84,14 @@ class ImageGenerationPipeline:
 
             # Render image
             try:
-                img = self._render_image(layout, fonts, data)
+                self._render_image()
             except Exception as e:
                 self.logger.error(f"Error rendering image for {date_str}: {e}")
                 raise
 
             # Save image
             try:
-                output_path = self._save_image(
-                    img, date_str, layout, fonts, data, out_path
-                )
+                output_path = self._save_image(date_str, layout, fonts, data, out_path)
             except Exception as e:
                 self.logger.error(f"Error saving image for {date_str}: {e}")
                 raise
@@ -244,7 +242,6 @@ class ImageGenerationPipeline:
             readings=readings,
             fonts={"serif": serif_font_36, "sans_uc": sans_font_36_uc},
             width=self.width,
-            padding=self.padding,
             start_y=col_y,
             line_height=48,
             font_manager=self.font_manager,
@@ -261,7 +258,7 @@ class ImageGenerationPipeline:
         }
         return layout, fonts
 
-    def _render_image(self, layout, fonts, data):
+    def _render_image(self):
         # Compose the image using the builder
         # Output path is handled in _save_image
         img = self.builder.create_base_image()
@@ -269,7 +266,7 @@ class ImageGenerationPipeline:
         # We'll use build_image for the actual save step
         return img
 
-    def _save_image(self, img, date_str, layout, fonts, data, out_path=None):
+    def _save_image(self, date_str, layout, fonts, data, out_path=None):
         # Use builder to do the full build and save
         build_dir = Path(Settings.BUILD_DIR)
         build_dir.mkdir(exist_ok=True)

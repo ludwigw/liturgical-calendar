@@ -133,7 +133,7 @@ class ReadingsManager:
             # Look through both easter and christmas feast data
             for feast_type in ["easter", "christmas"]:
                 if feast_type in feasts:
-                    for feast_key, feast_info in feasts[feast_type].items():
+                    for feast_info in feasts[feast_type].values():
                         if feast_info.get("name") == feast_name:
                             feast_readings = feast_info.get("readings", [])
                             if feast_readings:

@@ -348,18 +348,7 @@ class FeastService:
         """
         return self.get_complete_feast_info(date_str)
 
-    def _get_week_name(
-        self,
-        season: str,
-        weekno: int,
-        easter_point: int,
-        weekday_reading: str,
-        dayofweek: int,
-        date_obj: datetime.date,
-        current_date: int,
-        easter_date: int,
-        year: int,
-    ) -> str:
+    def _get_week_name(self) -> str:
         """Get the liturgical week name."""
         # This method is no longer needed with the new SeasonCalculator API
         # The week name is now provided directly by week_info()

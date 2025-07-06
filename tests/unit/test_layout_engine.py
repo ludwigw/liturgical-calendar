@@ -126,7 +126,6 @@ class TestLayoutEngine(unittest.TestCase):
             readings=readings,
             fonts={"serif": self.dummy_font, "sans_uc": self.dummy_font},
             width=800,
-            padding=Settings.PADDING,
             start_y=600,
             line_height=48,
         )

@@ -1,139 +1,143 @@
-# Lint Fixes Plan
+# Pylint Fixes Checklist
 
-## Progress Update (Phase 1 Quick Fixes)
-- [ ] **Final newlines:** All files except a few __init__.py files have final newlines. The following still need a final newline (C0305):
-    - [ ] liturgical_calendar/__init__.py
-    - [ ] liturgical_calendar/core/__init__.py
-    - [ ] liturgical_calendar/config/__init__.py
-    - [ ] liturgical_calendar/image_generation/__init__.py
-- [x] **Import order:** All files have correct import order (isort run with black profile).
-- [x] **Unused imports:** All unused imports removed (autoflake run with aggressive mode).
-- [ ] **Next:** Address C0415 (import outside toplevel), docstrings, logging, exception handling, and other issues in Phase 2/3
+**Current Score:** 8.45/10
+**Target Score:** 9.25-10.00/10
 
-## Overview
-This document outlines the plan to fix all pylint issues identified in the GitHub Actions workflow. The goal is to achieve a clean pylint score and ensure consistent code quality.
+## 🔴 HIGH PRIORITY - Easy Fixes (Quick Wins)
 
-## Current Status (Updated after black formatting)
-- [x] **Tests**: All 42 tests pass
-- [x] **Dependencies**: All packages install correctly and are up-to-date
-- [x] **CLI**: All functionality works
-- [x] **Code Formatting**: All files formatted with black
-- [ ] **Pylint**: Multiple style and quality issues remain (score: 7.85/10)
+### 1. Unused Variables/Arguments (W0612, W0613)
+- [ ] **`liturgical_calendar/cli.py:117`** - Remove unused `val_parser`
+- [ ] **`liturgical_calendar/cli.py:122`** - Remove unused `ver_parser`
+- [ ] **`liturgical_calendar/core/readings_manager.py:136`** - Remove unused `feast_key`
+- [ ] **`liturgical_calendar/image_generation/pipeline.py:264`** - Remove unused args: `layout`, `fonts`, `data`
+- [ ] **`liturgical_calendar/image_generation/pipeline.py:272`** - Remove unused arg: `img`
+- [ ] **`liturgical_calendar/image_generation/layout_engine.py:237`** - Remove unused arg: `padding`
+- [ ] **`liturgical_calendar/image_generation/layout_engine.py:302`** - Remove unused args: `text`, `font`, `max_width`
+- [ ] **`liturgical_calendar/services/feast_service.py:353-361`** - Remove 9 unused arguments
 
-## What Was Accomplished in Last Commit
-- [x] **Black formatting**: All Python files reformatted with consistent style
-- [x] **Dependency updates**: Upgraded Pillow, PyYAML, pylint, astroid, and black for Python 3.12+ compatibility
-- [x] **Trailing newlines**: Many files got final newlines added automatically
-- [x] **Some import order fixes**: Black may have fixed some import ordering issues
+### 2. Pointless Statements (W0104)
+- [ ] **`liturgical_calendar/core/season_calculator.py:103-104`** - Remove pointless statements
+- [ ] **`liturgical_calendar/services/feast_service.py:166`** - Remove pointless statement
 
-## Remaining Issue Categories and Fix Plan
+### 3. Duplicate Keys (W0109)
+- [ ] **`liturgical_calendar/data/feasts_data.py:177`** - Fix duplicate key '02-14'
 
-### Phase 1: Quick Fixes (1-2 hours) - HIGH PRIORITY
+### 4. Missing Raise From (W0707)
+- [ ] **`liturgical_calendar/core/readings_manager.py:211`** - Add `from e` to raise
+- [ ] **`liturgical_calendar/utils/file_system.py:105`** - Add `from e` to raise
+- [ ] **`liturgical_calendar/utils/file_system.py:184`** - Add `from e` to raise
+- [ ] **`liturgical_calendar/services/image_service.py:272`** - Add `from e` to raise
+- [ ] **`liturgical_calendar/services/config_service.py:357`** - Add `from e` to raise
+- [ ] **`liturgical_calendar/caching/artwork_cache.py:126`** - Add `from e` to raise
 
-#### 1.1 Missing Final Newlines (C0305) - PARTIALLY COMPLETE
-- [ ] liturgical_calendar/__init__.py
-- [ ] liturgical_calendar/core/__init__.py
-- [ ] liturgical_calendar/config/__init__.py
-- [ ] liturgical_calendar/image_generation/__init__.py
-- [x] All other files have final newlines.
+### 5. Unspecified Encoding (W1514)
+- [ ] **`liturgical_calendar/config/settings.py:61`** - Add `encoding="utf-8"`
+- [ ] **`liturgical_calendar/services/config_service.py:335`** - Add `encoding="utf-8"`
+- [ ] **`liturgical_calendar/services/config_service.py:350`** - Add `encoding="utf-8"`
 
-#### 1.2 Import Order (C0411) - COMPLETE
-- [x] All files have correct import order (isort run with black profile).
+### 6. Superfluous Parentheses (C0325)
+- [ ] **`liturgical_calendar/funcs.py:179`** - Remove unnecessary parentheses
 
-#### 1.3 Unused Imports (W0611) - COMPLETE
-- [x] All unused imports removed (autoflake run with aggressive mode).
+## 🟡 MEDIUM PRIORITY - Readability Improvements
 
-### Phase 2: Medium Effort (3-4 hours) - MEDIUM PRIORITY
+### 7. No-Else-Return/Continue (R1705, R1724)
+- [ ] **`liturgical_calendar/core/season_calculator.py:55`** - Remove unnecessary `elif`
+- [ ] **`liturgical_calendar/core/season_calculator.py:77`** - Remove unnecessary `else`
+- [ ] **`liturgical_calendar/services/feast_service.py:230`** - Remove unnecessary `elif`
+- [ ] **`liturgical_calendar/services/feast_service.py:254`** - Remove unnecessary `else`
+- [ ] **`liturgical_calendar/services/image_service.py:345`** - Remove unnecessary `else`
+- [ ] **`liturgical_calendar/services/image_service.py:352`** - Remove unnecessary `elif`
+- [ ] **`liturgical_calendar/services/image_service.py:369`** - Remove unnecessary `elif`
 
-#### 2.1 Missing Docstrings (C0114, C0115, C0116)
-- [ ] `liturgical_calendar/logging.py` - Add module docstring
-- [ ] `liturgical_calendar/cli.py` - Add module, class, and function docstrings
-- [ ] `liturgical_calendar/liturgical.py` - Add function docstring
-- [ ] `liturgical_calendar/data/readings_data.py` - Add module docstring
-- [ ] `liturgical_calendar/data/feasts_data.py` - Add module docstring
-- [ ] `liturgical_calendar/data/artwork_data.py` - Add module docstring
-- [ ] `liturgical_calendar/image_generation/layout_engine.py` - Add module docstring
-- [ ] `liturgical_calendar/image_generation/pipeline.py` - Add module and class docstrings
-- [ ] `liturgical_calendar/image_generation/font_manager.py` - Add module and class docstrings
-- [ ] `liturgical_calendar/image_generation/image_builder.py` - Add module and class docstrings
-- [ ] `liturgical_calendar/caching/artwork_cache.py` - Add module and function docstrings
-- [ ] `liturgical_calendar/caching/image_processor.py` - Add module and function docstrings
+### 8. Missing Docstrings (C0116, C0114)
+- [ ] **`liturgical_calendar/caching/artwork_cache.py:24`** - Add function docstring
+- [ ] **`liturgical_calendar/image_generation/font_manager.py:38`** - Add function docstring
+- [ ] **`liturgical_calendar/image_generation/font_manager.py:44`** - Add function docstring
+- [ ] **`liturgical_calendar/services/feast_service.py:368`** - Add function docstring
+- [ ] **`liturgical_calendar/services/feast_service.py:381`** - Add function docstring
+- [ ] **`liturgical_calendar/config/settings.py:1`** - Add module docstring
 
-#### 2.2 Logging F-string Issues (W1203)
-- [ ] `liturgical_calendar/liturgical.py` - 2 instances
-- [ ] `liturgical_calendar/cli.py` - 8 instances
-- [ ] `liturgical_calendar/core/readings_manager.py` - 8 instances
-- [ ] `liturgical_calendar/core/artwork_manager.py` - 6 instances
-- [ ] `liturgical_calendar/image_generation/image_builder.py` - 8 instances
-- [ ] `liturgical_calendar/image_generation/font_manager.py` - 3 instances
-- [ ] `liturgical_calendar/image_generation/pipeline.py` - 6 instances
-- [ ] `liturgical_calendar/utils/file_system.py` - 8 instances
-- [ ] `liturgical_calendar/caching/image_processor.py` - 12 instances
-- [ ] `liturgical_calendar/caching/artwork_cache.py` - 8 instances
-- [ ] `liturgical_calendar/services/feast_service.py` - 8 instances
-- [ ] `liturgical_calendar/services/image_service.py` - 4 instances
-- [ ] `liturgical_calendar/services/config_service.py` - 4 instances
+### 9. Import Outside Top Level (C0415)
+- [ ] **`liturgical_calendar/funcs.py:216-217`** - Move `hashlib` and `urllib.parse.urlparse` imports to top
+- [ ] **`liturgical_calendar/core/readings_manager.py:31`** - Move data imports to top
+- [ ] **`liturgical_calendar/core/readings_manager.py:131`** - Move `data.feasts_data.feasts` import to top
+- [ ] **`liturgical_calendar/core/artwork_manager.py:81`** - Move `funcs` imports to top
+- [ ] **`liturgical_calendar/core/artwork_manager.py:82`** - Move `readings_manager` import to top
+- [ ] **`liturgical_calendar/core/artwork_manager.py:190`** - Move `funcs.get_cache_filename` import to top
+- [ ] **`liturgical_calendar/core/artwork_manager.py:206`** - Move `datetime.timedelta` import to top
+- [ ] **`liturgical_calendar/image_generation/pipeline.py:121`** - Move `datetime` import to top
+- [ ] **`liturgical_calendar/image_generation/pipeline.py:145`** - Move `datetime` import to top
+- [ ] **`liturgical_calendar/services/feast_service.py:134`** - Move `funcs.get_advent_sunday` import to top
+- [ ] **`liturgical_calendar/services/image_service.py:243`** - Move `ImageGenerationPipeline` import to top
 
-#### 2.3 Exception Handling (W0707, W0718)
-- [ ] `liturgical_calendar/liturgical.py` - Use specific exceptions, add `from e`
-- [ ] `liturgical_calendar/cli.py` - Use specific exceptions, add `from e`
-- [ ] `liturgical_calendar/caching/artwork_cache.py` - Add `from e` to re-raises
-- [ ] `liturgical_calendar/caching/image_processor.py` - Add `from e` to re-raises
-- [ ] `liturgical_calendar/core/readings_manager.py` - Add `from e` to re-raises
-- [ ] `liturgical_calendar/utils/file_system.py` - Add `from e` to re-raises
-- [ ] `liturgical_calendar/services/config_service.py` - Add `from e` to re-raises
-- [ ] `liturgical_calendar/services/image_service.py` - Add `from e` to re-raises
+## 🟢 LOW PRIORITY - Design Decisions
 
-### Phase 3: Complex Refactoring (6-8 hours) - LOW PRIORITY
+### 10. Too Many Arguments (R0913, R0917)
+- [ ] **`liturgical_calendar/caching/image_processor.py:31`** - 7 args (API design decision)
+- [ ] **`liturgical_calendar/image_generation/image_builder.py:75`** - 6 args
+- [ ] **`liturgical_calendar/image_generation/layout_engine.py:14`** - 7 args
+- [ ] **`liturgical_calendar/image_generation/layout_engine.py:68`** - 9 args
+- [ ] **`liturgical_calendar/image_generation/layout_engine.py:121`** - 9 args
+- [ ] **`liturgical_calendar/image_generation/layout_engine.py:174`** - 9 args
+- [ ] **`liturgical_calendar/image_generation/layout_engine.py:231`** - 9 args
+- [ ] **`liturgical_calendar/image_generation/pipeline.py:272`** - 7 args
+- [ ] **`liturgical_calendar/services/feast_service.py:138`** - 6 args
+- [ ] **`liturgical_calendar/services/feast_service.py:312`** - 10 args
+- [ ] **`liturgical_calendar/services/feast_service.py:351`** - 10 args
+- [ ] **`liturgical_calendar/services/image_service.py:30`** - 6 args
 
-#### 3.1 Function Complexity (R0913, R0917, R1702)
-- [ ] `liturgical_calendar/cli.py` - Reduce nested blocks (R1702)
-- [ ] `liturgical_calendar/image_generation/layout_engine.py` - Reduce function arguments (R0913, R0917)
-- [ ] `liturgical_calendar/image_generation/pipeline.py` - Reduce function arguments (R0913, R0917)
-- [ ] `liturgical_calendar/image_generation/image_builder.py` - Reduce function arguments (R0913, R0917)
-- [ ] `liturgical_calendar/caching/artwork_cache.py` - Reduce function arguments (R0913, R0917)
-- [ ] `liturgical_calendar/caching/image_processor.py` - Reduce function arguments (R0913, R0917)
-- [ ] `liturgical_calendar/services/image_service.py` - Reduce return statements (R0911)
-- [ ] `liturgical_calendar/services/feast_service.py` - Reduce function arguments (R0913, R0917)
-- [ ] `liturgical_calendar/core/season_calculator.py` - Reduce return statements (R0911)
+### 11. Complexity Issues (R0911, R0912, R0914, R0915, R1702)
+- [ ] **`liturgical_calendar/cli.py`** - Too many locals (27), branches (38), statements (134), nested blocks (7)
+- [ ] **`liturgical_calendar/core/season_calculator.py`** - Too many returns (11), branches (14), locals (37), statements (103)
+- [ ] **`liturgical_calendar/core/readings_manager.py`** - Too many nested blocks (6)
+- [ ] **`liturgical_calendar/core/artwork_manager.py`** - Too many locals (33), branches (19), statements (62)
+- [ ] **`liturgical_calendar/image_generation/image_builder.py`** - Too many locals (22), branches (13)
+- [ ] **`liturgical_calendar/image_generation/pipeline.py`** - Too many locals (22)
+- [ ] **`liturgical_calendar/image_generation/layout_engine.py`** - Too many locals (24,27,21,30)
+- [ ] **`liturgical_calendar/caching/image_processor.py`** - Too many branches (14), statements (53)
+- [ ] **`liturgical_calendar/services/feast_service.py`** - Too many locals (22)
+- [ ] **`liturgical_calendar/services/image_service.py`** - Too many returns (13), branches (15)
 
-#### 3.2 Code Duplication (R0801)
-- [ ] Extract common season URL logic
-- [ ] Extract common error handling patterns
-- [ ] Extract common logging patterns
+### 12. Other Style Issues
+- [ ] **Line too long (C0301)** - 50+ instances across files
+- [ ] **Too many lines (C0302)** - Data files (expected for large data structures)
+- [ ] **Too few public methods (R0903)** - Simple classes
+- [ ] **Too many instance attributes (R0902)** - Complex classes
+- [ ] **Global statement (W0603)** - Legacy code in logging.py
+- [ ] **Duplicate code (R0801)** - Data/config files (expected)
+- [ ] **Broad exception catching (W0718)** - Acceptable in some contexts
+- [ ] **Logging f-string interpolation (W1203)** - Many instances
 
-#### 3.3 Other Issues
-- [ ] `liturgical_calendar/funcs.py` - Fix indentation issues (C0325)
-- [ ] `liturgical_calendar/exceptions.py` - Remove unnecessary pass statements (W0107)
-- [ ] `liturgical_calendar/data/feasts_data.py` - Fix duplicate dictionary key (W0109)
-- [ ] `liturgical_calendar/config/settings.py` - Add encoding to file operations (W1514)
-- [ ] `liturgical_calendar/liturgical.py` - Fix undefined variable (E0602)
+## 📊 Progress Tracking
 
-## Implementation Strategy
+### High Priority Fixes (1-6)
+- [ ] Unused Variables/Arguments: 0/8 completed
+- [ ] Pointless Statements: 0/2 completed
+- [ ] Duplicate Keys: 0/1 completed
+- [ ] Missing Raise From: 0/6 completed
+- [ ] Unspecified Encoding: 0/3 completed
+- [ ] Superfluous Parentheses: 0/1 completed
 
-### Step 1: Quick Fixes (Start Here)
-- [x] Fix remaining missing final newlines
-- [x] Fix import order issues
-- [x] Remove unused imports
+### Medium Priority Fixes (7-9)
+- [ ] No-Else-Return/Continue: 0/7 completed
+- [ ] Missing Docstrings: 0/6 completed
+- [ ] Import Outside Top Level: 0/11 completed
 
-### Step 2: Test After Each Phase
-- [ ] Run `pylint --rcfile=.pylintrc liturgical_calendar` after each phase
-- [ ] Ensure tests still pass: `python -m unittest discover -s tests -p 'test*.py' -v`
-- [ ] Commit changes after each phase
+### Low Priority Fixes (10-12)
+- [ ] Too Many Arguments: 0/12 completed
+- [ ] Complexity Issues: 0/10 completed
+- [ ] Other Style Issues: 0/8 completed
 
-### Step 3: Gradual Improvement
-- [ ] Focus on one category at a time
-- [ ] Use manual fixes for complex issues
-- [ ] Prioritize based on impact vs. effort
+## 🎯 Expected Impact
 
-## Success Criteria
-- [ ] Pylint score: 8.0+/10
-- [x] All tests passing
-- [ ] No critical issues (C, F, E categories)
-- [ ] Minimal warnings (W category)
+- **High Priority Fixes (1-6):** ~21 fixes → **+0.5-1.0 points**
+- **Medium Priority Fixes (7-9):** ~24 fixes → **+0.3-0.5 points**
+- **Total Potential Improvement:** **+0.8-1.5 points** → **Target: 9.25-10.00/10**
 
-## Notes
-- The code is functionally correct - these are quality/style improvements
-- Focus on Phase 1 first for immediate impact
-- Phase 2 and 3 can be done incrementally
-- Consider using pre-commit hooks to prevent regression
+## 📝 Notes
+
+- Focus on High Priority fixes first for maximum impact
+- Medium Priority fixes improve code quality and maintainability
+- Low Priority fixes are design decisions that may not need changing
+- Some issues (like "too many lines" in data files) are expected and can be ignored
+- Use `# pylint: disable=...` comments sparingly and only for justified cases
