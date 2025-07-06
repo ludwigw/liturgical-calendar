@@ -9,8 +9,8 @@ disable=line-too-long,
     broad-exception-caught,
     no-else-continue,
     inconsistent-return-statements,
-    missing-function-docstring,
-    missing-module-docstring,
+
+
     too-few-public-methods,
     too-many-nested-blocks,
     import-error,

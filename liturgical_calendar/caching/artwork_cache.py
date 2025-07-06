@@ -22,6 +22,7 @@ from .image_processor import ImageProcessor
 
 # Import get_instagram_image_url from the script (or reimplement if needed)
 def get_instagram_image_url(instagram_url):
+    """Convert an Instagram post URL to a direct image URL for downloading."""
     if "instagram.com" in instagram_url:
         url = instagram_url.rstrip("/")
         return f"{url}/media?size=l"

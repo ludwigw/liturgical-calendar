@@ -353,6 +353,7 @@ class FeastService:
         return ""
 
     def get_feast_for_date(self, date_obj):
+        """Get feast information for a specific date object."""
         try:
             self.logger.info(f"Looking up feast for {date_obj}")
             feast = self.season_calculator.get_feast(date_obj)
@@ -366,6 +367,7 @@ class FeastService:
             raise
 
     def get_readings_for_date(self, date_obj):
+        """Get readings for a specific date object."""
         try:
             self.logger.info(f"Getting readings for {date_obj}")
             readings = self.readings_manager.get_readings(date_obj)

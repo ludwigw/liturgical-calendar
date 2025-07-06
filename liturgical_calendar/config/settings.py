@@ -1,3 +1,11 @@
+"""
+Configuration management for the liturgical calendar project.
+
+This module provides centralized configuration settings for the liturgical calendar
+application, including image generation parameters, caching settings, and feature toggles.
+Settings can be loaded from YAML files and overridden by environment variables.
+"""
+
 import os
 
 import yaml

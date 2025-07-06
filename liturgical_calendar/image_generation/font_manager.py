@@ -36,10 +36,12 @@ class FontManager:
             raise
 
     def get_text_size(self, text: str, font: Any) -> Tuple[int, int]:
+        """Calculate the width and height of text when rendered with the given font."""
         bbox = font.getbbox(text)
         width = bbox[2] - bbox[0]
         height = bbox[3] - bbox[1]
         return width, height
 
     def get_text_metrics(self, font: Any) -> Tuple[int, int]:
+        """Get the ascent and descent metrics for the given font."""
         return font.getmetrics()
