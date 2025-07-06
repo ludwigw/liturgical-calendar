@@ -228,7 +228,7 @@ class FeastService:
         """Normalize week number based on season."""
         if weekno is not None and int(weekno) > 0:
             return int(weekno)
-        elif season not in ["Pre-Lent", "Christmas", "Lent"]:
+        if season not in ["Pre-Lent", "Christmas", "Lent"]:
             return None
         return weekno
 
@@ -252,8 +252,7 @@ class FeastService:
         if result.get("prec", 0) > 4 and result.get("prec") != 5:
             if result.get("martyr"):
                 return "red"
-            else:
-                return "white"
+            return "white"
 
         # Season colors
         season_colors = {

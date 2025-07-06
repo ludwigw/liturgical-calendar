@@ -344,31 +344,28 @@ class ImageService:
                 # But martyrs are red
                 if result.get("martyr"):
                     return "red"
-                else:
-                    return "white"
-            else:
-                # Not a feast day.
-                # Set a default color for the season
-                if season == "Advent":
-                    return "purple"
-                elif season == "Christmas":
-                    return "white"
-                elif season == "Epiphany":
-                    return "white"
-                elif season == "Lent":
-                    return "purple"
-                elif season == "Holy Week":
-                    return "red"
-                elif season == "Easter":
-                    return "white"
-                else:
-                    # The great fallback:
-                    return "green"
+                return "white"
+            # Not a feast day.
+            # Set a default color for the season
+            if season == "Advent":
+                return "purple"
+            if season == "Christmas":
+                return "white"
+            if season == "Epiphany":
+                return "white"
+            if season == "Lent":
+                return "purple"
+            if season == "Holy Week":
+                return "red"
+            if season == "Easter":
+                return "white"
+            # The great fallback:
+            return "green"
         # Two special cases for Christmas-based festivals which depend on the day of the week.
         if result.get("prec") == 5:  # An ordinary Sunday
             if christmas_point == advent_sunday:
                 return "white"  # Advent Sunday
-            elif christmas_point == advent_sunday - 7:
+            if christmas_point == advent_sunday - 7:
                 return "white"  # Christ the King
         return result.get("colour", "green")
 

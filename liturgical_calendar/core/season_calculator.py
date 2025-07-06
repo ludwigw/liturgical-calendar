@@ -54,30 +54,28 @@ class SeasonCalculator:
         # Use original logic
         if easter_point >= -62 and easter_point <= -47:
             return "Pre-Lent"
-        elif christmas_point >= advent_sunday and christmas_point <= -1:
+        if christmas_point >= advent_sunday and christmas_point <= -1:
             return "Advent"
-        elif christmas_point >= 0 and christmas_point <= 11:
+        if christmas_point >= 0 and christmas_point <= 11:
             return "Christmas"
-        elif christmas_point >= 12 and christmas_point < 40:
+        if christmas_point >= 12 and christmas_point < 40:
             return "Epiphany"
-        elif easter_point <= -62:
+        if easter_point <= -62:
             return "Ordinary Time"
-        elif easter_point > -47 and easter_point < -7:
+        if easter_point > -47 and easter_point < -7:
             return "Lent"
-        elif easter_point >= -7 and easter_point < 0:
+        if easter_point >= -7 and easter_point < 0:
             return "Holy Week"
-        elif easter_point >= 0 and easter_point < 49:
+        if easter_point >= 0 and easter_point < 49:
             return "Easter"
-        elif easter_point >= 49 and easter_point < 56:
+        if easter_point >= 49 and easter_point < 56:
             return "Pentecost"
-        else:
-            advent_sunday_abs = date_to_days(year, 12, 25) + advent_sunday
-            weeks_until_advent = (advent_sunday_abs - days) // 7
-            dayofweek = day_of_week(f_date.year, f_date.month, f_date.day)
-            if dayofweek == 0 and 0 < weeks_until_advent <= 4:
-                return "Pre-Advent"
-            else:
-                return "Trinity"
+        advent_sunday_abs = date_to_days(year, 12, 25) + advent_sunday
+        weeks_until_advent = (advent_sunday_abs - days) // 7
+        dayofweek = day_of_week(f_date.year, f_date.month, f_date.day)
+        if dayofweek == 0 and 0 < weeks_until_advent <= 4:
+            return "Pre-Advent"
+        return "Trinity"
 
     def week_info(self, f_date: date) -> Dict:
         """
