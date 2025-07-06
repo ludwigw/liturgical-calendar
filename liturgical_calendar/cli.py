@@ -131,7 +131,7 @@ def main(today_func=datetime.date.today):
     if args.config:
         print(f"[INFO] Using config file: {args.config}")
     Settings.load_from_file(args.config)
-    logger.info(f"Loaded config from {args.config or 'default'}")
+    logger.info("Loaded config from %s", args.config or "default")
 
     if args.command == "generate":
         # Parse date
@@ -147,7 +147,7 @@ def main(today_func=datetime.date.today):
         date_str = get_date_str(date)
         # Create ImageService with config
         image_service = ImageService(config=SimpleConfig)
-        logger.info(f"Generating image for {date_str}")
+        logger.info("Generating image for %s", date_str)
         try:
             result = image_service.generate_liturgical_image(date_str)
             if result.get("success"):
@@ -160,20 +160,20 @@ def main(today_func=datetime.date.today):
                     file_path = str(dest)
                 print(f"Saved image to {file_path}")
                 print(f"Feast: {result.get('feast_info', {}).get('name', 'Unknown')}")
-                logger.info(f"Image generated successfully: {file_path}")
+                logger.info("Image generated successfully: %s", file_path)
             else:
                 logger.error(
-                    f"Error generating image: {result.get('error', 'Unknown error')}"
+                    "Error generating image: %s", result.get("error", "Unknown error")
                 )
                 print(f"Error generating image: {result.get('error', 'Unknown error')}")
                 sys.exit(1)
             logger.info("Image generation completed successfully")
         except LiturgicalCalendarError as e:
-            logger.error(f"Liturgical Calendar Error: {e}")
+            logger.error("Liturgical Calendar Error: %s", e)
             print(f"Liturgical Calendar Error: {e}")
             sys.exit(1)
         except Exception as e:
-            logger.exception(f"Error in generate: {e}")
+            logger.exception("Error in generate: %s", e)
             print(f"Error in generate: {e}")
             sys.exit(1)
     elif args.command == "cache-artwork":
@@ -217,7 +217,10 @@ def main(today_func=datetime.date.today):
                         print(f"  - {url}")
 
             logger.info(
-                f"Cache-artwork completed: {result['success']} cached, {result['failed']} failed, {result['total']} total."
+                "Cache-artwork completed: %s cached, %s failed, %s total.",
+                result["success"],
+                result["failed"],
+                result["total"],
             )
 
             # Exit with error code if any failed
@@ -226,7 +229,7 @@ def main(today_func=datetime.date.today):
                 # Don't exit with error code for partial failures - this allows the system to continue
 
         except Exception as e:
-            logger.exception(f"Error in cache-artwork: {e}")
+            logger.exception("Error in cache-artwork: %s", e)
             print(f"Error in cache-artwork: {e}")
             sys.exit(1)
     elif args.command == "info":
@@ -243,9 +246,9 @@ def main(today_func=datetime.date.today):
             print(f"Week: {result.get('week', 'Unknown')}")
             print(f"Name: {result.get('name', 'Unknown')}")
             print(f"Colour: {result.get('colour', 'Unknown')}")
-            logger.info(f"Info for {date_str}: {result}")
+            logger.info("Info for %s: %s", date_str, result)
         except Exception as e:
-            logger.exception(f"Error in info: {e}")
+            logger.exception("Error in info: %s", e)
             print(f"Error in info: {e}")
             sys.exit(1)
     elif args.command == "validate-config":
@@ -267,7 +270,7 @@ def main(today_func=datetime.date.today):
                         print(f"  - {err}")
                 sys.exit(1)
         except Exception as e:
-            logger.exception(f"Error in validate-config: {e}")
+            logger.exception("Error in validate-config: %s", e)
             print(f"Error in validate-config: {e}")
             sys.exit(1)
     elif args.command == "version":

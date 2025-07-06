@@ -160,7 +160,7 @@ class ReadingsManager:
             Returns empty list if no readings found.
         """
         try:
-            self.logger.info(f"Looking up readings for {date_str}")
+            self.logger.info("Looking up readings for %s", date_str)
             date = datetime.strptime(date_str, "%Y-%m-%d").date()
             year = date.year
 
@@ -173,7 +173,7 @@ class ReadingsManager:
                 if week:
                     readings = self.get_sunday_readings(week, sunday_cycle)
                     if readings:
-                        self.logger.info(f"Readings found for {date_str}")
+                        self.logger.info("Readings found for %s", date_str)
                     return readings
             else:
                 # It's a weekday - check precedence order
@@ -190,7 +190,7 @@ class ReadingsManager:
                         weekday_reading, day_of_week, weekday_cycle
                     )
                     if week_based_readings:
-                        self.logger.info(f"Readings found for {date_str}")
+                        self.logger.info("Readings found for %s", date_str)
                         return week_based_readings
 
                 # 2. Check for fixed weekday readings as fallback
@@ -198,14 +198,14 @@ class ReadingsManager:
                     date_str, weekday_cycle
                 )
                 if fixed_readings:
-                    self.logger.info(f"Readings found for {date_str}")
+                    self.logger.info("Readings found for %s", date_str)
                     return fixed_readings
 
-            self.logger.info(f"No readings found for {date_str}")
+            self.logger.info("No readings found for %s", date_str)
             return []
 
         except (ValueError, KeyError, TypeError) as e:
-            self.logger.error(f"Error looking up readings for {date_str}: {e}")
+            self.logger.error("Error looking up readings for %s: %s", date_str, e)
             raise ReadingsNotFoundError(
                 f"Error getting readings for date {date_str}: {e}"
             ) from e

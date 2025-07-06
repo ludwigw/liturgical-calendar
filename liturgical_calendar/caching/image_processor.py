@@ -68,20 +68,27 @@ class ImageProcessor:
                 with open(cache_path, "wb") as f:
                     for chunk in response.iter_content(chunk_size=8192):
                         f.write(chunk)
-                self.logger.info(f"Image downloaded successfully: {cache_path}")
+                self.logger.info("Image downloaded successfully: %s", cache_path)
                 return
 
             except requests.ConnectionError as e:
                 if attempt < max_retries - 1:
                     delay = retry_delay * (2**attempt)  # Exponential backoff
                     self.logger.warning(
-                        f"Network connection error (attempt {attempt + 1}/{max_retries}) for {url}: {e}"
+                        "Network connection error (attempt %s/%s) for %s: %s",
+                        attempt + 1,
+                        max_retries,
+                        url,
+                        e,
                     )
-                    self.logger.info(f"Retrying in {delay:.1f} seconds...")
+                    self.logger.info("Retrying in %.1f seconds...", delay)
                     time.sleep(delay)
                     continue
                 self.logger.error(
-                    f"Failed to download {url} after {max_retries} attempts due to connection error: {e}"
+                    "Failed to download %s after %s attempts due to connection error: %s",
+                    url,
+                    max_retries,
+                    e,
                 )
                 if cache_path.exists():
                     cache_path.unlink(missing_ok=True)
@@ -93,13 +100,20 @@ class ImageProcessor:
                 if attempt < max_retries - 1:
                     delay = retry_delay * (2**attempt)  # Exponential backoff
                     self.logger.warning(
-                        f"Request timeout (attempt {attempt + 1}/{max_retries}) for {url}: {e}"
+                        "Request timeout (attempt %s/%s) for %s: %s",
+                        attempt + 1,
+                        max_retries,
+                        url,
+                        e,
                     )
-                    self.logger.info(f"Retrying in {delay:.1f} seconds...")
+                    self.logger.info("Retrying in %.1f seconds...", delay)
                     time.sleep(delay)
                     continue
                 self.logger.error(
-                    f"Failed to download {url} after {max_retries} attempts due to timeout: {e}"
+                    "Failed to download %s after %s attempts due to timeout: %s",
+                    url,
+                    max_retries,
+                    e,
                 )
                 if cache_path.exists():
                     cache_path.unlink(missing_ok=True)
@@ -109,7 +123,7 @@ class ImageProcessor:
 
             except requests.HTTPError as e:
                 # Don't retry HTTP errors (4xx, 5xx) as they're likely permanent
-                self.logger.error(f"HTTP error downloading {url}: {e}")
+                self.logger.error("HTTP error downloading %s: %s", url, e)
                 if cache_path.exists():
                     cache_path.unlink(missing_ok=True)
                 raise CacheError(f"HTTP error downloading {url}: {e}") from e
@@ -118,13 +132,20 @@ class ImageProcessor:
                 if attempt < max_retries - 1:
                     delay = retry_delay * (2**attempt)  # Exponential backoff
                     self.logger.warning(
-                        f"Unexpected error (attempt {attempt + 1}/{max_retries}) for {url}: {e}"
+                        "Unexpected error (attempt %s/%s) for %s: %s",
+                        attempt + 1,
+                        max_retries,
+                        url,
+                        e,
                     )
-                    self.logger.info(f"Retrying in {delay:.1f} seconds...")
+                    self.logger.info("Retrying in %.1f seconds...", delay)
                     time.sleep(delay)
                     continue
                 self.logger.error(
-                    f"Failed to download {url} after {max_retries} attempts due to unexpected error: {e}"
+                    "Failed to download %s after %s attempts due to unexpected error: %s",
+                    url,
+                    max_retries,
+                    e,
                 )
                 if cache_path.exists():
                     cache_path.unlink(missing_ok=True)
@@ -141,11 +162,11 @@ class ImageProcessor:
             # Reopen to get size (verify() leaves file closed)
             with Image.open(image_path) as img:
                 _ = img.size
-            self.logger.info(f"Image validated successfully: {image_path}")
+            self.logger.info("Image validated successfully: %s", image_path)
             return True
         except Exception as e:
             image_path.unlink(missing_ok=True)
-            self.logger.error(f"File is not a valid image: {image_path} ({e})")
+            self.logger.error("File is not a valid image: %s (%s)", image_path, e)
             raise ArtworkNotFoundError(
                 f"File is not a valid image: {image_path} ({e})"
             ) from e
@@ -164,19 +185,24 @@ class ImageProcessor:
                 width, height = img.size
                 if width < target_size[0] or height < target_size[1]:
                     self.logger.info(
-                        f"Upsampling {original_path.name} ({width}x{height}) to {target_size[0]}x{target_size[1]}"
+                        "Upsampling %s (%sx%s) to %sx%s",
+                        original_path.name,
+                        width,
+                        height,
+                        target_size[0],
+                        target_size[1],
                     )
                     upsampled = img.convert("RGB").resize(
                         target_size, Resampling.LANCZOS
                     )
                     safe_save_image(upsampled, target_path, quality=95)
-                    self.logger.info(f"Image upsampled successfully: {target_path}")
+                    self.logger.info("Image upsampled successfully: %s", target_path)
                     return True
                 # No upsampling needed, just copy
                 shutil.copy2(str(original_path), str(target_path))
                 return False
         except Exception as e:
-            self.logger.error(f"Error during upsampling: {e}")
+            self.logger.error("Error during upsampling: %s", e)
             raise ImageGenerationError(f"Error during upsampling: {e}") from e
 
     def archive_original(self, image_path: Path, archive_dir: Path) -> bool:
@@ -188,8 +214,8 @@ class ImageProcessor:
             archive_dir.mkdir(exist_ok=True, parents=True)
             archive_path = archive_dir / image_path.name
             shutil.move(str(image_path), str(archive_path))
-            self.logger.info(f"Archived original image: {archive_path}")
+            self.logger.info("Archived original image: %s", archive_path)
             return True
         except Exception as e:
-            self.logger.error(f"Error archiving original image: {e}")
+            self.logger.error("Error archiving original image: %s", e)
             raise CacheError(f"Error archiving original image: {e}") from e

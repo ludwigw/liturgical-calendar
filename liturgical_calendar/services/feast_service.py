@@ -353,27 +353,27 @@ class FeastService:
     def get_feast_for_date(self, date_obj):
         """Get feast information for a specific date object."""
         try:
-            self.logger.info(f"Looking up feast for {date_obj}")
+            self.logger.info("Looking up feast for %s", date_obj)
             feast = self.season_calculator.get_feast(date_obj)
             if feast:
-                self.logger.info(f"Feast found: {feast['name']}")
+                self.logger.info("Feast found: %s", feast["name"])
             else:
-                self.logger.info(f"No feast found for {date_obj}")
+                self.logger.info("No feast found for %s", date_obj)
             return feast
         except Exception as e:
-            self.logger.exception(f"Error looking up feast for {date_obj}: {e}")
+            self.logger.exception("Error looking up feast for %s: %s", date_obj, e)
             raise
 
     def get_readings_for_date(self, date_obj):
         """Get readings for a specific date object."""
         try:
-            self.logger.info(f"Getting readings for {date_obj}")
+            self.logger.info("Getting readings for %s", date_obj)
             readings = self.readings_manager.get_readings(date_obj)
             if readings:
-                self.logger.info(f"Readings found for {date_obj}")
+                self.logger.info("Readings found for %s", date_obj)
             else:
-                self.logger.info(f"No readings found for {date_obj}")
+                self.logger.info("No readings found for %s", date_obj)
             return readings
         except Exception as e:
-            self.logger.exception(f"Error getting readings for {date_obj}: {e}")
+            self.logger.exception("Error getting readings for %s: %s", date_obj, e)
             raise

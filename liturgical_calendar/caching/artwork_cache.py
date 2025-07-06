@@ -69,7 +69,7 @@ class ArtworkCache:
         # Check if already cached
         if cache_path.exists():
             self.logger.info(
-                f"Image already cached for {source_url}, skipping download"
+                "Image already cached for %s, skipping download", source_url
             )
             return True
 
@@ -80,11 +80,14 @@ class ArtworkCache:
             if direct_url:
                 download_url = direct_url
                 self.logger.info(
-                    f"Converting Instagram URL to direct image URL: {source_url} -> {download_url}"
+                    "Converting Instagram URL to direct image URL: %s -> %s",
+                    source_url,
+                    download_url,
                 )
             else:
                 self.logger.warning(
-                    f"Could not convert Instagram URL to direct image URL: {source_url}"
+                    "Could not convert Instagram URL to direct image URL: %s",
+                    source_url,
                 )
 
         try:
@@ -104,7 +107,8 @@ class ArtworkCache:
                     )
                     if not archived:
                         self.logger.error(
-                            f"Could not archive original image before upsampling: {cache_path}"
+                            "Could not archive original image before upsampling: %s",
+                            cache_path,
                         )
                         raise CacheError(
                             f"Could not archive original image before upsampling: {cache_path}"
@@ -115,14 +119,14 @@ class ArtworkCache:
                     self.processor.archive_original(cache_path, self.original_dir)
                     archived_path = self.original_dir / cache_path.name
                     shutil.copy2(str(archived_path), str(cache_path))
-            self.logger.info(f"Cache saved for key: {source_url}")
+            self.logger.info("Cache saved for key: %s", source_url)
             return True
         except (CacheError, ArtworkNotFoundError, ImageGenerationError) as e:
-            self.logger.error(f"Download/cache error for {source_url}: {e}")
+            self.logger.error("Download/cache error for %s: %s", source_url, e)
             return False
         except Exception as e:
             self.logger.exception(
-                f"Unexpected error in download_and_cache for {source_url}: {e}"
+                "Unexpected error in download_and_cache for %s: %s", source_url, e
             )
             raise CacheError(f"Unexpected error in download_and_cache: {e}") from e
 
@@ -153,7 +157,7 @@ class ArtworkCache:
                 if age_days > max_age_days:
                     file.unlink()
                     removed.append(str(file))
-        self.logger.info(f"Removed {len(removed)} old cache files")
+        self.logger.info("Removed %s old cache files", len(removed))
         return removed
 
     def cache_multiple_artwork(self, source_urls, max_retries=3, retry_delay=5.0):
@@ -173,26 +177,28 @@ class ArtworkCache:
         failed_count = 0
         failed_urls = []
 
-        self.logger.info(f"Starting batch cache operation for {total} artwork items")
+        self.logger.info("Starting batch cache operation for %s artwork items", total)
 
         for i, url in enumerate(source_urls, 1):
-            self.logger.info(f"Processing artwork {i}/{total}: {url}")
+            self.logger.info("Processing artwork %s/%s: %s", i, total, url)
             try:
                 success = self.download_and_cache(
                     url, max_retries=max_retries, retry_delay=retry_delay
                 )
                 if success:
                     success_count += 1
-                    self.logger.info(f"Successfully cached artwork {i}/{total}")
+                    self.logger.info("Successfully cached artwork %s/%s", i, total)
                 else:
                     failed_count += 1
                     failed_urls.append(url)
-                    self.logger.warning(f"Failed to cache artwork {i}/{total}: {url}")
+                    self.logger.warning(
+                        "Failed to cache artwork %s/%s: %s", i, total, url
+                    )
             except Exception as e:
                 failed_count += 1
                 failed_urls.append(url)
                 self.logger.error(
-                    f"Exception while caching artwork {i}/{total}: {url} - {e}"
+                    "Exception while caching artwork %s/%s: %s - %s", i, total, url, e
                 )
 
         result = {
@@ -203,6 +209,9 @@ class ArtworkCache:
         }
 
         self.logger.info(
-            f"Batch cache operation completed: {success_count} successful, {failed_count} failed out of {total} total"
+            "Batch cache operation completed: %s successful, %s failed out of %s total",
+            success_count,
+            failed_count,
+            total,
         )
         return result

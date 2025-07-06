@@ -64,7 +64,7 @@ class ImageGenerationPipeline:
             Path to the generated image file
         """
         try:
-            self.logger.info(f"Starting image generation pipeline for {date_str}")
+            self.logger.info("Starting image generation pipeline for %s", date_str)
 
             # Prepare data with graceful degradation
             if feast_info and artwork_info:
@@ -80,28 +80,28 @@ class ImageGenerationPipeline:
             try:
                 layout, fonts = self._create_layout(data)
             except Exception as e:
-                self.logger.error(f"Error creating layout for {date_str}: {e}")
+                self.logger.error("Error creating layout for %s: %s", date_str, e)
                 raise
 
             # Render image
             try:
                 self._render_image()
             except Exception as e:
-                self.logger.error(f"Error rendering image for {date_str}: {e}")
+                self.logger.error("Error rendering image for %s: %s", date_str, e)
                 raise
 
             # Save image
             try:
                 output_path = self._save_image(date_str, layout, fonts, data, out_path)
             except Exception as e:
-                self.logger.error(f"Error saving image for {date_str}: {e}")
+                self.logger.error("Error saving image for %s: %s", date_str, e)
                 raise
 
-            self.logger.info(f"Image generation pipeline completed for {date_str}")
+            self.logger.info("Image generation pipeline completed for %s", date_str)
             return output_path
         except Exception as e:
             self.logger.exception(
-                f"Error in image generation pipeline for {date_str}: {e}"
+                "Error in image generation pipeline for %s: %s", date_str, e
             )
             raise
 

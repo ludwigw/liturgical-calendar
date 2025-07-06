@@ -56,16 +56,16 @@ class LiturgicalImageBuilder:
             or not isinstance(artwork_path, str)
             or not os.path.isfile(artwork_path)
         ):
-            self.logger.warning(f"Artwork file not found: {artwork_path}")
+            self.logger.warning("Artwork file not found: %s", artwork_path)
             # Create a simple gray placeholder
             art_img = Image.new("RGB", size, Settings.PLACEHOLDER_COLOR)
         else:
             try:
                 art_img = Image.open(artwork_path).convert("RGB")
                 art_img = art_img.resize(size, Resampling.LANCZOS)
-                self.logger.debug(f"Successfully loaded artwork: {artwork_path}")
+                self.logger.debug("Successfully loaded artwork: %s", artwork_path)
             except Exception as e:
-                self.logger.error(f"Error loading artwork {artwork_path}: {e}")
+                self.logger.error("Error loading artwork %s: %s", artwork_path, e)
                 # Create a simple gray placeholder on error
                 art_img = Image.new("RGB", size, Settings.PLACEHOLDER_COLOR)
 
@@ -95,7 +95,7 @@ class LiturgicalImageBuilder:
     ):
         """Construct and return a liturgical calendar image for the given parameters."""
         try:
-            self.logger.info(f"Building image for {date_str}")
+            self.logger.info("Building image for %s", date_str)
             img = self.create_base_image()
             draw = ImageDraw.Draw(img)
 
@@ -123,12 +123,14 @@ class LiturgicalImageBuilder:
             if main_artwork and isinstance(main_artwork, dict):
                 if main_artwork.get("fallback"):
                     self.logger.info(
-                        f"Using fallback artwork for {date_str}: {main_artwork.get('fallback_type', 'unknown')}"
+                        "Using fallback artwork for %s: %s",
+                        date_str,
+                        main_artwork.get("fallback_type", "unknown"),
                     )
                 elif main_artwork.get("placeholder"):
-                    self.logger.info(f"Using placeholder artwork for {date_str}")
+                    self.logger.info("Using placeholder artwork for %s", date_str)
                 else:
-                    self.logger.info(f"Using primary artwork for {date_str}")
+                    self.logger.info("Using primary artwork for %s", date_str)
 
             self.paste_artwork(
                 img, main_art_path, main_art["pos"], main_art["size"], main_artwork
@@ -188,24 +190,24 @@ class LiturgicalImageBuilder:
             # Save with enhanced error handling using utility functions
             try:
                 safe_save_image(img, out_path, quality=95)
-                self.logger.info(f"Image build completed for {date_str}: {out_path}")
+                self.logger.info("Image build completed for %s: %s", date_str, out_path)
             except Exception as e:
-                self.logger.error(f"Error saving image for {date_str}: {e}")
+                self.logger.error("Error saving image for %s: %s", date_str, e)
                 # Try saving with different format
                 try:
                     out_path_png = str(out_path).replace(".jpg", ".png")
                     safe_save_image(img, out_path_png, quality=95)
                     self.logger.info(
-                        f"Image saved as PNG for {date_str}: {out_path_png}"
+                        "Image saved as PNG for %s: %s", date_str, out_path_png
                     )
                     return out_path_png
                 except Exception as e2:
                     self.logger.error(
-                        f"Failed to save image in any format for {date_str}: {e2}"
+                        "Failed to save image in any format for %s: %s", date_str, e2
                     )
                     raise
 
             return out_path
         except Exception as e:
-            self.logger.exception(f"Error building image for {date_str}: {e}")
+            self.logger.exception("Error building image for %s: %s", date_str, e)
             raise

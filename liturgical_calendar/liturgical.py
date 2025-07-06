@@ -69,11 +69,11 @@ def main():
         print(f"Colour: {result.get('colour', 'Unknown')}")
         logger.info("liturgical.py script completed successfully")
     except LiturgicalCalendarError as e:
-        logger.error(f"Liturgical Calendar Error: {e}")
+        logger.error("Liturgical Calendar Error: %s", e)
         print(f"Liturgical Calendar Error: {e}")
         sys.exit(1)
     except Exception as e:
-        logger.exception(f"Error in liturgical.py: {e}")
+        logger.exception("Error in liturgical.py: %s", e)
         print(f"Error in liturgical.py: {e}")
         sys.exit(1)
 

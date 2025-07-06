@@ -127,21 +127,23 @@ class ImageService:
                 output_path = None
                 if output_dir:
                     output_path = os.path.join(output_dir, f"liturgical_{date_str}.png")
-                self.logger.info(f"Generating image for {date_str}")
+                self.logger.info("Generating image for %s", date_str)
                 result = self.generate_liturgical_image(
                     date_str, output_path, transferred
                 )
                 if result.get("success"):
                     self.logger.info(
-                        f"Image generated successfully: {result.get('file_path')}"
+                        "Image generated successfully: %s", result.get("file_path")
                     )
                 else:
                     self.logger.error(
-                        f"Image generation failed for {date_str}: {result.get('error', 'Unknown error')}"
+                        "Image generation failed for %s: %s",
+                        date_str,
+                        result.get("error", "Unknown error"),
                     )
                 results.append(result)
             except Exception as e:
-                self.logger.error(f"Image generation error for {date_str}: {e}")
+                self.logger.error("Image generation error for %s: %s", date_str, e)
                 results.append({"date": date_str, "success": False, "error": str(e)})
 
         return results
@@ -256,7 +258,7 @@ class ImageService:
             # Pass the prepared feast and artwork info to the pipeline
             feast_info = image_data
             artwork_info = image_data.get("artwork_info", {})
-            self.logger.info(f"Starting image generation for {date_str}")
+            self.logger.info("Starting image generation for %s", date_str)
             file_path = self.pipeline.generate_image(
                 date_str, output_path, feast_info, artwork_info
             )
@@ -265,9 +267,9 @@ class ImageService:
                 "image_data": image_data,
                 "file_path": str(file_path),
             }
-            self.logger.info(f"Image generated successfully: {file_path}")
+            self.logger.info("Image generated successfully: %s", file_path)
         except Exception as e:
-            self.logger.exception(f"Error generating image for {date_str}: {e}")
+            self.logger.exception("Error generating image for %s: %s", date_str, e)
             raise ImageGenerationError(f"Error generating image: {e}") from e
 
         return result
