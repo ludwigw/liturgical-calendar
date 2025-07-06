@@ -49,7 +49,8 @@ def get_advent_sunday(year: int) -> int:
     # Move forward to the next Sunday if needed
     while possible_advent.weekday() != 6:  # 6 = Sunday in Python's weekday()
         possible_advent += timedelta(days=1)
-    offset = (possible_advent - christmas).days
+    delta = possible_advent - christmas
+    offset = delta.days
     return offset
 
 
@@ -176,8 +177,10 @@ def get_week_number(given_date: date) -> int:
     start_of_year = date(given_date.year, 1, 1)
     start_of_year_weekday = start_of_year.weekday()
     if start_of_year_weekday != 6:
-        start_of_year += timedelta(days=(6 - start_of_year_weekday))
-    delta_days = (given_date - start_of_year).days
+        days_to_sunday = 6 - start_of_year_weekday
+        start_of_year += timedelta(days=days_to_sunday)
+    delta = given_date - start_of_year
+    delta_days = delta.days
     return delta_days // 7 + 1
 
 

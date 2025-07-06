@@ -20,7 +20,7 @@ disable=line-too-long,
     no-else-return,
     too-many-lines,
     duplicate-key,
-    superfluous-parens,
+
     too-many-instance-attributes,
     too-many-return-statements,
     global-statement,
