@@ -2,11 +2,8 @@
 
 ## Testing Framework
 - Use `unittest` for all testing, not `pytest`
-- **CRITICAL**: Always run ALL tests before committing changes
 - **REQUIRED**: Use `PYTHONPATH=. python -m unittest discover -s tests -p 'test*.py' -v` to run all tests at once
-- **REQUIRED**: When committing changes to a file, the test results appended to the commit message must include the tests for that file.
 - **NOTE**: `unittest discover` may not work without setting PYTHONPATH due to import issues
-- Always include a complete test summary table in commit messages showing all test suites and their results
 
 ## Code Changes and Logic Preservation
 - **DEFAULT**: Use existing logic that is known to work rather than rewriting calculations from scratch

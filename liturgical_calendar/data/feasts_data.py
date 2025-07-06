@@ -352,14 +352,9 @@ feasts = {
             "prec": 3,
         },
         "02-14": {
-            "name": "Valentine",
+            "name": "Valentine, Cyril and Methodius",
             "martyr": 1,
             "url": "https://en.wikipedia.org/wiki/Saint_Valentine",
-            "prec": 3,
-        },
-        "02-14": {
-            "name": "Cyril and Methodius",
-            "url": "https://en.wikipedia.org/wiki/Cyril_and_Methodius",
             "prec": 4,
             "readings": ["Isaiah 52:7-10", "Romans 10:11-15"],
         },
