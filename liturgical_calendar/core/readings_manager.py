@@ -207,7 +207,7 @@ class ReadingsManager:
             return []
 
         except (ValueError, KeyError, TypeError) as e:
-            self.logger.exception(f"Error looking up readings for {date_str}: {e}")
+            self.logger.error(f"Error looking up readings for {date_str}: {e}")
             raise ReadingsNotFoundError(
                 f"Error getting readings for date {date_str}: {e}"
             )

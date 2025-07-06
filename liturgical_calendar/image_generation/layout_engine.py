@@ -16,7 +16,6 @@ class LayoutEngine:
         season: str,
         date: str,
         fonts: Dict[str, Any],
-        _draw: Any,
         width: int,
         padding: int,
         font_manager=None,
@@ -75,7 +74,6 @@ class LayoutEngine:
         y: int,
         fonts: Dict[str, Any] = None,
         next_title_y_offset: int = 16,
-        _draw: Any = None,
         font_manager=None,
     ) -> Dict[str, Any]:
         """
@@ -109,14 +107,13 @@ class LayoutEngine:
                     thumb_size,
                     fonts,
                     next_title_y_offset,
-                    None,
                     font_manager,
                 )
             )
             layout["show_next"] = True
         return layout
 
-    def _get_text_width(self, _draw, text, font, font_manager=None):
+    def _get_text_width(self, text, font, font_manager=None):
         if font_manager:
             return font_manager.get_text_size(text, font)[0]
         return font.getbbox(text)[2] - font.getbbox(text)[0]
@@ -130,7 +127,6 @@ class LayoutEngine:
         thumb_size: int,
         fonts: Dict[str, Any],
         next_title_y_offset: int,
-        _draw: Any,
         font_manager=None,
     ) -> Dict[str, Any]:
         """
@@ -143,8 +139,8 @@ class LayoutEngine:
         # Baseline alignment
         sans_ascent, _ = sans_font.getmetrics()
         serif_ascent, _ = serif_font.getmetrics()
-        next_prefix_w = self._get_text_width(None, next_prefix, sans_font, font_manager)
-        next_title_w = self._get_text_width(None, next_title, serif_font, font_manager)
+        next_prefix_w = self._get_text_width(next_prefix, sans_font, font_manager)
+        next_title_w = self._get_text_width(next_title, serif_font, font_manager)
         total_next_w = next_prefix_w + next_title_w
         next_x = art_x + (art_size - total_next_w) // 2
         next_title_y = thumb_y + thumb_size + next_title_y_offset
@@ -179,7 +175,6 @@ class LayoutEngine:
         self,
         title: str,
         fonts: Dict[str, Any],
-        _draw: Any,
         width: int,
         padding: int,
         title_font_size: int,
@@ -238,7 +233,6 @@ class LayoutEngine:
         week: str,
         readings: list,
         fonts: Dict[str, Any],
-        _draw: Any,
         width: int,
         padding: int,
         start_y: int,

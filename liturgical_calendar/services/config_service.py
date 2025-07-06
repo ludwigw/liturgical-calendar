@@ -240,6 +240,7 @@ class ConfigService:
             Dictionary with validation results
         """
         warnings = []
+        errors = []
 
         # Check required directories
         required_dirs = [self.get("artwork.cache_dir"), self.get("output.directory")]
@@ -251,17 +252,17 @@ class ConfigService:
                     self.logger.info(f"Created missing directory: {dir_path}")
                 except Exception as e:
                     self.logger.error(f"Cannot create directory {dir_path}: {e}")
-                    raise ConfigError(f"Cannot create directory {dir_path}: {e}")
+                    errors.append(f"Cannot create directory {dir_path}: {e}")
 
         # Check image settings
         image_settings = self.get_image_settings()
         if image_settings["width"] <= 0 or image_settings["height"] <= 0:
             self.logger.error("Image dimensions must be positive")
-            raise ConfigError("Image dimensions must be positive")
+            errors.append("Image dimensions must be positive")
 
         if image_settings["quality"] < 1 or image_settings["quality"] > 100:
             self.logger.error("Image quality must be between 1 and 100")
-            raise ConfigError("Image quality must be between 1 and 100")
+            errors.append("Image quality must be between 1 and 100")
 
         # Check artwork settings
         artwork_settings = self.get_artwork_settings()
@@ -269,8 +270,15 @@ class ConfigService:
             warnings.append("Artwork cache size should be positive")
             self.logger.warning("Artwork cache size should be positive")
 
-        self.logger.info("Configuration validated successfully")
-        return {"valid": True, "errors": [], "warnings": warnings}
+        valid = len(errors) == 0
+        if valid:
+            self.logger.info("Configuration validated successfully")
+        else:
+            self.logger.error(
+                f"Configuration validation failed with {len(errors)} errors"
+            )
+
+        return {"valid": valid, "errors": errors, "warnings": warnings}
 
     def _get_default_config_path(self) -> str:
         """Get the default configuration file path."""
@@ -331,16 +339,16 @@ class ConfigService:
                 return self._get_default_config()
         else:
             # Create default config file
-            default_config = self._get_default_config()
-            self._save_config(default_config)
-            return default_config
+            self._config = self._get_default_config()
+            self._save_config()
+            return self._config
 
-    def _save_config(self, config: Dict[str, Any]) -> None:
+    def _save_config(self) -> None:
         """Save configuration to file."""
 
         def write_json(path):
             with open(path, "w") as f:
-                json.dump(config, f, indent=2)
+                json.dump(self._config, f, indent=2)
 
         try:
             safe_write_file(self.config_file, write_json, estimated_size=4096)

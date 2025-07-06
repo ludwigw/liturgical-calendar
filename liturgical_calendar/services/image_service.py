@@ -9,7 +9,7 @@ for generating liturgical calendar images.
 import os
 from typing import Any, Dict, List, Optional
 
-from liturgical_calendar.exceptions import ImageGenerationError, LiturgicalCalendarError
+from liturgical_calendar.exceptions import ImageGenerationError
 from liturgical_calendar.logging import get_logger
 
 from ..core.artwork_manager import ArtworkManager
@@ -139,7 +139,7 @@ class ImageService:
                         f"Image generation failed for {date_str}: {result.get('error', 'Unknown error')}"
                     )
                 results.append(result)
-            except (ImageGenerationError, LiturgicalCalendarError) as e:
+            except Exception as e:
                 self.logger.error(f"Image generation error for {date_str}: {e}")
                 results.append({"date": date_str, "success": False, "error": str(e)})
 

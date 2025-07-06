@@ -1,6 +1,7 @@
 """
 Image generation pipeline for the liturgical calendar project.
 """
+
 from pathlib import Path
 
 from liturgical_calendar.config.settings import Settings
@@ -14,6 +15,7 @@ from liturgical_calendar.services.feast_service import FeastService
 
 class ImageGenerationPipeline:
     """Pipeline for generating liturgical calendar images from input data."""
+
     def __init__(self, config=None):
         self.config = config
         self.logger = get_logger(__name__)
@@ -192,7 +194,6 @@ class ImageGenerationPipeline:
             season,
             date_text,
             {"serif": serif_font_36, "sans_uc": sans_font_36_uc},
-            None,
             self.width,
             self.padding,
             font_manager=self.font_manager,
@@ -212,7 +213,6 @@ class ImageGenerationPipeline:
                 "sans_32": fonts["sans_32"],
                 "sans_26": fonts["sans_26"],
             },
-            draw=None,
             font_manager=self.font_manager,
         )
         # Title
@@ -223,14 +223,13 @@ class ImageGenerationPipeline:
         title = title.replace("：", ":")
         title_y = art_y + self.artwork_size + self.row_spacing
         title_layout = self.layout_engine.create_title_layout(
-            title,
-            {"serif_96": serif_font_96},
-            None,
-            self.width,
-            self.padding,
-            self.title_font_size,
-            self.title_line_height,
-            title_y,
+            title=title,
+            fonts={"serif_96": serif_font_96},
+            width=self.width,
+            padding=self.padding,
+            title_font_size=self.title_font_size,
+            title_line_height=self.title_line_height,
+            start_y=title_y,
             font_manager=self.font_manager,
         )
         last_title_baseline = title_layout["last_baseline"]
@@ -241,14 +240,13 @@ class ImageGenerationPipeline:
             readings = ["No assigned readings for this day."]
         col_y = last_title_baseline + 96 - sans_font_36_uc.getmetrics()[0]
         readings_layout = self.layout_engine.create_readings_layout(
-            week,
-            readings,
-            {"serif": serif_font_36, "sans_uc": sans_font_36_uc},
-            None,
-            self.width,
-            self.padding,
-            col_y,
-            48,
+            week=week,
+            readings=readings,
+            fonts={"serif": serif_font_36, "sans_uc": sans_font_36_uc},
+            width=self.width,
+            padding=self.padding,
+            start_y=col_y,
+            line_height=48,
             font_manager=self.font_manager,
         )
         layout = {
