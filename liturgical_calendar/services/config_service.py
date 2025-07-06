@@ -332,7 +332,7 @@ class ConfigService:
         """Load configuration from file."""
         if os.path.exists(self.config_file):
             try:
-                with open(self.config_file, "r") as f:
+                with open(self.config_file, "r", encoding="utf-8") as f:
                     return json.load(f)
             except Exception:
                 # If file is corrupted, return defaults
@@ -347,7 +347,7 @@ class ConfigService:
         """Save configuration to file."""
 
         def write_json(path):
-            with open(path, "w") as f:
+            with open(path, "w", encoding="utf-8") as f:
                 json.dump(self._config, f, indent=2)
 
         try:

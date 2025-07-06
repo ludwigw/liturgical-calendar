@@ -58,7 +58,7 @@ class Settings:
         ENV variables must match the class attribute names (e.g., IMAGE_WIDTH).
         """
         if path and isinstance(path, str) and path.strip() and os.path.exists(path):
-            with open(path) as f:
+            with open(path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
             for key, value in data.items():
                 if hasattr(cls, key):
