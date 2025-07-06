@@ -1,6 +1,7 @@
 """
 Artwork caching utilities for the liturgical calendar project.
 """
+
 import shutil
 import time
 from pathlib import Path
@@ -29,6 +30,7 @@ def get_instagram_image_url(instagram_url):
 
 class ArtworkCache:
     """Caches and manages artwork images for the liturgical calendar."""
+
     def __init__(self, cache_dir=None):
         self.cache_dir = Path(cache_dir) if cache_dir else Path(Settings.CACHE_DIR)
         self.original_dir = self.cache_dir / Settings.ORIGINALS_SUBDIR

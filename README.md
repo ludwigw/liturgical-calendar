@@ -39,15 +39,15 @@ litcal [subcommand] [options]
 
 ### Subcommands
 
-- `generate [DATE] [--output PATH] [--config CONFIG] [--verbose]`  
+- `generate [DATE] [--output PATH] [--config CONFIG] [--verbose]`
   Generate a liturgical image for a given date (default: today).
-- `info [DATE] [--config CONFIG] [--verbose]`  
+- `info [DATE] [--config CONFIG] [--verbose]`
   Print liturgical info (season, feast, readings) for a date.
-- `cache-artwork [--config CONFIG] [--verbose]`  
+- `cache-artwork [--config CONFIG] [--verbose]`
   Download/cache all artwork images.
-- `validate-config [--config CONFIG] [--verbose]`  
+- `validate-config [--config CONFIG] [--verbose]`
   Validate the current config file and print any issues.
-- `version`  
+- `version`
   Print version and exit.
 
 ### Global Options
@@ -141,7 +141,7 @@ for today.
 ```console
 # Get info for today
 $ liturgical_calendar
-name : 
+name :
 prec : 1
 season : Advent
 weekno : 4

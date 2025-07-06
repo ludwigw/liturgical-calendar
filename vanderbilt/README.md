@@ -67,4 +67,4 @@ This folder contains tools and data for comparing the Revised Common Lectionary 
 
 ---
 
-For questions or to extend the mapping/normalization logic, see the scripts in `src/` or the HTML report for detailed diagnostics. 
+For questions or to extend the mapping/normalization logic, see the scripts in `src/` or the HTML report for detailed diagnostics.

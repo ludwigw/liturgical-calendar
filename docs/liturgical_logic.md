@@ -161,4 +161,4 @@ For a sample Anglican calendar to compare with the code's output, see: [Church o
 
 ---
 
-**If you encounter a confusing calculation or naming rule, check this file and the referenced code sections for rationale and examples.** 
+**If you encounter a confusing calculation or naming rule, check this file and the referenced code sections for rationale and examples.**

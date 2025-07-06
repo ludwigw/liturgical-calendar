@@ -33,4 +33,4 @@ USER_AGENT: 'Mozilla/5.0'         # User agent for HTTP requests
 ENABLE_UPSAMPLING: true           # Whether to upsample images to minimum size
 LOGGING_LEVEL: "INFO"             # Logging level (e.g., INFO, DEBUG)
 
-# Add more settings as needed, following the pattern above. 
+# Add more settings as needed, following the pattern above.

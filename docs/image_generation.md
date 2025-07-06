@@ -31,4 +31,4 @@ ImageService.generate_liturgical_image('2025-04-20', output_path='output.png')
 ## See Also
 - `docs/architecture.md` for system overview
 - `docs/api_reference.md` for class/method details
-- `docs/examples/` for runnable scripts 
+- `docs/examples/` for runnable scripts

@@ -12,6 +12,7 @@ from datetime import date, datetime
 from liturgical_calendar.logging import get_logger, setup_logging
 
 from .config.settings import Settings
+from .exceptions import LiturgicalCalendarError
 from .services.config_service import ConfigService
 from .services.feast_service import FeastService
 from .services.image_service import ImageService

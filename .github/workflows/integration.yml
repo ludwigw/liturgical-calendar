@@ -12,25 +12,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-          
+
       - name: Install Poetry
         uses: snok/install-poetry@v1.4.1
         with:
           virtualenvs-create: true
           virtualenvs-in-project: true
-          
+
       - name: Install dependencies
         run: poetry install
-        
+
       - name: Run integration tests
         run: |
           poetry run python -m unittest discover -s tests/integration -p 'test*.py' -v
-          
+
       - name: Test CLI functionality
         run: |
           # Test help commands
@@ -38,19 +38,19 @@ jobs:
           poetry run python -m liturgical_calendar.cli generate --help
           poetry run python -m liturgical_calendar.cli info --help
           poetry run python -m liturgical_calendar.cli cache-artwork --help
-          
+
           # Test version command
           poetry run python -m liturgical_calendar.cli version
-          
+
           # Test info command (should work without network)
           poetry run python -m liturgical_calendar.cli info 2024-12-25
-          
+
           # Test config validation
           poetry run python -m liturgical_calendar.cli validate-config
-          
+
       - name: Test package installation
         run: |
           # Test that the package can be installed and imported
           poetry run python -c "import liturgical_calendar; print('Package imports successfully')"
           poetry run python -c "from liturgical_calendar.cli import main; print('CLI imports successfully')"
-          poetry run python -c "from liturgical_calendar.liturgical import liturgical_calendar; print('Main function imports successfully')" 
+          poetry run python -c "from liturgical_calendar.liturgical import liturgical_calendar; print('Main function imports successfully')"

@@ -1,6 +1,7 @@
 """
 Command-line interface for the liturgical calendar project. Supports image generation, artwork caching, and info queries.
 """
+
 import argparse
 import datetime
 import sys
@@ -42,6 +43,7 @@ FONTS_DIR = Settings.FONTS_DIR
 
 class SimpleConfig:
     """Simple configuration holder for image generation settings."""
+
     IMAGE_WIDTH = WIDTH
     IMAGE_HEIGHT = HEIGHT
     BG_COLOR = BG_COLOR

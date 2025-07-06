@@ -5,7 +5,6 @@ repos:
     hooks:
       - id: black
         language_version: python3
-        args: [--line-length=88]
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
@@ -13,27 +12,33 @@ repos:
       - id: isort
         args: [--profile=black, --line-length=88]
 
-  # Linting
-  - repo: https://github.com/pycqa/pylint
-    rev: v3.1.0
-    hooks:
-      - id: pylint
-        args: [--rcfile=.pylintrc]
-        additional_dependencies: [pylint]
-
-  # Remove unused imports
+  # Remove unused imports (run before linting)
   - repo: https://github.com/PyCQA/autoflake
     rev: v2.3.1
     hooks:
       - id: autoflake
         args: [--in-place, --remove-all-unused-imports, --remove-unused-variables, --expand-star-imports, --remove-duplicate-keys]
 
-  # Check for trailing whitespace and final newlines
+  # Fix file formatting issues before linting
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
+
+  # Linting (run after formatting fixes)
+  - repo: https://github.com/pycqa/pylint
+    rev: v3.1.0
+    hooks:
+      - id: pylint
+        args: [--rcfile=.pylintrc]
+        additional_dependencies: [pylint, Pillow, requests]
+        files: ^liturgical_calendar/
+
+  # Other checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
       - id: check-yaml
       - id: check-added-large-files
       - id: check-merge-conflict

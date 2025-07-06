@@ -49,10 +49,11 @@ class TestArtworkCache(unittest.TestCase):
             mock_resp.raise_for_status = lambda: None
             mock_session.return_value.get.return_value = mock_resp
             # Patch Image.open to simulate a large image
-            with patch(
-                "liturgical_calendar.caching.artwork_cache.Image.open"
-            ) as mock_open, patch.object(
-                cache.processor, "validate_image", return_value=True
+            with (
+                patch(
+                    "liturgical_calendar.caching.artwork_cache.Image.open"
+                ) as mock_open,
+                patch.object(cache.processor, "validate_image", return_value=True),
             ):
                 mock_img = MagicMock()
                 mock_img.size = (1200, 1200)
@@ -89,14 +90,11 @@ class TestArtworkCache(unittest.TestCase):
         mock_resp.raise_for_status = lambda: None
         mock_session.return_value.get.return_value = mock_resp
         # Patch processor methods to always succeed
-        with patch(
-            "liturgical_calendar.caching.artwork_cache.Image.open"
-        ) as mock_open, patch.object(
-            self.cache.processor, "validate_image", return_value=True
-        ), patch.object(
-            self.cache.processor, "upsample_image", return_value=True
-        ), patch.object(
-            self.cache.processor, "archive_original", return_value=True
+        with (
+            patch("liturgical_calendar.caching.artwork_cache.Image.open") as mock_open,
+            patch.object(self.cache.processor, "validate_image", return_value=True),
+            patch.object(self.cache.processor, "upsample_image", return_value=True),
+            patch.object(self.cache.processor, "archive_original", return_value=True),
         ):
             mock_img = MagicMock()
             mock_img.size = (500, 500)
@@ -150,13 +148,17 @@ class TestArtworkCache(unittest.TestCase):
             mock_resp.raise_for_status = lambda: None
             mock_session.return_value.get.return_value = mock_resp
             # Patch Image.open to simulate a large image
-            with patch(
-                "liturgical_calendar.caching.artwork_cache.Image.open"
-            ) as mock_open, patch.object(
-                cache.processor, "validate_image", return_value=True
-            ), patch.object(
-                cache.processor, "download_image", wraps=cache.processor.download_image
-            ) as mock_download:
+            with (
+                patch(
+                    "liturgical_calendar.caching.artwork_cache.Image.open"
+                ) as mock_open,
+                patch.object(cache.processor, "validate_image", return_value=True),
+                patch.object(
+                    cache.processor,
+                    "download_image",
+                    wraps=cache.processor.download_image,
+                ) as mock_download,
+            ):
                 mock_img = MagicMock()
                 mock_img.size = (1200, 1200)
                 mock_open.return_value.__enter__.return_value = mock_img

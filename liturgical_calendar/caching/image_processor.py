@@ -9,6 +9,7 @@ from typing import Optional
 
 import requests
 from PIL import Image
+from PIL.Image import Resampling
 
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.exceptions import (
@@ -35,11 +36,11 @@ class ImageProcessor:
         referer: Optional[str] = None,
         max_retries: int = 3,
         retry_delay: float = 5.0,
-    ) -> bool:
+    ) -> None:
         """
         Download an image from a URL to the given cache path with retry logic.
         Optionally set headers and referer for the request.
-        Returns True if successful, raises CacheError on failure.
+        Raises CacheError on failure.
         """
         for attempt in range(max_retries):
             try:
@@ -68,7 +69,7 @@ class ImageProcessor:
                     for chunk in response.iter_content(chunk_size=8192):
                         f.write(chunk)
                 self.logger.info(f"Image downloaded successfully: {cache_path}")
-                return True
+                return
 
             except requests.ConnectionError as e:
                 if attempt < max_retries - 1:
@@ -79,15 +80,14 @@ class ImageProcessor:
                     self.logger.info(f"Retrying in {delay:.1f} seconds...")
                     time.sleep(delay)
                     continue
-                else:
-                    self.logger.error(
-                        f"Failed to download {url} after {max_retries} attempts due to connection error: {e}"
-                    )
-                    if cache_path.exists():
-                        cache_path.unlink(missing_ok=True)
-                    raise CacheError(
-                        f"Network connection failed after {max_retries} attempts: {e}"
-                    )
+                self.logger.error(
+                    f"Failed to download {url} after {max_retries} attempts due to connection error: {e}"
+                )
+                if cache_path.exists():
+                    cache_path.unlink(missing_ok=True)
+                raise CacheError(
+                    f"Network connection failed after {max_retries} attempts: {e}"
+                ) from e
 
             except requests.Timeout as e:
                 if attempt < max_retries - 1:
@@ -98,22 +98,21 @@ class ImageProcessor:
                     self.logger.info(f"Retrying in {delay:.1f} seconds...")
                     time.sleep(delay)
                     continue
-                else:
-                    self.logger.error(
-                        f"Failed to download {url} after {max_retries} attempts due to timeout: {e}"
-                    )
-                    if cache_path.exists():
-                        cache_path.unlink(missing_ok=True)
-                    raise CacheError(
-                        f"Request timeout after {max_retries} attempts: {e}"
-                    )
+                self.logger.error(
+                    f"Failed to download {url} after {max_retries} attempts due to timeout: {e}"
+                )
+                if cache_path.exists():
+                    cache_path.unlink(missing_ok=True)
+                raise CacheError(
+                    f"Request timeout after {max_retries} attempts: {e}"
+                ) from e
 
             except requests.HTTPError as e:
                 # Don't retry HTTP errors (4xx, 5xx) as they're likely permanent
                 self.logger.error(f"HTTP error downloading {url}: {e}")
                 if cache_path.exists():
                     cache_path.unlink(missing_ok=True)
-                raise CacheError(f"HTTP error downloading {url}: {e}")
+                raise CacheError(f"HTTP error downloading {url}: {e}") from e
 
             except Exception as e:
                 if attempt < max_retries - 1:
@@ -124,13 +123,12 @@ class ImageProcessor:
                     self.logger.info(f"Retrying in {delay:.1f} seconds...")
                     time.sleep(delay)
                     continue
-                else:
-                    self.logger.error(
-                        f"Failed to download {url} after {max_retries} attempts due to unexpected error: {e}"
-                    )
-                    if cache_path.exists():
-                        cache_path.unlink(missing_ok=True)
-                    raise CacheError(f"Unexpected error downloading {url}: {e}")
+                self.logger.error(
+                    f"Failed to download {url} after {max_retries} attempts due to unexpected error: {e}"
+                )
+                if cache_path.exists():
+                    cache_path.unlink(missing_ok=True)
+                raise CacheError(f"Unexpected error downloading {url}: {e}") from e
 
     def validate_image(self, image_path: Path) -> bool:
         """
@@ -148,7 +146,9 @@ class ImageProcessor:
         except Exception as e:
             image_path.unlink(missing_ok=True)
             self.logger.error(f"File is not a valid image: {image_path} ({e})")
-            raise ArtworkNotFoundError(f"File is not a valid image: {image_path} ({e})")
+            raise ArtworkNotFoundError(
+                f"File is not a valid image: {image_path} ({e})"
+            ) from e
 
     def upsample_image(
         self, original_path: Path, target_path: Path, target_size=None
@@ -166,17 +166,18 @@ class ImageProcessor:
                     self.logger.info(
                         f"Upsampling {original_path.name} ({width}x{height}) to {target_size[0]}x{target_size[1]}"
                     )
-                    upsampled = img.convert("RGB").resize(target_size, Image.LANCZOS)
+                    upsampled = img.convert("RGB").resize(
+                        target_size, Resampling.LANCZOS
+                    )
                     safe_save_image(upsampled, target_path, quality=95)
                     self.logger.info(f"Image upsampled successfully: {target_path}")
                     return True
-                else:
-                    # No upsampling needed, just copy
-                    shutil.copy2(str(original_path), str(target_path))
-                    return False
+                # No upsampling needed, just copy
+                shutil.copy2(str(original_path), str(target_path))
+                return False
         except Exception as e:
             self.logger.error(f"Error during upsampling: {e}")
-            raise ImageGenerationError(f"Error during upsampling: {e}")
+            raise ImageGenerationError(f"Error during upsampling: {e}") from e
 
     def archive_original(self, image_path: Path, archive_dir: Path) -> bool:
         """
@@ -191,14 +192,4 @@ class ImageProcessor:
             return True
         except Exception as e:
             self.logger.error(f"Error archiving original image: {e}")
-            raise CacheError(f"Error archiving original image: {e}")
-
-    def process_image(self, image_path, output_path, _options=None):
-        """Process and return an image for the given parameters."""
-        try:
-            self.logger.info(f"Processing image: {image_path}")
-            # ... existing logic ...
-            self.logger.info(f"Image processed successfully: {output_path}")
-        except Exception as e:
-            self.logger.exception(f"Error processing image {image_path}: {e}")
-            raise
+            raise CacheError(f"Error archiving original image: {e}") from e

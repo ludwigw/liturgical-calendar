@@ -286,4 +286,4 @@
 - For architectural context, see `docs/architecture.md`.
 - For logic and edge cases, see `docs/liturgical_logic.md`.
 
-(Work in progress) 
+(Work in progress)

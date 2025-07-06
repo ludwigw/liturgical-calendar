@@ -91,7 +91,7 @@ class ArtworkManager:
         day = date_obj.day
 
         # Get the yearly cycle (A, B, C)
-        sunday_cycle, weekday_cycle = readings_manager.get_yearly_cycle(year)
+        sunday_cycle, _unused_weekday_cycle = readings_manager.get_yearly_cycle(year)
         cycle_index = {"A": 0, "B": 1, "C": 2}[sunday_cycle]
 
         # Format the date key for christmas-based feasts
@@ -203,7 +203,7 @@ class ArtworkManager:
         Returns:
             Next artwork entry with 'date' field added, or None if not found
         """
-        from datetime import datetime, timedelta
+        from datetime import timedelta
 
         # Parse the current date
         current_date_obj = datetime.strptime(current_date, "%Y-%m-%d").date()
@@ -269,23 +269,3 @@ class ArtworkManager:
                             }
                         )
         return squashed
-
-    def get_artwork_for_feast(self, feast_info):
-        try:
-            feast_name = feast_info.get("name", "Unknown")
-            self.logger.info(f"Looking up artwork for feast: {feast_name}")
-            artwork = self._lookup_artwork(feast_info)
-            if artwork:
-                self.logger.info(f"Artwork found for feast: {feast_name}")
-            else:
-                self.logger.info(f"No artwork found for feast: {feast_name}")
-            return artwork
-        except Exception as e:
-            self.logger.exception(
-                f"Error looking up artwork for feast {feast_name}: {e}"
-            )
-            raise
-
-    def _lookup_artwork(self, feast_info):
-        # ... existing logic ...
-        pass

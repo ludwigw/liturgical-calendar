@@ -1,9 +1,11 @@
 """
 Image builder for constructing liturgical calendar images.
 """
+
 import os
 
 from PIL import Image, ImageDraw
+from PIL.Image import Resampling
 
 from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.logging import get_logger
@@ -12,6 +14,7 @@ from liturgical_calendar.utils.file_system import safe_save_image
 
 class LiturgicalImageBuilder:
     """Builds images for the liturgical calendar using provided data and settings."""
+
     def __init__(self, config=None):
         self.config = config
         self.logger = get_logger(__name__)
@@ -20,6 +23,17 @@ class LiturgicalImageBuilder:
         self.bg_color = getattr(config, "BG_COLOR", Settings.BG_COLOR)
 
     def create_base_image(self, width=None, height=None, bg_color=None):
+        """
+        Create a base image with the specified dimensions and background color.
+
+        Args:
+            width: Image width (uses default if None)
+            height: Image height (uses default if None)
+            bg_color: Background color (uses default if None)
+
+        Returns:
+            PIL Image object
+        """
         w = width if width is not None else self.width
         h = height if height is not None else self.height
         color = bg_color if bg_color is not None else self.bg_color
@@ -48,7 +62,7 @@ class LiturgicalImageBuilder:
         else:
             try:
                 art_img = Image.open(artwork_path).convert("RGB")
-                art_img = art_img.resize(size, Image.LANCZOS)
+                art_img = art_img.resize(size, Resampling.LANCZOS)
                 self.logger.debug(f"Successfully loaded artwork: {artwork_path}")
             except Exception as e:
                 self.logger.error(f"Error loading artwork {artwork_path}: {e}")
@@ -59,6 +73,19 @@ class LiturgicalImageBuilder:
         return image
 
     def draw_text(self, image, text, position, font, color):
+        """
+        Draw text on the image at the specified position.
+
+        Args:
+            image: PIL Image to draw on
+            text: Text to draw
+            position: (x, y) position to draw text
+            font: Font to use
+            color: Color of the text
+
+        Returns:
+            Modified PIL Image
+        """
         draw = ImageDraw.Draw(image)
         draw.text(position, text, font=font, fill=color)
         return image
