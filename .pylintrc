@@ -5,18 +5,12 @@ disable=line-too-long,
     too-many-statements,
     chained-comparison,
     too-many-arguments,
-
     no-else-continue,
     inconsistent-return-statements,
-
-
     too-few-public-methods,
     too-many-nested-blocks,
     import-error,
-    unspecified-encoding,
-
     too-many-lines,
-    duplicate-key,
     too-many-instance-attributes,
     too-many-return-statements,
     global-statement,
