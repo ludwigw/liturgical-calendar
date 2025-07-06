@@ -123,7 +123,7 @@ class ArtworkCache:
             self.logger.exception(
                 f"Unexpected error in download_and_cache for {source_url}: {e}"
             )
-            raise CacheError(f"Unexpected error in download_and_cache: {e}")
+            raise CacheError(f"Unexpected error in download_and_cache: {e}") from e
 
     def get_cache_info(self, source_url):
         """Return info about the cached file (size, modified time, dimensions if image)."""

@@ -269,7 +269,7 @@ class ImageService:
             self.logger.info(f"Image generated successfully: {file_path}")
         except Exception as e:
             self.logger.exception(f"Error generating image for {date_str}: {e}")
-            raise ImageGenerationError(f"Error generating image: {e}")
+            raise ImageGenerationError(f"Error generating image: {e}") from e
 
         return result
 

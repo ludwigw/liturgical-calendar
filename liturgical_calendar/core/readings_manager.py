@@ -210,7 +210,7 @@ class ReadingsManager:
             self.logger.error(f"Error looking up readings for {date_str}: {e}")
             raise ReadingsNotFoundError(
                 f"Error getting readings for date {date_str}: {e}"
-            )
+            ) from e
 
     def validate_readings_data(self, readings: Dict) -> bool:
         """

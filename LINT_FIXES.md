@@ -20,7 +20,7 @@
 - [x] **`liturgical_calendar/services/feast_service.py:166`** - Remove pointless statement
 
 ### 3. Duplicate Keys (W0109)
-- [ ] **`liturgical_calendar/data/feasts_data.py:177`** - Fix duplicate key '02-14'
+- [x] **`liturgical_calendar/data/feasts_data.py:177`** - Fix duplicate key '02-14'
 
 ### 4. Missing Raise From (W0707)
 - [ ] **`liturgical_calendar/core/readings_manager.py:211`** - Add `from e` to raise

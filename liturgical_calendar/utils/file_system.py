@@ -102,7 +102,7 @@ def safe_write_file(
     except (PermissionError, OSError) as e:
         logger.error(f"File system error writing {file_path}: {e}")
         _cleanup_partial_file(temp_path)
-        raise OSError(f"File system error writing {file_path}: {e}")
+        raise OSError(f"File system error writing {file_path}: {e}") from e
 
     except Exception as e:
         logger.error(f"Error writing {file_path}: {e}")
@@ -181,7 +181,7 @@ def ensure_directory(
                 logger.info(f"Created directory: {directory}")
             except Exception as e:
                 logger.error(f"Cannot create directory {directory}: {e}")
-                raise OSError(f"Cannot create directory {directory}: {e}")
+                raise OSError(f"Cannot create directory {directory}: {e}") from e
         else:
             raise OSError(f"Directory does not exist: {directory}")
 

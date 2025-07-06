@@ -354,4 +354,6 @@ class ConfigService:
             safe_write_file(self.config_file, write_json, estimated_size=4096)
         except Exception as e:
             self.logger.error(f"Failed to save config file {self.config_file}: {e}")
-            raise ConfigError(f"Failed to save config file {self.config_file}: {e}")
+            raise ConfigError(
+                f"Failed to save config file {self.config_file}: {e}"
+            ) from e
