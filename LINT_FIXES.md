@@ -16,8 +16,8 @@
 - [ ] **`liturgical_calendar/services/feast_service.py:353-361`** - Remove 9 unused arguments
 
 ### 2. Pointless Statements (W0104)
-- [ ] **`liturgical_calendar/core/season_calculator.py:103-104`** - Remove pointless statements
-- [ ] **`liturgical_calendar/services/feast_service.py:166`** - Remove pointless statement
+- [x] **`liturgical_calendar/core/season_calculator.py:103-104`** - Remove pointless statements
+- [x] **`liturgical_calendar/services/feast_service.py:166`** - Remove pointless statement
 
 ### 3. Duplicate Keys (W0109)
 - [ ] **`liturgical_calendar/data/feasts_data.py:177`** - Fix duplicate key '02-14'

@@ -95,13 +95,7 @@ class SeasonCalculator:
         days = date_to_days(f_date.year, f_date.month, f_date.day)
         easter_month, easter_day = get_easter(year)
         easterday = date_to_days(year, easter_month, easter_day)
-        if f_date.month <= 2:
-            christmasday = date_to_days(year - 1, 12, 25)
-        else:
-            christmasday = date_to_days(year, 12, 25)
         advent_sunday = get_advent_sunday(year)
-        days - easterday
-        days - christmasday
         dayofweek = day_of_week(f_date.year, f_date.month, f_date.day)
         week_start_sunday_days = days - dayofweek
         week_start_sunday = add_delta_days(week_start_sunday_days)

@@ -163,7 +163,6 @@ class FeastService:
             if not has_principal_feast:
                 # Calculate season for Sunday using new API
                 week_info = self.season_calculator.week_info(date_obj)
-                week_info["season"]
                 week_name = week_info["week_name"]
                 # Use the week name as the Sunday name (original logic with week number)
                 possibles.append({"prec": 5, "type": "Sunday", "name": week_name})
