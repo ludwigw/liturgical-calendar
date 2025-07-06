@@ -193,7 +193,7 @@ class ImageProcessor:
             self.logger.error(f"Error archiving original image: {e}")
             raise CacheError(f"Error archiving original image: {e}")
 
-    def process_image(self, image_path, output_path, options=None):
+    def process_image(self, image_path, output_path, _options=None):
         """Process and return an image for the given parameters."""
         try:
             self.logger.info(f"Processing image: {image_path}")

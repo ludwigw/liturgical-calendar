@@ -16,7 +16,7 @@ class LayoutEngine:
         season: str,
         date: str,
         fonts: Dict[str, Any],
-        draw: Any,
+        _draw: Any,
         width: int,
         padding: int,
         font_manager=None,
@@ -43,8 +43,8 @@ class LayoutEngine:
         x = (width - total_w) // 2
         y = padding
         # Baseline alignment: get font metrics
-        sans_ascent, sans_descent = sans_font_36_uc.getmetrics()
-        serif_ascent, serif_descent = serif_font_36.getmetrics()
+        sans_ascent, _ = sans_font_36_uc.getmetrics()
+        serif_ascent, _ = serif_font_36.getmetrics()
         baseline_y = y + max(sans_ascent, serif_ascent)
         return {
             "season": {
@@ -75,7 +75,7 @@ class LayoutEngine:
         y: int,
         fonts: Dict[str, Any] = None,
         next_title_y_offset: int = 16,
-        draw: Any = None,
+        _draw: Any = None,
         font_manager=None,
     ) -> Dict[str, Any]:
         """
@@ -116,7 +116,7 @@ class LayoutEngine:
             layout["show_next"] = True
         return layout
 
-    def _get_text_width(self, draw, text, font, font_manager=None):
+    def _get_text_width(self, _draw, text, font, font_manager=None):
         if font_manager:
             return font_manager.get_text_size(text, font)[0]
         return font.getbbox(text)[2] - font.getbbox(text)[0]
@@ -130,7 +130,7 @@ class LayoutEngine:
         thumb_size: int,
         fonts: Dict[str, Any],
         next_title_y_offset: int,
-        draw: Any,
+        _draw: Any,
         font_manager=None,
     ) -> Dict[str, Any]:
         """
@@ -179,7 +179,7 @@ class LayoutEngine:
         self,
         title: str,
         fonts: Dict[str, Any],
-        draw: Any,
+        _draw: Any,
         width: int,
         padding: int,
         title_font_size: int,
@@ -238,7 +238,7 @@ class LayoutEngine:
         week: str,
         readings: list,
         fonts: Dict[str, Any],
-        draw: Any,
+        _draw: Any,
         width: int,
         padding: int,
         start_y: int,

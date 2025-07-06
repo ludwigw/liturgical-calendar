@@ -49,7 +49,7 @@ class ArtworkCache:
     def download_and_cache(
         self,
         source_url,
-        original_instagram_url=None,
+        _original_instagram_url=None,
         upsample=True,
         max_retries=3,
         retry_delay=5.0,

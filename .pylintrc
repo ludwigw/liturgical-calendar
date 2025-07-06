@@ -3,4 +3,5 @@ disable=line-too-long,
     too-many-locals,
     too-many-branches,
     too-many-statements,
-    chained-comparison
+    chained-comparison,
+    logging-fstring-interpolation

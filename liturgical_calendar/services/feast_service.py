@@ -237,8 +237,8 @@ class FeastService:
         self,
         result: Dict[str, Any],
         season: str,
-        christmas_point: int,
-        advent_sunday: int,
+        _christmas_point: int,
+        _advent_sunday: int,
     ) -> str:
         """Determine the liturgical color for the feast."""
         # Special cases for rose Sundays
@@ -316,10 +316,10 @@ class FeastService:
         day: int,
         transferred: bool,
         s_date: str,
-        days: int,
-        season: str,
-        weekno: int,
-        dayofweek: int,
+        _days: int,
+        _season: str,
+        _weekno: int,
+        _dayofweek: int,
     ) -> list:
         """
         Public method to collect all possible feasts for the date.

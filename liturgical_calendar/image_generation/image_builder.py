@@ -26,7 +26,7 @@ class LiturgicalImageBuilder:
         img = Image.new("RGB", (w, h), color)
         return img
 
-    def paste_artwork(self, image, artwork_path, position, size, artwork_info=None):
+    def paste_artwork(self, image, artwork_path, position, size, _artwork_info=None):
         """
         Paste artwork at the given position and size.
 
@@ -35,7 +35,7 @@ class LiturgicalImageBuilder:
             artwork_path: Path to the artwork file
             position: (x, y) position to paste
             size: (width, height) size to resize artwork to
-            artwork_info: Optional artwork information dict
+            _artwork_info: Optional artwork information dict
         """
         if (
             not artwork_path
@@ -64,7 +64,7 @@ class LiturgicalImageBuilder:
         return image
 
     def build_image(
-        self, date_str, liturgical_info, artwork_info, layout, fonts, out_path
+        self, date_str, _liturgical_info, _artwork_info, layout, _fonts, out_path
     ):
         """Construct and return a liturgical calendar image for the given parameters."""
         try:
