@@ -23,52 +23,52 @@
 - [x] **`liturgical_calendar/data/feasts_data.py:177`** - Fix duplicate key '02-14'
 
 ### 4. Missing Raise From (W0707)
-- [ ] **`liturgical_calendar/core/readings_manager.py:211`** - Add `from e` to raise
-- [ ] **`liturgical_calendar/utils/file_system.py:105`** - Add `from e` to raise
-- [ ] **`liturgical_calendar/utils/file_system.py:184`** - Add `from e` to raise
-- [ ] **`liturgical_calendar/services/image_service.py:272`** - Add `from e` to raise
-- [ ] **`liturgical_calendar/services/config_service.py:357`** - Add `from e` to raise
-- [ ] **`liturgical_calendar/caching/artwork_cache.py:126`** - Add `from e` to raise
+- [x] **`liturgical_calendar/core/readings_manager.py:211`** - Add 'from e' to ReadingsNotFoundError raise
+- [x] **`liturgical_calendar/utils/file_system.py:105`** - Add 'from e' to OSError raise
+- [x] **`liturgical_calendar/utils/file_system.py:184`** - Add 'from e' to OSError raise
+- [x] **`liturgical_calendar/caching/artwork_cache.py:126`** - Add 'from e' to CacheError raise
+- [x] **`liturgical_calendar/services/image_service.py:272`** - Add 'from e' to ImageGenerationError raise
+- [x] **`liturgical_calendar/services/config_service.py:357`** - Add 'from e' to ConfigError raise
 
 ### 5. Unspecified Encoding (W1514)
-- [ ] **`liturgical_calendar/config/settings.py:61`** - Add `encoding="utf-8"`
-- [ ] **`liturgical_calendar/services/config_service.py:335`** - Add `encoding="utf-8"`
-- [ ] **`liturgical_calendar/services/config_service.py:350`** - Add `encoding="utf-8"`
+- [x] **`liturgical_calendar/config/settings.py:61`** - Add `encoding="utf-8"`
+- [x] **`liturgical_calendar/services/config_service.py:335`** - Add `encoding="utf-8"`
+- [x] **`liturgical_calendar/services/config_service.py:350`** - Add `encoding="utf-8"`
 
 ### 6. Superfluous Parentheses (C0325)
-- [ ] **`liturgical_calendar/funcs.py:179`** - Remove unnecessary parentheses
+- [x] **`liturgical_calendar/funcs.py:179`** - Remove unnecessary parentheses
 
 ## 🟡 MEDIUM PRIORITY - Readability Improvements
 
 ### 7. No-Else-Return/Continue (R1705, R1724)
-- [ ] **`liturgical_calendar/core/season_calculator.py:55`** - Remove unnecessary `elif`
-- [ ] **`liturgical_calendar/core/season_calculator.py:77`** - Remove unnecessary `else`
-- [ ] **`liturgical_calendar/services/feast_service.py:230`** - Remove unnecessary `elif`
-- [ ] **`liturgical_calendar/services/feast_service.py:254`** - Remove unnecessary `else`
-- [ ] **`liturgical_calendar/services/image_service.py:345`** - Remove unnecessary `else`
-- [ ] **`liturgical_calendar/services/image_service.py:352`** - Remove unnecessary `elif`
-- [ ] **`liturgical_calendar/services/image_service.py:369`** - Remove unnecessary `elif`
+- [x] **`liturgical_calendar/core/season_calculator.py:55`** - Remove unnecessary `elif`
+- [x] **`liturgical_calendar/core/season_calculator.py:77`** - Remove unnecessary `else`
+- [x] **`liturgical_calendar/services/feast_service.py:230`** - Remove unnecessary `elif`
+- [x] **`liturgical_calendar/services/feast_service.py:254`** - Remove unnecessary `else`
+- [x] **`liturgical_calendar/services/image_service.py:345`** - Remove unnecessary `else`
+- [x] **`liturgical_calendar/services/image_service.py:352`** - Remove unnecessary `elif`
+- [x] **`liturgical_calendar/services/image_service.py:369`** - Remove unnecessary `elif`
 
 ### 8. Missing Docstrings (C0116, C0114)
-- [ ] **`liturgical_calendar/caching/artwork_cache.py:24`** - Add function docstring
-- [ ] **`liturgical_calendar/image_generation/font_manager.py:38`** - Add function docstring
-- [ ] **`liturgical_calendar/image_generation/font_manager.py:44`** - Add function docstring
-- [ ] **`liturgical_calendar/services/feast_service.py:368`** - Add function docstring
-- [ ] **`liturgical_calendar/services/feast_service.py:381`** - Add function docstring
-- [ ] **`liturgical_calendar/config/settings.py:1`** - Add module docstring
+- [x] **`liturgical_calendar/caching/artwork_cache.py:24`** - Add function docstring
+- [x] **`liturgical_calendar/image_generation/font_manager.py:38`** - Add function docstring
+- [x] **`liturgical_calendar/image_generation/font_manager.py:44`** - Add function docstring
+- [x] **`liturgical_calendar/services/feast_service.py:368`** - Add function docstring
+- [x] **`liturgical_calendar/services/feast_service.py:381`** - Add function docstring
+- [x] **`liturgical_calendar/config/settings.py:1`** - Add module docstring
 
 ### 9. Import Outside Top Level (C0415)
-- [ ] **`liturgical_calendar/funcs.py:216-217`** - Move `hashlib` and `urllib.parse.urlparse` imports to top
-- [ ] **`liturgical_calendar/core/readings_manager.py:31`** - Move data imports to top
-- [ ] **`liturgical_calendar/core/readings_manager.py:131`** - Move `data.feasts_data.feasts` import to top
-- [ ] **`liturgical_calendar/core/artwork_manager.py:81`** - Move `funcs` imports to top
-- [ ] **`liturgical_calendar/core/artwork_manager.py:82`** - Move `readings_manager` import to top
-- [ ] **`liturgical_calendar/core/artwork_manager.py:190`** - Move `funcs.get_cache_filename` import to top
-- [ ] **`liturgical_calendar/core/artwork_manager.py:206`** - Move `datetime.timedelta` import to top
-- [ ] **`liturgical_calendar/image_generation/pipeline.py:121`** - Move `datetime` import to top
-- [ ] **`liturgical_calendar/image_generation/pipeline.py:145`** - Move `datetime` import to top
-- [ ] **`liturgical_calendar/services/feast_service.py:134`** - Move `funcs.get_advent_sunday` import to top
-- [ ] **`liturgical_calendar/services/image_service.py:243`** - Move `ImageGenerationPipeline` import to top
+- [x] **`liturgical_calendar/funcs.py:216-217`** - Move `hashlib` and `urllib.parse.urlparse` imports to top
+- [x] **`liturgical_calendar/core/readings_manager.py:31`** - Move data imports to top
+- [x] **`liturgical_calendar/core/readings_manager.py:131`** - Move `data.feasts_data.feasts` import to top
+- [x] **`liturgical_calendar/core/artwork_manager.py:81`** - Move `funcs` imports to top
+- [x] **`liturgical_calendar/core/artwork_manager.py:82`** - Move `readings_manager` import to top
+- [x] **`liturgical_calendar/core/artwork_manager.py:190`** - Move `funcs.get_cache_filename` import to top
+- [x] **`liturgical_calendar/core/artwork_manager.py:206`** - Move `datetime.timedelta` import to top
+- [x] **`liturgical_calendar/image_generation/pipeline.py:121`** - Move `datetime` import to top
+- [x] **`liturgical_calendar/image_generation/pipeline.py:145`** - Move `datetime` import to top
+- [x] **`liturgical_calendar/services/feast_service.py:134`** - Move `funcs.get_advent_sunday` import to top
+- [x] **`liturgical_calendar/services/image_service.py:243`** - Move `ImageGenerationPipeline` import to top
 
 ## 🟢 LOW PRIORITY - Design Decisions
 
@@ -119,9 +119,10 @@
 - [ ] Superfluous Parentheses: 0/1 completed
 
 ### Medium Priority Fixes (7-9)
-- [ ] No-Else-Return/Continue: 0/7 completed
-- [ ] Missing Docstrings: 0/6 completed
-- [ ] Import Outside Top Level: 0/11 completed
+- [x] No-Else-Return/Continue: 7/7 completed
+- [x] Missing Docstrings: 6/6 completed
+- [x] Import Outside Top Level: 11/11 completed
+- [x] Logging F-String Interpolation: 100% completed
 
 ### Low Priority Fixes (10-12)
 - [ ] Too Many Arguments: 0/12 completed
@@ -141,3 +142,6 @@
 - Low Priority fixes are design decisions that may not need changing
 - Some issues (like "too many lines" in data files) are expected and can be ignored
 - Use `# pylint: disable=...` comments sparingly and only for justified cases
+
+### 10. Logging F-String Interpolation (W1203)
+- [x] All logging calls use parameterized style, not f-strings or .format()

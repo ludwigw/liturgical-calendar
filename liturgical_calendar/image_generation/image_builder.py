@@ -64,7 +64,7 @@ class LiturgicalImageBuilder:
                 art_img = Image.open(artwork_path).convert("RGB")
                 art_img = art_img.resize(size, Resampling.LANCZOS)
                 self.logger.debug("Successfully loaded artwork: %s", artwork_path)
-            except Exception as e:
+            except (OSError, ValueError, TypeError) as e:
                 self.logger.error("Error loading artwork %s: %s", artwork_path, e)
                 # Create a simple gray placeholder on error
                 art_img = Image.new("RGB", size, Settings.PLACEHOLDER_COLOR)
@@ -191,7 +191,7 @@ class LiturgicalImageBuilder:
             try:
                 safe_save_image(img, out_path, quality=95)
                 self.logger.info("Image build completed for %s: %s", date_str, out_path)
-            except Exception as e:
+            except (OSError, ValueError, TypeError) as e:
                 self.logger.error("Error saving image for %s: %s", date_str, e)
                 # Try saving with different format
                 try:
@@ -201,13 +201,13 @@ class LiturgicalImageBuilder:
                         "Image saved as PNG for %s: %s", date_str, out_path_png
                     )
                     return out_path_png
-                except Exception as e2:
+                except (OSError, ValueError, TypeError) as e2:
                     self.logger.error(
                         "Failed to save image in any format for %s: %s", date_str, e2
                     )
                     raise
 
             return out_path
-        except Exception as e:
+        except (OSError, ValueError, TypeError, RuntimeError) as e:
             self.logger.exception("Error building image for %s: %s", date_str, e)
             raise

@@ -124,7 +124,7 @@ class ArtworkCache:
         except (CacheError, ArtworkNotFoundError, ImageGenerationError) as e:
             self.logger.error("Download/cache error for %s: %s", source_url, e)
             return False
-        except Exception as e:
+        except (OSError, ValueError, TypeError) as e:
             self.logger.exception(
                 "Unexpected error in download_and_cache for %s: %s", source_url, e
             )
@@ -143,7 +143,7 @@ class ArtworkCache:
         try:
             with Image.open(cache_path) as img:
                 info["dimensions"] = img.size
-        except Exception:
+        except (OSError, ValueError, TypeError):
             info["dimensions"] = None
         return info
 
@@ -194,7 +194,7 @@ class ArtworkCache:
                     self.logger.warning(
                         "Failed to cache artwork %s/%s: %s", i, total, url
                     )
-            except Exception as e:
+            except (OSError, ValueError, TypeError) as e:
                 failed_count += 1
                 failed_urls.append(url)
                 self.logger.error(

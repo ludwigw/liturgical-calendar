@@ -249,9 +249,9 @@ class ConfigService:
             if dir_path and not os.path.exists(dir_path):
                 try:
                     os.makedirs(dir_path, exist_ok=True)
-                    self.logger.info(f"Created missing directory: {dir_path}")
-                except Exception as e:
-                    self.logger.error(f"Cannot create directory {dir_path}: {e}")
+                    self.logger.info("Created missing directory: %s", dir_path)
+                except (OSError, PermissionError) as e:
+                    self.logger.error("Cannot create directory %s: %s", dir_path, e)
                     errors.append(f"Cannot create directory {dir_path}: {e}")
 
         # Check image settings
@@ -275,7 +275,7 @@ class ConfigService:
             self.logger.info("Configuration validated successfully")
         else:
             self.logger.error(
-                f"Configuration validation failed with {len(errors)} errors"
+                "Configuration validation failed with %d errors", len(errors)
             )
 
         return {"valid": valid, "errors": errors, "warnings": warnings}
@@ -283,7 +283,13 @@ class ConfigService:
     def _get_default_config_path(self) -> str:
         """Get the default configuration file path."""
         config_dir = os.path.expanduser("~/.liturgical_calendar")
-        os.makedirs(config_dir, exist_ok=True)
+        try:
+            os.makedirs(config_dir, exist_ok=True)
+        except (OSError, PermissionError) as e:
+            self.logger.error("Cannot create config directory %s: %s", config_dir, e)
+            raise ConfigError(
+                f"Cannot create config directory {config_dir}: {e}"
+            ) from e
         return os.path.join(config_dir, "config.json")
 
     def _get_default_config(self) -> Dict[str, Any]:
@@ -330,11 +336,13 @@ class ConfigService:
 
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from file."""
+        if not self.config_file:
+            self.config_file = self._get_default_config_path()
         if os.path.exists(self.config_file):
             try:
                 with open(self.config_file, "r", encoding="utf-8") as f:
                     return json.load(f)
-            except Exception:
+            except (OSError, ValueError, TypeError):
                 # If file is corrupted, return defaults
                 return self._get_default_config()
         else:
@@ -352,8 +360,8 @@ class ConfigService:
 
         try:
             safe_write_file(self.config_file, write_json, estimated_size=4096)
-        except Exception as e:
-            self.logger.error(f"Failed to save config file {self.config_file}: {e}")
+        except (OSError, ValueError, TypeError) as e:
+            self.logger.error("Failed to save config file %s: %s", self.config_file, e)
             raise ConfigError(
                 f"Failed to save config file {self.config_file}: {e}"
             ) from e

@@ -246,7 +246,7 @@ class ArtworkManager:
                 feast = None
                 try:
                     feast = get_liturgical_feast(season, pointer)
-                except Exception:
+                except (ValueError, KeyError, TypeError):
                     pass
                 if not feast or feast.get("prec", 0) <= 5:
                     continue

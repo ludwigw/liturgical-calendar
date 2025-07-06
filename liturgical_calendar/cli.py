@@ -138,7 +138,7 @@ def main(today_func=datetime.date.today):
         if args.date:
             try:
                 date = datetime.datetime.strptime(args.date, "%Y-%m-%d").date()
-            except Exception:
+            except ValueError:
                 logger.error("Invalid date format. Use YYYY-MM-DD.")
                 print("Invalid date format. Use YYYY-MM-DD.")
                 sys.exit(1)
@@ -172,7 +172,7 @@ def main(today_func=datetime.date.today):
             logger.error("Liturgical Calendar Error: %s", e)
             print(f"Liturgical Calendar Error: {e}")
             sys.exit(1)
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.exception("Error in generate: %s", e)
             print(f"Error in generate: {e}")
             sys.exit(1)
@@ -228,7 +228,7 @@ def main(today_func=datetime.date.today):
                 print(f"Warning: {result['failed']} artwork items failed to cache")
                 # Don't exit with error code for partial failures - this allows the system to continue
 
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.exception("Error in cache-artwork: %s", e)
             print(f"Error in cache-artwork: {e}")
             sys.exit(1)
@@ -247,7 +247,7 @@ def main(today_func=datetime.date.today):
             print(f"Name: {result.get('name', 'Unknown')}")
             print(f"Colour: {result.get('colour', 'Unknown')}")
             logger.info("Info for %s: %s", date_str, result)
-        except Exception as e:
+        except (ValueError, OSError, RuntimeError) as e:
             logger.exception("Error in info: %s", e)
             print(f"Error in info: {e}")
             sys.exit(1)
@@ -269,7 +269,7 @@ def main(today_func=datetime.date.today):
                     for err in result["errors"]:
                         print(f"  - {err}")
                 sys.exit(1)
-        except Exception as e:
+        except (OSError, RuntimeError, ValueError) as e:
             logger.exception("Error in validate-config: %s", e)
             print(f"Error in validate-config: {e}")
             sys.exit(1)

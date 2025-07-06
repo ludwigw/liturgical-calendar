@@ -142,7 +142,7 @@ class ImageService:
                         result.get("error", "Unknown error"),
                     )
                 results.append(result)
-            except Exception as e:
+            except (OSError, ValueError, TypeError, RuntimeError) as e:
                 self.logger.error("Image generation error for %s: %s", date_str, e)
                 results.append({"date": date_str, "success": False, "error": str(e)})
 

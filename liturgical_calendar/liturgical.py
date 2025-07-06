@@ -72,7 +72,7 @@ def main():
         logger.error("Liturgical Calendar Error: %s", e)
         print(f"Liturgical Calendar Error: {e}")
         sys.exit(1)
-    except Exception as e:
+    except (ValueError, OSError, RuntimeError) as e:
         logger.exception("Error in liturgical.py: %s", e)
         print(f"Error in liturgical.py: {e}")
         sys.exit(1)

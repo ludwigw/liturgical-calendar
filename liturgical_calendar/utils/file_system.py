@@ -47,11 +47,11 @@ def check_disk_space(
             logger.error(msg)
             raise OSError(msg)
 
-        logger.debug(f"Disk space check passed: {usage.free/1024/1024:.1f}MB free")
+        logger.debug("Disk space check passed: %.1fMB free", usage.free / 1024 / 1024)
         return True
 
-    except Exception as e:
-        logger.error(f"Error checking disk space in {directory}: {e}")
+    except (OSError, PermissionError) as e:
+        logger.error("Error checking disk space in %s: %s", directory, e)
         raise
 
 
@@ -96,16 +96,16 @@ def safe_write_file(
         # Atomic move to final location
         temp_path.replace(file_path)
 
-        logger.info(f"File written successfully: {file_path}")
+        logger.info("File written successfully: %s", file_path)
         return True
 
     except (PermissionError, OSError) as e:
-        logger.error(f"File system error writing {file_path}: {e}")
+        logger.error("File system error writing %s: %s", file_path, e)
         _cleanup_partial_file(temp_path)
         raise OSError(f"File system error writing {file_path}: {e}") from e
 
-    except Exception as e:
-        logger.error(f"Error writing {file_path}: {e}")
+    except (ValueError, TypeError) as e:
+        logger.error("Error writing %s: %s", file_path, e)
         _cleanup_partial_file(temp_path)
         raise
 
@@ -151,9 +151,9 @@ def _cleanup_partial_file(file_path: Optional[Path]) -> None:
     if file_path and file_path.exists():
         try:
             file_path.unlink()
-            logger.debug(f"Cleaned up partial file: {file_path}")
-        except Exception as e:
-            logger.error(f"Failed to cleanup partial file {file_path}: {e}")
+            logger.debug("Cleaned up partial file: %s", file_path)
+        except (OSError, PermissionError) as e:
+            logger.error("Failed to cleanup partial file %s: %s", file_path, e)
 
 
 def ensure_directory(
@@ -178,9 +178,9 @@ def ensure_directory(
         if create_if_missing:
             try:
                 directory.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Created directory: {directory}")
+                logger.info("Created directory: %s", directory)
             except Exception as e:
-                logger.error(f"Cannot create directory {directory}: {e}")
+                logger.error("Cannot create directory %s: %s", directory, e)
                 raise OSError(f"Cannot create directory {directory}: {e}") from e
         else:
             raise OSError(f"Directory does not exist: {directory}")

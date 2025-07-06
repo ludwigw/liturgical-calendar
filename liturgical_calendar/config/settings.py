@@ -88,6 +88,6 @@ class Settings:
                         # For color tuples: "255,255,255"
                         val = tuple(int(x) for x in val.split(","))
                     # else: leave as string
-                except Exception:
+                except (ValueError, TypeError):
                     pass
                 setattr(cls, key, val)
