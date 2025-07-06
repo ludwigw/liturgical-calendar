@@ -114,12 +114,12 @@ def main(today_func=datetime.date.today):
     )
 
     # validate-config
-    val_parser = subparsers.add_parser(
+    subparsers.add_parser(
         "validate-config", help="Validate the config file and print issues"
     )
 
     # version
-    ver_parser = subparsers.add_parser("version", help="Show CLI version and exit")
+    subparsers.add_parser("version", help="Show CLI version and exit")
 
     args = parser.parse_args()
 
