@@ -58,6 +58,7 @@ class SimpleConfig:
     TITLE_LINE_HEIGHT = TITLE_LINE_HEIGHT
     COLUMN_FONT_SIZE = COLUMN_FONT_SIZE
     AUTO_CACHE_ARTWORK = True  # Automatically cache missing artwork on first run
+    CACHE_DIR = Settings.CACHE_DIR  # Cache directory from settings
 
 
 def get_date_str(date):
@@ -95,6 +96,11 @@ def main(today_func=datetime.date.today):
         action="store_true",
         help="Disable automatic caching of missing artwork",
     )
+    gen_parser.add_argument(
+        "--cache-dir",
+        type=str,
+        help="Custom cache directory for artwork (default: from config)",
+    )
 
     # cache-artwork
     cache_parser = subparsers.add_parser(
@@ -111,6 +117,11 @@ def main(today_func=datetime.date.today):
         type=float,
         default=5.0,
         help="Base delay between retries in seconds (default: 5.0)",
+    )
+    cache_parser.add_argument(
+        "--cache-dir",
+        type=str,
+        help="Custom cache directory for artwork (default: from config)",
     )
 
     # info
@@ -156,6 +167,11 @@ def main(today_func=datetime.date.today):
         if args.no_auto_cache:
             SimpleConfig.AUTO_CACHE_ARTWORK = False
             logger.info("Auto-caching disabled for this run")
+
+        # Handle custom cache directory
+        if args.cache_dir:
+            SimpleConfig.CACHE_DIR = args.cache_dir
+            logger.info("Using custom cache directory: %s", args.cache_dir)
 
         # Create ImageService with config
         image_service = ImageService(config=SimpleConfig)
@@ -205,7 +221,13 @@ def main(today_func=datetime.date.today):
                         if url:
                             urls.add(url)
 
-            cache = ArtworkCache()
+            # Use custom cache directory if provided
+            cache_dir = args.cache_dir if args.cache_dir else None
+            if cache_dir:
+                logger.info(
+                    "Using custom cache directory for cache-artwork: %s", cache_dir
+                )
+            cache = ArtworkCache(cache_dir=cache_dir)
             total = len(urls)
 
             print(f"Found {total} unique artwork URLs to cache")
