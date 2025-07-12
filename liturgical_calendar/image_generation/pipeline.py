@@ -21,7 +21,7 @@ class ImageGenerationPipeline:
         self.config = config
         self.logger = get_logger(__name__)
         self.feast_service = FeastService()
-        self.artwork_manager = ArtworkManager()
+        self.artwork_manager = ArtworkManager(config=config)
         self.font_manager = FontManager(
             getattr(config, "FONTS_DIR", Settings.FONTS_DIR)
         )

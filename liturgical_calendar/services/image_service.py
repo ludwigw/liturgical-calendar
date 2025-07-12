@@ -46,14 +46,14 @@ class ImageService:
             feast_service: Optional FeastService instance for dependency injection
             config: Optional configuration object for the pipeline
         """
-        self.artwork_manager = artwork_manager or ArtworkManager()
+        self.config = config
+        self.artwork_manager = artwork_manager or ArtworkManager(config=config)
         self.readings_manager = readings_manager or ReadingsManager()
         self.season_calculator = season_calculator or SeasonCalculator()
         self.feast_service = feast_service or FeastService(
             season_calculator=self.season_calculator,
             readings_manager=self.readings_manager,
         )
-        self.config = config
         self.pipeline = None  # Will be initialized lazily when needed
         self.logger = get_logger(__name__)
 
