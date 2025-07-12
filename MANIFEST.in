@@ -1,0 +1,2 @@
+include liturgical_calendar/fonts/*
+recursive-include liturgical_calendar/fonts *
