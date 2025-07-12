@@ -57,6 +57,7 @@ class SimpleConfig:
     TITLE_FONT_SIZE = TITLE_FONT_SIZE
     TITLE_LINE_HEIGHT = TITLE_LINE_HEIGHT
     COLUMN_FONT_SIZE = COLUMN_FONT_SIZE
+    AUTO_CACHE_ARTWORK = True  # Automatically cache missing artwork on first run
 
 
 def get_date_str(date):
@@ -89,6 +90,11 @@ def main(today_func=datetime.date.today):
         "date", nargs="?", type=str, help="Date (YYYY-MM-DD), default: today"
     )
     gen_parser.add_argument("--output", type=str, help="Output file path (optional)")
+    gen_parser.add_argument(
+        "--no-auto-cache",
+        action="store_true",
+        help="Disable automatic caching of missing artwork",
+    )
 
     # cache-artwork
     cache_parser = subparsers.add_parser(
@@ -145,6 +151,12 @@ def main(today_func=datetime.date.today):
         else:
             date = today_func()
         date_str = get_date_str(date)
+
+        # Handle auto-cache setting
+        if args.no_auto_cache:
+            SimpleConfig.AUTO_CACHE_ARTWORK = False
+            logger.info("Auto-caching disabled for this run")
+
         # Create ImageService with config
         image_service = ImageService(config=SimpleConfig)
         logger.info("Generating image for %s", date_str)

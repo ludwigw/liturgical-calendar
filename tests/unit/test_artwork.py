@@ -77,9 +77,8 @@ class TestGetImageSourceForDate(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_liturgical_priority_matching(self):
-        # 2025-01-06 is Epiphany, test with liturgical_result
-        liturgical_result = {"name": "Epiphany", "prec": 7}
-        result = artwork_manager.get_artwork_for_date("2025-01-06", liturgical_result)
+        # 2025-01-06 is Epiphany
+        result = artwork_manager.get_artwork_for_date("2025-01-06")
         self.assertIsNotNone(result)
         self.assertEqual(result["name"], "Epiphany")
 

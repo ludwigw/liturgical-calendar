@@ -17,6 +17,8 @@ Generate today's liturgical image with default settings:
 python -m liturgical_calendar.cli generate
 ```
 
+The system automatically downloads any missing artwork on first run - no manual setup required!
+
 Or get liturgical info for today at the command line:
 
 ```sh
@@ -39,12 +41,12 @@ litcal [subcommand] [options]
 
 ### Subcommands
 
-- `generate [DATE] [--output PATH] [--config CONFIG] [--verbose]`
-  Generate a liturgical image for a given date (default: today).
+- `generate [DATE] [--output PATH] [--config CONFIG] [--verbose] [--no-auto-cache]`
+  Generate a liturgical image for a given date (default: today). Automatically downloads missing artwork.
 - `info [DATE] [--config CONFIG] [--verbose]`
   Print liturgical info (season, feast, readings) for a date.
 - `cache-artwork [--config CONFIG] [--verbose]`
-  Download/cache all artwork images.
+  Download/cache all artwork images (useful for offline environments).
 - `validate-config [--config CONFIG] [--verbose]`
   Validate the current config file and print any issues.
 - `version`
@@ -58,9 +60,17 @@ litcal [subcommand] [options]
 ### Example Usage
 
 ```sh
+# Generate images (auto-downloads missing artwork)
 python -m liturgical_calendar.cli generate 2024-12-25 --output christmas.png --verbose
+python -m liturgical_calendar.cli generate --no-auto-cache  # Disable auto-caching
+
+# Get liturgical information
 python -m liturgical_calendar.cli info 2024-12-25
+
+# Manual cache management (for offline environments)
 python -m liturgical_calendar.cli cache-artwork
+
+# Configuration and system
 python -m liturgical_calendar.cli validate-config
 python -m liturgical_calendar.cli version
 ```

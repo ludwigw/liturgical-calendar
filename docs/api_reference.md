@@ -60,7 +60,7 @@
     - `relative_to` (str): "easter" or "christmas"
     - `pointer` (int/str): Offset or date key
     - `cycle_index` (int): Which artwork to select if multiple (default 0)
-- `get_artwork_for_date(date_str, liturgical_info=None)`
+- `get_artwork_for_date(date_str)`
   - **Description:** Returns the artwork entry for a specific date, using liturgical context if provided.
   - **Parameters:**
     - `date_str` (str): "YYYY-MM-DD"
@@ -118,7 +118,7 @@
   - **Description:** Returns statistics about a batch of image generation results.
   - **Parameters:**
     - `results` (list of dicts)
-- `get_artwork_for_date(date_str, feast_info=None)`
+- `get_artwork_for_date(date_str)`
   - **Description:** Returns artwork info for a date, optionally using feast info.
   - **Parameters:**
     - `date_str` (str): "YYYY-MM-DD"
@@ -259,6 +259,18 @@
 - `get_cache_info()`
   - **Description:** Returns information about the current cache contents.
   - **Parameters:** None
+
+### ArtworkManager
+- `get_artwork_for_date(date_str, auto_cache=True)`
+  - **Description:** Gets artwork for a date with automatic caching support.
+  - **Parameters:**
+    - `date_str` (str): Date in YYYY-MM-DD format
+    - `liturgical_info` (dict, optional): Pre-computed liturgical information
+    - `auto_cache` (bool): Whether to automatically cache missing artwork (default: True)
+- `find_next_artwork(current_date)`
+  - **Description:** Finds the next available artwork after a given date.
+  - **Parameters:**
+    - `current_date` (str): Date in YYYY-MM-DD format
 
 ### ImageProcessor
 - `download_image(url, out_path)`
