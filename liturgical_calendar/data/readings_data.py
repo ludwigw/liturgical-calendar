@@ -2006,6 +2006,10 @@ weekday_readings = {
             "2": ["Ecclesiastes 11:9-12:end", "John 20:19-end"],
         },
     },
+    # Issue #2: Missing "Trinity 23" weekday readings data
+    # October 31st, 2024 is calculated as "Trinity 23" but this data doesn't exist
+    # The weekday readings data needs to be extended to include higher Trinity week numbers
+    # Current data only goes up to "Trinity 22"
     "4 before Advent": {
         "Monday": {
             "1": ["Daniel 1", "Revelation 1"],

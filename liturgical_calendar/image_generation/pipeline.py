@@ -21,7 +21,7 @@ class ImageGenerationPipeline:
         self.config = config
         self.logger = get_logger(__name__)
         self.feast_service = FeastService()
-        self.artwork_manager = ArtworkManager()
+        self.artwork_manager = ArtworkManager(config=config)
         self.font_manager = FontManager(
             getattr(config, "FONTS_DIR", Settings.FONTS_DIR)
         )
@@ -240,6 +240,12 @@ class ImageGenerationPipeline:
         week = data["info"].get("week", "").upper()
         readings = data["info"].get("readings", [])
         if not readings:
+            # Issue #2: Some dates have no readings due to data gaps
+            # Example: October 31st, 2024 shows "No assigned readings for this day"
+            # because it's calculated as "Trinity 23" weekday readings, but the data
+            # only goes up to "Trinity 22". The season calculation logic is correct,
+            # but the weekday readings data needs to be extended to include higher
+            # Trinity week numbers.
             readings = ["No assigned readings for this day."]
         col_y = last_title_baseline + 96 - sans_font_36_uc.getmetrics()[0]
         readings_layout = self.layout_engine.create_readings_layout(

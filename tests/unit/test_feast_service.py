@@ -308,6 +308,47 @@ class TestFeastService(unittest.TestCase):
             mock_get_complete.assert_called_once_with("2024-12-25")
             self.assertEqual(result, {"test": "data"})
 
+    def test_fallback_to_sunday_weekday_readings_when_no_feast_readings(self):
+        """Test that if a feast/artwork is selected without readings, fallback to Sunday/weekday readings occurs."""
+        # Mock season calculator
+        self.mock_season_calculator.week_info.return_value = {
+            "season": "Ordinary Time",
+            "week_name": "Proper 25",
+            "week_start_sunday": date(2025, 10, 26),
+            "weekday_reading_key": "Proper 25",
+        }
+
+        # Feast with no readings (e.g., All Hallows Eve)
+        feast_data = {"name": "All Hallows Eve", "prec": 4}
+
+        # Patch get_liturgical_feast to only return feast for the target date
+        def mock_get_liturgical_feast(relative_to, pointer):
+            # Only return feast for 2025-10-31 (the test date)
+            if relative_to == "christmas" and pointer == "10-31":
+                return feast_data
+            return None
+
+        with patch(
+            "liturgical_calendar.services.feast_service.get_liturgical_feast",
+            side_effect=mock_get_liturgical_feast,
+        ):
+            # The readings manager should be called for fallback
+            self.mock_readings_manager.get_feast_readings.return_value = []
+            self.mock_readings_manager.get_readings_for_date.return_value = [
+                "Fallback Reading 1",
+                "Fallback Reading 2",
+            ]
+
+            result = self.feast_service.get_complete_feast_info("2025-10-31")
+
+        # Should use fallback readings
+        self.assertEqual(result["name"], "All Hallows Eve")
+        self.assertEqual(result["prec"], 4)
+        self.assertIn("readings", result)
+        self.assertEqual(
+            result["readings"], ["Fallback Reading 1", "Fallback Reading 2"]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

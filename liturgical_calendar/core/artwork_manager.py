@@ -46,7 +46,13 @@ class ArtworkManager:
         self.feasts = artwork_feasts
         self.config = config
         self.logger = get_logger(__name__)
-        self.cache = ArtworkCache()
+
+        # Use cache directory from config if available, otherwise use default
+        cache_dir = None
+        if config and hasattr(config, "CACHE_DIR"):
+            cache_dir = config.CACHE_DIR
+            self.logger.info("Using custom cache directory from config: %s", cache_dir)
+        self.cache = ArtworkCache(cache_dir=cache_dir)
 
     def lookup_feast_artwork(
         self, relative_to: str, pointer: Any, cycle_index: int = 0
@@ -126,7 +132,7 @@ class ArtworkManager:
             else:
                 possible_entries.append(entry_list)
 
-        # Select the best entry based on cycle and precedence
+        # Select the best entry based on cycle
         selected_entry = None
         if possible_entries:
             # Sort by cycle preference (current cycle first, then others)
