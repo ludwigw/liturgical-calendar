@@ -32,5 +32,6 @@ USER_AGENT: 'Mozilla/5.0'         # User agent for HTTP requests
 # Feature toggles
 ENABLE_UPSAMPLING: true           # Whether to upsample images to minimum size
 LOGGING_LEVEL: "INFO"             # Logging level (e.g., INFO, DEBUG)
+AUTO_CACHE_ARTWORK: true          # Automatically cache missing artwork on first run
 
 # Add more settings as needed, following the pattern above.

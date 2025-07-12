@@ -11,6 +11,7 @@ from liturgical_calendar.config.settings import Settings
 from liturgical_calendar.funcs import date_to_days, get_cache_filename, get_easter
 from liturgical_calendar.logging import get_logger
 
+from ..caching.artwork_cache import ArtworkCache
 from ..data.artwork_data import feasts as artwork_feasts
 from ..data.feasts_data import (  # Only if needed for squashed artwork
     get_liturgical_feast,
@@ -28,6 +29,7 @@ class ArtworkManager:
     - Retrieving artwork for specific dates with liturgical prioritization
     - Finding artwork entries that are never selected due to precedence rules
     - Managing cached artwork file paths
+    - Automatic caching of missing artwork on first run
 
     The manager maintains the original data structure and logic while providing
     a more maintainable and testable interface. It works with the refactored
@@ -36,6 +38,7 @@ class ArtworkManager:
 
     Attributes:
         feasts: The artwork data dictionary containing easter and christmas season feasts
+        cache: ArtworkCache instance for downloading and managing cached artwork
     """
 
     def __init__(self, config=None):
@@ -43,6 +46,7 @@ class ArtworkManager:
         self.feasts = artwork_feasts
         self.config = config
         self.logger = get_logger(__name__)
+        self.cache = ArtworkCache()
 
     def lookup_feast_artwork(
         self, relative_to: str, pointer: Any, cycle_index: int = 0
@@ -67,14 +71,16 @@ class ArtworkManager:
         return feast_list[cycle_index % len(feast_list)]
 
     def get_artwork_for_date(
-        self, date_str: str, liturgical_info: Optional[Dict[str, Any]] = None
+        self,
+        date_str: str,
+        auto_cache: bool = True,
     ) -> Optional[Dict[str, Any]]:
         """
         Get artwork information for a given date.
 
         Args:
             date_str: Date string in YYYY-MM-DD format
-            liturgical_info: Optional result from liturgical_calendar to help prioritize feasts
+            auto_cache: Whether to automatically cache missing artwork (default: True)
 
         Returns:
             dict: Artwork object with 'source', 'name', 'url' (if exists), 'martyr' (if exists),
@@ -120,56 +126,88 @@ class ArtworkManager:
             else:
                 possible_entries.append(entry_list)
 
-        if not possible_entries:
+        # Select the best entry based on cycle and precedence
+        selected_entry = None
+        if possible_entries:
+            # Sort by cycle preference (current cycle first, then others)
+            cycle_priorities = [
+                cycle_index,
+                (cycle_index + 1) % 3,
+                (cycle_index + 2) % 3,
+            ]
+
+            for cycle_priority in cycle_priorities:
+                for entry in possible_entries:
+                    if isinstance(entry, dict) and entry.get("cycle") == cycle_priority:
+                        selected_entry = entry
+                        break
+                if selected_entry:
+                    break
+
+            # If no cycle-specific entry found, use the first available
+            if not selected_entry and possible_entries:
+                selected_entry = (
+                    possible_entries[0]
+                    if isinstance(possible_entries[0], dict)
+                    else None
+                )
+
+        if not selected_entry:
             return None
 
-        # If we have liturgical result, prioritize entries that match the liturgical name
-        if liturgical_info:
-            liturgical_name = liturgical_info.get("name")
-            liturgical_prec = liturgical_info.get("prec", 0)
-            if liturgical_prec >= 5:
-                # Only for feasts with prec >= 5, match by name
-                matching_entries = [
-                    entry
-                    for entry in possible_entries
-                    if entry.get("name") == liturgical_name
-                ]
-                if matching_entries:
-                    # If multiple matching entries, select by cycle
-                    selected_entry = matching_entries[
-                        cycle_index % len(matching_entries)
-                    ]
-                else:
-                    # If no exact match, select by cycle from all entries
-                    selected_entry = possible_entries[
-                        cycle_index % len(possible_entries)
-                    ]
-            else:
-                # For prec < 5, select by cycle from all entries
-                selected_entry = possible_entries[cycle_index % len(possible_entries)]
-        else:
-            selected_entry = possible_entries[cycle_index % len(possible_entries)]
-
+        # Build result dictionary
         result = {
+            "name": selected_entry.get("name", ""),
             "source": selected_entry.get("source"),
-            "name": selected_entry.get("name"),
+            "url": selected_entry.get("url"),
+            "martyr": selected_entry.get("martyr"),
         }
-        if "url" in selected_entry:
-            result["url"] = selected_entry["url"]
-        if "martyr" in selected_entry:
-            result["martyr"] = selected_entry["martyr"]
 
-        # Add cached file info
-        source_url = selected_entry.get("source")
+        # Check cache status and handle auto-caching
+        source_url = result.get("source")
         if source_url:
             cache_filename = get_cache_filename(source_url)
             cached_path = Path(Settings.CACHE_DIR) / cache_filename
+
             if cached_path.exists():
                 result["cached_file"] = str(cached_path)
                 result["cached"] = True
             else:
                 result["cached_file"] = None
                 result["cached"] = False
+
+                # Auto-cache if enabled and this is the first run scenario
+                if auto_cache:
+                    self.logger.info(
+                        "Artwork not cached for %s, attempting to download: %s",
+                        date_str,
+                        source_url,
+                    )
+                    try:
+                        success = self.cache.download_and_cache(source_url)
+                        if success:
+                            result["cached_file"] = str(cached_path)
+                            result["cached"] = True
+                            self.logger.info(
+                                "Successfully cached artwork for %s", date_str
+                            )
+                        else:
+                            self.logger.warning(
+                                "Failed to cache artwork for %s: %s",
+                                date_str,
+                                source_url,
+                            )
+                    except (
+                        OSError,
+                        IOError,
+                        ConnectionError,
+                        TimeoutError,
+                        ValueError,
+                        TypeError,
+                    ) as e:
+                        self.logger.error(
+                            "Error caching artwork for %s: %s", date_str, e
+                        )
         else:
             result["cached_file"] = None
             result["cached"] = False

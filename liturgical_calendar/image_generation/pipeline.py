@@ -142,7 +142,15 @@ class ImageGenerationPipeline:
         date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
         friendly_date = date.strftime("%-d %B, %Y")
         info = self.feast_service.get_liturgical_info(date_str)
-        artwork_candidate = self.artwork_manager.get_artwork_for_date(date_str, info)
+
+        # Use auto-caching based on configuration
+        auto_cache = getattr(
+            self.config, "AUTO_CACHE_ARTWORK", Settings.AUTO_CACHE_ARTWORK
+        )
+        artwork_candidate = self.artwork_manager.get_artwork_for_date(
+            date_str, auto_cache=auto_cache
+        )
+
         artwork = (
             artwork_candidate
             if artwork_candidate and artwork_candidate.get("cached_file")

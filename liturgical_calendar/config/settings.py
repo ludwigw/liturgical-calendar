@@ -57,7 +57,10 @@ class Settings:
 
     # Feature toggles
     ENABLE_UPSAMPLING = True
-    LOGGING_LEVEL = "INFO"  # Can be overridden
+    LOGGING_LEVEL = "INFO"
+    AUTO_CACHE_ARTWORK = (
+        True  # Automatically cache missing artwork on first run  # Can be overridden
+    )
 
     @classmethod
     def load_from_file(cls, path="config.yaml"):

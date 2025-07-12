@@ -17,12 +17,14 @@ See also: api_reference.md for method details, image_generation.md for pipeline,
 
 #### ArtworkManager
 - **Purpose**: Low-level artwork selection and management
-- **Key Method**: `get_artwork_for_date(date_str, liturgical_info)`
+- **Key Method**: `get_artwork_for_date(date_str, auto_cache=True)`
 - **Responsibilities**:
   - Artwork lookup by date with liturgical context
   - Cycle-based artwork selection
   - Cached file path management
   - Artwork validation
+  - Automatic caching of missing artwork
+  - Fallback artwork selection when primary artwork unavailable
 
 #### SeasonCalculator
 - **Purpose**: Liturgical season and week calculations
