@@ -11,13 +11,17 @@ from liturgical_calendar.image_generation.font_manager import FontManager
 from liturgical_calendar.image_generation.image_builder import LiturgicalImageBuilder
 from liturgical_calendar.image_generation.layout_engine import LayoutEngine
 from liturgical_calendar.logging import get_logger
-from liturgical_calendar.services.feast_service import FeastService
 
 
 class ImageGenerationPipeline:
     """Pipeline for generating liturgical calendar images from input data."""
 
     def __init__(self, config=None):
+        # Delayed import to avoid circular dependency with image_service.py
+        # noqa: E402
+        # pylint: disable=import-outside-toplevel
+        from liturgical_calendar.services.feast_service import FeastService
+
         self.config = config
         self.logger = get_logger(__name__)
         self.feast_service = FeastService()

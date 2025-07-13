@@ -10,7 +10,6 @@ import os
 from typing import Any, Dict, List, Optional
 
 from liturgical_calendar.exceptions import ImageGenerationError
-from liturgical_calendar.image_generation.pipeline import ImageGenerationPipeline
 from liturgical_calendar.logging import get_logger
 
 from ..core.artwork_manager import ArtworkManager
@@ -223,16 +222,13 @@ class ImageService:
     def _generate_image(
         self, image_data: Dict[str, Any], output_path: Optional[str] = None
     ) -> Dict[str, Any]:
-        """
-        Generate the actual image using the image generation pipeline.
+        # Delayed import to avoid circular dependency with pipeline.py
+        # noqa: E402
+        # pylint: disable=import-outside-toplevel
+        from liturgical_calendar.image_generation.pipeline import (
+            ImageGenerationPipeline,
+        )
 
-        Args:
-            image_data: Prepared data for image generation
-            output_path: Optional path for saving the image
-
-        Returns:
-            Image generation result dictionary
-        """
         if not self.config:
             self.logger.error(
                 "ImageService requires a configuration object to initialize the pipeline"
