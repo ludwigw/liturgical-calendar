@@ -26,7 +26,7 @@ class Settings:
     # Image generation settings
     IMAGE_WIDTH = 1404  # px
     IMAGE_HEIGHT = 1872  # px
-    FONTS_DIR = "fonts"  # Directory for font files
+    FONTS_DIR = None  # Let FontManager use importlib.resources
     PADDING = 48  # px
     ARTWORK_SIZE = 1080  # px
     ROW_SPACING = 48  # px
