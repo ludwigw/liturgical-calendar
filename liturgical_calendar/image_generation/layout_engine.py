@@ -184,7 +184,7 @@ class LayoutEngine:
     ) -> Dict[str, Any]:
         """Return layout info for the artwork title, including wrapped lines and positions."""
         font = fonts["serif_96"]
-        max_width = width - 2 * padding
+        max_width = width - 4 * padding
 
         # Wrap text
         def wrap_text(text, font, max_width):
