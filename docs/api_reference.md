@@ -103,6 +103,25 @@
   - **Parameters:**
     - `date_str` (str): "YYYY-MM-DD"
 
+## Top-Level Functions
+
+### liturgical_calendar
+- `liturgical_calendar(s_date, transferred=False)`
+  - **Description:** Returns the liturgical colour and feast information for a given day.
+  - **Parameters:**
+    - `s_date` (str/datetime/date): Date to query (YYYY-MM-DD format or datetime/date object)
+    - `transferred` (bool, optional): Whether to check for transferred feasts
+  - **Returns:** Dictionary containing feast information (name, season, week, colour, etc.)
+
+### get_liturgical_info_with_artwork
+- `get_liturgical_info_with_artwork(s_date, transferred=False)`
+  - **Description:** Returns combined feast and artwork information for a given day, with artwork names prioritized over feast names when available.
+  - **Parameters:**
+    - `s_date` (str/datetime/date): Date to query (YYYY-MM-DD format or datetime/date object)
+    - `transferred` (bool, optional): Whether to check for transferred feasts
+  - **Returns:** Dictionary containing combined feast and artwork information with artwork-prioritized name
+  - **Note:** This function matches the logic used in the image generation pipeline for consistent data presentation across all uses of the library.
+
 ### ImageService
 - `generate_liturgical_image(date_str, output_path=None, transferred=False)`
   - **Description:** Generates and saves a liturgical image for a date.

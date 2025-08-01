@@ -38,6 +38,30 @@ def liturgical_calendar(s_date: str, transferred: bool = False):
     return feast_service.get_complete_feast_info(s_date, transferred)
 
 
+def get_liturgical_info_with_artwork(s_date: str, transferred: bool = False):
+    """
+    Return combined feast and artwork information for a given day.
+
+    This function provides feast data with artwork names prioritized over feast names
+    when available, falling back to day of week when neither is present. This matches
+    the logic used in the image generation pipeline.
+
+    Args:
+        s_date: Date string in YYYY-MM-DD format, or datetime/date object
+        transferred: Whether to check for transferred feasts
+
+    Returns:
+        Dictionary containing combined feast and artwork information with
+        artwork-prioritized name
+    """
+    if isinstance(s_date, datetime):
+        s_date = s_date.date().strftime("%Y-%m-%d")
+    elif isinstance(s_date, date):
+        s_date = s_date.strftime("%Y-%m-%d")
+    # If string, assume it's already in YYYY-MM-DD format
+    return feast_service.get_combined_liturgical_info(s_date, transferred)
+
+
 def main():
     """Main entry point for running the script as a CLI."""
     # Parse --verbose flag

@@ -344,6 +344,55 @@ class FeastService:
         """
         return self.get_complete_feast_info(date_str)
 
+    def get_combined_liturgical_info(
+        self, date_str: str, transferred: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Get combined feast and artwork information for a given date.
+
+        This method combines feast data with artwork data, prioritizing artwork names
+        over feast names when available, falling back to day of week when neither is present.
+        This matches the logic used in the image generation pipeline.
+
+        Args:
+            date_str: Date string in YYYY-MM-DD format
+            transferred: Whether to check for transferred feasts
+
+        Returns:
+            Combined liturgical information dictionary with artwork-prioritized name
+        """
+        # Get feast information
+        feast_info = self.get_complete_feast_info(date_str, transferred)
+
+        # Get artwork information
+        # Delayed import to avoid circular dependency
+        # noqa: E402
+        # pylint: disable=import-outside-toplevel
+        from liturgical_calendar.core.artwork_manager import ArtworkManager
+
+        artwork_manager = ArtworkManager()
+        artwork_info = artwork_manager.get_artwork_for_date(date_str)
+
+        # Create a copy of feast_info to avoid modifying the original
+        combined_info = feast_info.copy()
+
+        # Determine the name using the same logic as the image generation pipeline
+        if artwork_info and artwork_info.get("name", ""):
+            # Prioritize artwork name over feast name
+            combined_info["name"] = artwork_info.get("name", "")
+            # Add artwork information to the result
+            combined_info["artwork"] = artwork_info
+        else:
+            # Fall back to feast name or day of week
+            if not combined_info.get("name"):
+                # If no feast name, use day of week
+                date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+                combined_info["name"] = date_obj.strftime("%A")
+            # Add empty artwork info for consistency
+            combined_info["artwork"] = None
+
+        return combined_info
+
     def _get_week_name(self) -> str:
         """Get the liturgical week name."""
         # This method is no longer needed with the new SeasonCalculator API
