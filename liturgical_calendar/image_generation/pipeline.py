@@ -142,32 +142,43 @@ class ImageGenerationPipeline:
     def _prepare_data(self, date_str):
         """
         Original data preparation method (for backward compatibility).
+        Now uses the combined API to avoid duplicating logic.
         """
         date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
         friendly_date = date.strftime("%-d %B, %Y")
-        info = self.feast_service.get_liturgical_info(date_str)
 
-        # Use auto-caching based on configuration
-        auto_cache = getattr(
-            self.config, "AUTO_CACHE_ARTWORK", Settings.AUTO_CACHE_ARTWORK
-        )
-        artwork_candidate = self.artwork_manager.get_artwork_for_date(
-            date_str, auto_cache=auto_cache
-        )
+        # Use the new combined API instead of duplicating logic
+        combined_info = self.feast_service.get_combined_liturgical_info(date_str)
 
-        artwork = (
-            artwork_candidate
-            if artwork_candidate and artwork_candidate.get("cached_file")
-            else None
-        )
+        # Extract artwork from combined info
+        artwork = combined_info.get("artwork")
+
+        # Handle cached artwork logic
+        if artwork and not artwork.get("cached_file"):
+            # Use auto-caching based on configuration
+            auto_cache = getattr(
+                self.config, "AUTO_CACHE_ARTWORK", Settings.AUTO_CACHE_ARTWORK
+            )
+            if auto_cache:
+                # Get the cached version
+                artwork_candidate = self.artwork_manager.get_artwork_for_date(
+                    date_str, auto_cache=auto_cache
+                )
+                artwork = (
+                    artwork_candidate
+                    if artwork_candidate and artwork_candidate.get("cached_file")
+                    else None
+                )
+
         next_artwork = None
         if not (artwork and artwork.get("cached_file")):
             next_artwork = self.artwork_manager.find_next_artwork(date_str)
+
         return {
             "date": date,
             "date_str": date_str,
             "friendly_date": friendly_date,
-            "info": info,
+            "info": combined_info,  # Now contains the combined data with artwork-prioritized name
             "artwork": artwork,
             "next_artwork": next_artwork,
         }
@@ -223,10 +234,8 @@ class ImageGenerationPipeline:
             font_manager=self.font_manager,
         )
         # Title
-        if data["artwork"] and data["artwork"].get("name", ""):
-            title = data["artwork"].get("name", "")
-        else:
-            title = data["date"].strftime("%A")
+        # Use the combined name from the API instead of duplicating the logic
+        title = data["info"].get("name", data["date"].strftime("%A"))
         title = title.replace("：", ":")
         title_y = art_y + self.artwork_size + self.row_spacing
         title_layout = self.layout_engine.create_title_layout(
