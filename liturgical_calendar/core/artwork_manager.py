@@ -80,6 +80,9 @@ class ArtworkManager:
         self,
         date_str: str,
         auto_cache: bool = True,
+        feast_info: Optional[  # pylint: disable=unused-argument
+            Dict[str, Any]
+        ] = None,  # Added for backward compatibility
     ) -> Optional[Dict[str, Any]]:
         """
         Get artwork information for a given date.
@@ -87,6 +90,7 @@ class ArtworkManager:
         Args:
             date_str: Date string in YYYY-MM-DD format
             auto_cache: Whether to automatically cache missing artwork (default: True)
+            feast_info: Feast information (added for backward compatibility, not currently used)
 
         Returns:
             dict: Artwork object with 'source', 'name', 'url' (if exists), 'martyr' (if exists),

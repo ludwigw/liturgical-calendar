@@ -166,7 +166,8 @@ class ImageService:
         date_str = date_obj.strftime("%Y-%m-%d")
 
         # Use the artwork manager to select artwork for the date
-        artwork = self.artwork_manager.get_artwork_for_date(date_str)
+        # Pass feast_info for backward compatibility with existing tests
+        artwork = self.artwork_manager.get_artwork_for_date(date_str, feast_info)
 
         if not artwork:
             # Return empty dict as fallback
