@@ -188,9 +188,16 @@ class ImageService:
             Prepared data for image generation
         """
         # Create a combined data structure that includes both feast and artwork info
+        # Prioritize artwork name over feast name (same logic as pipeline)
+        artwork_name = artwork_info.get("name", "") if artwork_info else ""
+        feast_name = feast_info.get("name", "")
+
+        # Use artwork name if available, otherwise fall back to feast name
+        primary_name = artwork_name if artwork_name else feast_name
+
         image_data = {
             # Feast information
-            "name": feast_info.get("name", ""),
+            "name": primary_name,  # Now uses artwork-prioritized name
             "season": feast_info.get("season", ""),
             "week": feast_info.get("week", ""),
             "weekno": feast_info.get("weekno"),
