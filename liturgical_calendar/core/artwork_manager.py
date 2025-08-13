@@ -136,7 +136,7 @@ class ArtworkManager:
             else:
                 possible_entries.append(entry_list)
 
-        # Select the best entry based on cycle and precedence
+        # Select the best entry based on cycle
         selected_entry = None
         if possible_entries:
             # Sort by cycle preference (current cycle first, then others)

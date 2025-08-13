@@ -817,6 +817,10 @@ class TestReadingsCoverage(unittest.TestCase):
             "2017-12-24",
         ]
 
+        # Add a date that triggers the missing Trinity 23 readings
+        if "2024-10-31" not in test_dates:
+            test_dates.append("2024-10-31")
+
         # Remove duplicates while preserving order
         unique_dates = list(dict.fromkeys(test_dates))
 
@@ -827,6 +831,12 @@ class TestReadingsCoverage(unittest.TestCase):
 
                 self.assertTrue(readings, f"No readings found for {date_str}")
                 self.assertGreater(len(readings), 0, f"Empty readings for {date_str}")
+                # Fail if the readings are just the placeholder
+                self.assertNotIn(
+                    "No assigned readings for this day.",
+                    readings,
+                    f"Placeholder returned instead of real readings for {date_str}",
+                )
 
     def test_sunday_cycle_coverage(self):
         """Test that we have good coverage of A, B, C Sunday cycles"""
